@@ -1,0 +1,20 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Banco SQLite: contém dado pessoal de devedor (nome, documento) e a trilha de
+# auditoria. Nunca versionar — é o arquivo mais sensível da operação.
+*.db
+*.db-wal
+*.db-shm
+
+# Saída do graphify (grafo de conhecimento gerado a partir do código).
+graphify-out/
+
+# Exportações e pacotes locais: o código-fonte já está versionado.
+*.zip
