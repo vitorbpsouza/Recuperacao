@@ -155,7 +155,7 @@ A saída esperada termina com `recredita_api conecta como recredita_app`.
 gcloud run deploy recredita --project $PROJETO --region $REGIAO --image $IMAGEM:$VERSAO \
   --service-account $SA_API --add-cloudsql-instances $CONEXAO \
   --set-secrets DATABASE_URL=recredita-db-api:latest,SEGREDO_SESSAO=recredita-segredo-sessao:latest \
-  --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJETO \
+  --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJETO,MIGRAR_NA_SUBIDA=nao \
   --allow-unauthenticated --cpu 1 --memory 512Mi --min-instances 0 --max-instances 4
 ```
 
@@ -217,6 +217,7 @@ A migração roda **antes** do deploy, com a versão anterior ainda no ar. Por i
 | `CENTRAL_DIR`, `MIGRACOES_DIR` | imagem | build da central e migrações dentro do container |
 | `DATABASE_URL` | segredo `recredita-db-api` | obrigatória em produção (sem ela a API não sobe) |
 | `SEGREDO_SESSAO` | segredo `recredita-segredo-sessao` | 32+ caracteres; trocar invalida só os tokens CSRF — a tela busca um novo ao recarregar, a sessão continua |
+| `MIGRAR_NA_SUBIDA` | `--set-env-vars` (`nao`) | o login da API não tem permissão de DDL: as migrações rodam no job |
 | `GOOGLE_CLOUD_PROJECT` | `--set-env-vars` | liga a CAMILA via Vertex AI |
 | `GOOGLE_CLOUD_LOCATION` | opcional | padrão `southamerica-east1` |
 | `CAMILA_MODELO` | opcional | padrão `gemini-3-flash-preview` |

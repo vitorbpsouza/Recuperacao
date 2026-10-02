@@ -131,6 +131,7 @@ jobs:
           docker run -d --name recredita --network host \
             -e DATABASE_URL=postgres://recredita_api:api-ci@localhost:5432/recredita \
             -e SEGREDO_SESSAO="$(openssl rand -hex 32)" \
+            -e MIGRAR_NA_SUBIDA=nao \
             recredita:ci
           for i in $(seq 1 30); do curl -sf localhost:8080/api/saude && exit 0; sleep 1; done
           docker logs recredita

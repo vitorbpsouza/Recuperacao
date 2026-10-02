@@ -6,79 +6,71 @@ Alternativa ao Google Cloud ([infra.md](infra.md)) para rodar a ReCredita num se
 
 **O aplicativo não precisa de montagem nenhuma.** O container não grava nada em disco: todo dado vive no Postgres. Deixe a tela "Armazenamento" do app vazia.
 
-O que precisa persistir é o **serviço Postgres** (`db-recuperacao`). O Easypanel já cria um volume para ele. Configure ali os **backups** (Armazenamento → Criar Backup de Volume, ou o backup do próprio serviço de banco). É o único dado da operação.
+O que precisa persistir é o **serviço Postgres** (`db-recuperacao`). O Easypanel já cria um volume para ele. Configure ali os **backups**: é o único dado da operação.
 
 ## 1. Fonte e build
 
 - Fonte: repositório GitHub `vitorbpsouza/Recuperacao`, branch `main`.
 - Build: **Dockerfile** (caminho `Dockerfile`).
 
-## 2. Banco: papel da API
+## 2. Variáveis de ambiente
 
-A API não deve conectar como `postgres` (superusuário). O isolamento entre canais e tenants é imposto pelo RLS do banco, e o login da API deve ter só o papel da aplicação.
+Em **Ambiente**, uma variável por linha, no formato `NOME=valor`:
 
-No console do serviço de banco (`psql -U postgres -d lion`), uma vez:
-
-```sql
-create role recredita_api login password '<senha gerada: openssl rand -hex 24>';
+```
+DATABASE_URL=postgres://postgres:<senha do postgres>@lion_db-recuperacao:5432/lion?sslmode=disable
+SEGREDO_SESSAO=<saída de: openssl rand -hex 32>
+ADMIN_EMAIL=admin@recredita.local
+ADMIN_SENHA=<senha forte, 12 ou mais caracteres>
 ```
 
-## 3. Variáveis de ambiente do app
+- Opcional: `GOOGLE_CLOUD_PROJECT` liga a CAMILA via Vertex AI. Sem ela, a CAMILA fica indisponível e o resto funciona.
+- `NODE_ENV=production`, `PORT=8080`, `CENTRAL_DIR` e `MIGRACOES_DIR` já vêm da imagem.
+- `sslmode=disable` só vale porque o banco está na rede interna do Easypanel. Nunca exponha a porta do Postgres para fora.
+- As senhas ficam só no Easypanel, nunca no repositório.
 
-| Variável | Valor |
-| --- | --- |
-| `DATABASE_URL` | `postgres://recredita_api:<senha da API>@lion_db-recuperacao:5432/lion?sslmode=disable` |
-| `SEGREDO_SESSAO` | `openssl rand -hex 32` (32+ caracteres; o mesmo em todas as réplicas) |
-| `GOOGLE_CLOUD_PROJECT` | opcional — liga a CAMILA via Vertex AI; sem ela, a CAMILA fica indisponível e o resto funciona |
+## 3. Domínio
 
-`NODE_ENV=production`, `PORT=8080`, `CENTRAL_DIR` e `MIGRACOES_DIR` já vêm da imagem.
+Em **Domínios**, configure o seu domínio com **HTTPS ligado** e porta de destino **8080**. Sem HTTPS o login não se mantém: o cookie de sessão é `__Host-sessao` (Secure).
 
-`sslmode=disable` só vale porque o banco está na rede interna do Easypanel (`lion_db-recuperacao`). Nunca exponha a porta do Postgres para fora.
+## 4. Implantar
 
-A URL com a senha do `postgres` fica só no Easypanel e no console, nunca no repositório.
+Clique em **Implantar**. Na subida, a API prepara o banco sozinha:
 
-## 4. Domínio
+1. aplica as migrações pendentes;
+2. cria o admin de `ADMIN_EMAIL`/`ADMIN_SENHA`, se ele ainda não existir.
 
-- Domínios → adicionar o domínio com **HTTPS ligado** e a porta de destino **8080**.
-- HTTPS é obrigatório: o cookie de sessão é `__Host-sessao` (Secure). Sem HTTPS, o login não se mantém.
+No log aparecem `migrações aplicadas: …` (ou `banco em dia: nenhuma migração pendente`) e `admin criado: …`. Confira `https://<domínio>/api/saude` e entre com o admin.
 
-## 5. Implantar e migrar
+Para uma homologação com dados de demonstração, acrescente `SEMEAR_DADOS_SINTETICOS=sim`. Nunca faça isso em produção.
 
-1. **Implantar**.
-2. No console do app (ícone `>_`), rode as migrações com o superusuário. Elas criam as tabelas e o papel `recredita_app`, e concedem esse papel ao `recredita_api`:
+A cada versão nova, basta **Implantar**: as migrações pendentes rodam na subida.
+
+- Migração já aplicada nunca é editada: o migrador confere o checksum.
+- Várias instâncias sobem sem conflito: um advisory lock do Postgres faz uma migrar de cada vez.
+
+## 5. Endurecer depois (recomendado)
+
+O `postgres` é superusuário. O isolamento entre Plano A e B continua valendo, porque toda transação da API roda como `recredita_app` sob RLS. Ainda assim, o ideal é a API conectar com um papel sem permissão de DDL:
+
+1. No console do banco, crie o papel da API:
+
+   ```sql
+   create role recredita_api login password '<senha>';
+   ```
+
+2. No console do app (`>_`), migre com a URL do `postgres` e conceda o papel:
 
    ```bash
-   DATABASE_URL='postgres://postgres:<senha do postgres>@lion_db-recuperacao:5432/lion?sslmode=disable' \
+   DATABASE_URL='postgres://postgres:<senha>@lion_db-recuperacao:5432/lion?sslmode=disable' \
    LOGIN_DA_API=recredita_api node dist/migrar.js
    ```
 
-   A saída termina com `recredita_api conecta como recredita_app`.
+3. No app, troque `DATABASE_URL` para o usuário `recredita_api` e acrescente `MIGRAR_NA_SUBIDA=nao`.
 
-3. Primeiro admin (mesmo console; a senha vai por variável para não ficar no histórico de argumentos):
-
-   ```bash
-   DATABASE_URL='postgres://postgres:<senha do postgres>@lion_db-recuperacao:5432/lion?sslmode=disable' \
-   SENHA_INICIAL='<senha forte>' node dist/criar-usuario.js admin@<domínio> "Nome Completo" admin
-   ```
-
-4. Só para homologação, dados sintéticos de demonstração:
-
-   ```bash
-   DATABASE_URL='…postgres…' SEMEAR_DADOS_SINTETICOS=sim node dist/seed.js
-   ```
-
-   Nunca faça isso no banco de produção.
-
-5. Confira `https://<domínio>/api/saude`: a resposta é `{"ok":true,…}`.
-
-## Versão nova
-
-1. **Implantar** (o Easypanel refaz a imagem da `main`).
-2. Rode `node dist/migrar.js` no console com a URL do `postgres`, como no passo 5.
-
-As migrações são compatíveis com a versão anterior, e migração já aplicada nunca é editada (o migrador confere o checksum).
+Daí em diante, rode o passo 2 a cada versão que trouxer migração nova.
 
 ## Segurança
 
 - A senha do `postgres` circulou em conversa: **troque-a** (`alter role postgres password '…'`) e atualize-a no Easypanel.
-- Backups do volume do banco agendados. Sem eles, perder o servidor é perder a operação.
+- Mantenha os backups do volume do banco agendados. Sem eles, perder o servidor é perder a operação.
