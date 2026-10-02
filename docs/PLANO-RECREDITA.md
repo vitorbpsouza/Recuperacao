@@ -410,7 +410,7 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
 - `packages/ui` com shadcn, tokens e componentes de marca.
 - Shell da central: Sidebar com seletor de canal e usuário real; Header com breadcrumb, ⌘K, notificações e CAMILA. TanStack Router e Query.
 - Saída: login → shell novo → lista real de casos por canal no staging, com invariantes verdes no Postgres.
-- **Andamento (2026-10-02):** tudo acima está no código e verificado — invariantes e API contra Postgres 18, jornadas E2E contra a imagem de produção, CI com três jobs. Falta executar o passo a passo de [infra.md](infra.md) num projeto GCP: a saída da fase depende do staging no ar.
+- **Andamento (2026-10-02):** tudo acima está no código e verificado — invariantes e API contra Postgres 18, jornadas E2E contra a imagem de produção, CI com três jobs. Falta executar o passo a passo de [infra.md](infra.md) num projeto GCP: a saída da fase depende do staging no ar. Em 2026-10-02 a implantação seguiu pelo Easypanel (servidor próprio, app + Postgres); guia em [easypanel.md](easypanel.md).
 
 ### Fase 1 — Todas as telas atuais em shadcn, com dado real
 

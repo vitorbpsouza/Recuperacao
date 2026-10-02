@@ -1,5 +1,7 @@
 # Infraestrutura — staging e produção
 
+> Rodando num servidor próprio com Easypanel? Veja [easypanel.md](easypanel.md).
+
 Google Cloud em São Paulo (`southamerica-east1`): Cloud Run, Cloud SQL para PostgreSQL 18, Secret Manager e Artifact Registry. Todo dado fica no Brasil, o que simplifica a homologação pelos bancos (Res. CMN 4.893/2021).
 
 > **O que já foi validado e o que não foi.** A imagem, o fluxo de banco (dono sem superusuário, login da API só com o papel da aplicação), os jobs e as jornadas E2E contra a imagem rodaram localmente e rodam no CI (job `imagem`, em `.github/workflows/ci.yml`). Os comandos `gcloud` abaixo seguem a referência oficial, mas **ainda não foram executados num projeto real**: revise-os na primeira subida.

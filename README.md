@@ -90,4 +90,4 @@ O CI falha se o cliente versionado não bater com a API.
 docker build -t recredita .
 ```
 
-Uma imagem para staging e produção: a API serve a central na mesma origem, e migração, criação de usuário e seed são a mesma imagem com outro comando. O passo a passo no Google Cloud está em [docs/infra.md](docs/infra.md).
+Uma imagem para staging e produção: a API serve a central na mesma origem, e migração, criação de usuário e seed são a mesma imagem com outro comando. O passo a passo no Google Cloud está em [docs/infra.md](docs/infra.md); no Easypanel, em [docs/easypanel.md](docs/easypanel.md).
