@@ -1917,6 +1917,426 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/fipe/{tipo}/marcas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tipo: "carros" | "motos" | "caminhoes";
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            codigo: string;
+                            nome: string;
+                        }[];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fipe/{tipo}/marcas/{marca}/modelos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tipo: "carros" | "motos" | "caminhoes";
+                    marca: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            codigo: string;
+                            nome: string;
+                        }[];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fipe/{tipo}/marcas/{marca}/modelos/{modelo}/anos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tipo: "carros" | "motos" | "caminhoes";
+                    marca: string;
+                    modelo: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            codigo: string;
+                            nome: string;
+                        }[];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/fipe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        tipo: "carros" | "motos" | "caminhoes";
+                        marca: string;
+                        modelo: string;
+                        ano: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValorFipe"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/verificacao-veicular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        bureauId: string;
+                        /** @enum {string} */
+                        baseLegal: "execucao_contrato" | "legitimo_interesse" | "obrigacao_legal" | "consentimento";
+                        justificativa: string;
+                        veiculo: {
+                            placa: string;
+                            chassi?: string;
+                            renavam?: string;
+                            modelo?: string;
+                            cor?: string;
+                            anoFabricacao?: number;
+                            anoModelo?: number;
+                            situacao?: string;
+                        };
+                        /** @default [] */
+                        restricoes?: string[];
+                        renajud?: boolean;
+                        rouboFurto?: boolean;
+                        leilao?: boolean;
+                        alienacaoFiduciaria?: boolean;
+                        anoLicenciamento?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/verificacoes-veiculares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["VerificacaoVeicular"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/avistamentos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Avistamento"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        observadoEm: unknown;
+                        latitude?: number;
+                        longitude?: number;
+                        descricao: string;
+                        /** @enum {string} */
+                        fonte: "equipe_campo" | "credor" | "devedor" | "outro";
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/consultas": {
         parameters: {
             query?: never;
@@ -2451,6 +2871,10 @@ export interface components {
                 credorNome: string | null;
                 valorDivida: number | null;
                 dataRecebimento: unknown;
+                renavam: string | null;
+                valorFipe: number | null;
+                fipeCodigo: string | null;
+                fipeReferencia: string | null;
             };
             fonte: {
                 nome: string;
@@ -2462,7 +2886,7 @@ export interface components {
         EventoCasoInput: {
             id: number;
             /** @enum {string} */
-            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico";
+            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento";
             statusDe: string | null;
             statusPara: string | null;
             usuarioNome: string | null;
@@ -2586,6 +3010,40 @@ export interface components {
             para: string;
             rotulo: string;
             pendencias: string[];
+        };
+        ValorFipeInput: {
+            valor: number;
+            codigoFipe: string;
+            mesReferencia: string;
+            marca: string;
+            modelo: string;
+            anoModelo: number;
+        };
+        VerificacaoVeicularInput: {
+            id: number;
+            fornecedor: string;
+            baseLegal: string;
+            justificativa: string;
+            situacao: string | null;
+            restricoes: string[];
+            renajud: boolean | null;
+            rouboFurto: boolean | null;
+            leilao: boolean | null;
+            alienacaoFiduciaria: boolean | null;
+            anoLicenciamento: number | null;
+            usuarioNome: string | null;
+            verificadoEm: unknown;
+        };
+        AvistamentoInput: {
+            id: number;
+            observadoEm: unknown;
+            registradoEm: unknown;
+            latitude: number | null;
+            longitude: number | null;
+            descricao: string;
+            /** @enum {string} */
+            fonte: "equipe_campo" | "credor" | "devedor" | "outro";
+            usuarioNome: string | null;
         };
         Erro: {
             erro: string;
@@ -2956,6 +3414,10 @@ export interface components {
                 valorDivida: number | null;
                 /** Format: date-time */
                 dataRecebimento: string;
+                renavam: string | null;
+                valorFipe: number | null;
+                fipeCodigo: string | null;
+                fipeReferencia: string | null;
             };
             fonte: {
                 nome: string;
@@ -2967,7 +3429,7 @@ export interface components {
         EventoCaso: {
             id: number;
             /** @enum {string} */
-            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico";
+            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento";
             statusDe: string | null;
             statusPara: string | null;
             usuarioNome: string | null;
@@ -3102,6 +3564,43 @@ export interface components {
             para: string;
             rotulo: string;
             pendencias: string[];
+        };
+        ValorFipe: {
+            valor: number;
+            codigoFipe: string;
+            mesReferencia: string;
+            marca: string;
+            modelo: string;
+            anoModelo: number;
+        };
+        VerificacaoVeicular: {
+            id: number;
+            fornecedor: string;
+            baseLegal: string;
+            justificativa: string;
+            situacao: string | null;
+            restricoes: string[];
+            renajud: boolean | null;
+            rouboFurto: boolean | null;
+            leilao: boolean | null;
+            alienacaoFiduciaria: boolean | null;
+            anoLicenciamento: number | null;
+            usuarioNome: string | null;
+            /** Format: date-time */
+            verificadoEm: string;
+        };
+        Avistamento: {
+            id: number;
+            /** Format: date-time */
+            observadoEm: string;
+            /** Format: date-time */
+            registradoEm: string;
+            latitude: number | null;
+            longitude: number | null;
+            descricao: string;
+            /** @enum {string} */
+            fonte: "equipe_campo" | "credor" | "devedor" | "outro";
+            usuarioNome: string | null;
         };
     };
     responses: never;

@@ -87,6 +87,11 @@ export const ativo = pgTable('ativo', {
   cidade: text('cidade'),
   uf: text('uf'),
   dataRecebimento: criadoEm('data_recebimento'),
+  renavam: text('renavam'),
+  valorFipe: dinheiro('valor_fipe'),
+  fipeCodigo: text('fipe_codigo'),
+  fipeReferencia: text('fipe_referencia'),
+  fipeConsultadoEm: instante('fipe_consultado_em'),
   criadoEm: criadoEm(),
 });
 
@@ -165,7 +170,7 @@ export const casoEvento = pgTable('caso_evento', {
   id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
   tenantId: text('tenant_id').notNull(),
   casoId: text('caso_id').notNull(),
-  tipo: text('tipo').$type<'criado' | 'status_alterado' | 'distribuido' | 'rito_definido' | 'registro_juridico'>().notNull(),
+  tipo: text('tipo').$type<'criado' | 'status_alterado' | 'distribuido' | 'rito_definido' | 'registro_juridico' | 'verificacao_veicular' | 'avistamento'>().notNull(),
   statusDe: text('status_de'),
   statusPara: text('status_para'),
   usuarioId: text('usuario_id'),

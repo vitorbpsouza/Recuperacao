@@ -117,6 +117,46 @@ test('cadastra um bem no Plano A e cai na ficha do caso novo', async ({ page }) 
   await expect(page.getByText('Recebido', { exact: true }).first()).toBeVisible();
 });
 
+test('relatório do fornecedor: guarda o veículo e descarta dono e radar', async ({ page }) => {
+  await page.goto('/a/casos/caso-a-002');
+  await page.getByRole('tab', { name: 'Veículo' }).click();
+  await page.getByRole('button', { name: 'Colar relatório' }).click();
+  const dialogo = page.getByRole('dialog');
+  await dialogo.getByLabel('Relatório').fill(
+    [
+      'DATA - HORA: 01/10/2026:10:00, PLACA: SEED002, LOCAL: RUA FICTICIA, LATITUDE: -23.5, LONGITUDE: -46.6',
+      'Placa: SEED002',
+      'Renavam: 01234567890',
+      'Situação: EM_CIRCULACAO',
+      'Documento: 00000000000',
+      'Nome: PESSOA FICTICIA',
+      'Restrição 1: RENAJUD',
+      'Renajud: Sim',
+      'Roubo/Furto: Não',
+    ].join('\n'),
+  );
+  await expect(dialogo.getByText(/Descartado: .*dados do proprietário/)).toBeVisible();
+  await expect(dialogo.getByText('PESSOA FICTICIA', { exact: true })).toHaveCount(0);
+
+  await dialogo.getByRole('combobox').first().click();
+  await page.getByRole('option', { name: 'B3 / SNG (Gravames)' }).click();
+  await dialogo.getByLabel('Por que esta consulta').fill('conferir restrições antes da abordagem em campo');
+  await dialogo.getByRole('button', { name: 'Registrar verificação' }).click();
+  await expect(page.getByText('Verificação registrada na trilha de auditoria.')).toBeVisible();
+  await expect(page.getByText('01234567890')).toBeVisible();
+});
+
+test('avistamento fica registrado com autor e hora', async ({ page }) => {
+  await page.goto('/a/casos/caso-a-002');
+  await page.getByRole('tab', { name: 'Avistamentos' }).click();
+  const aba = page.getByRole('tabpanel');
+  await aba.getByRole('button', { name: 'Registrar', exact: true }).click();
+  await aba.getByLabel('Onde').fill('estacionado na Rua Augusta, em frente ao número 900');
+  await aba.getByRole('button', { name: 'Registrar', exact: true }).click();
+  await expect(page.getByText('Avistamento registrado.')).toBeVisible();
+  await expect(page.getByText('estacionado na Rua Augusta, em frente ao número 900')).toBeVisible();
+});
+
 test.describe('sem sessão', () => {
   test.use({ storageState: SEM_SESSAO });
 

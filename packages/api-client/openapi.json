@@ -1419,7 +1419,23 @@
                 "nullable": true,
                 "type": "number"
               },
-              "dataRecebimento": {}
+              "dataRecebimento": {},
+              "renavam": {
+                "nullable": true,
+                "type": "string"
+              },
+              "valorFipe": {
+                "nullable": true,
+                "type": "number"
+              },
+              "fipeCodigo": {
+                "nullable": true,
+                "type": "string"
+              },
+              "fipeReferencia": {
+                "nullable": true,
+                "type": "string"
+              }
             },
             "required": [
               "chassi",
@@ -1427,7 +1443,11 @@
               "cor",
               "credorNome",
               "valorDivida",
-              "dataRecebimento"
+              "dataRecebimento",
+              "renavam",
+              "valorFipe",
+              "fipeCodigo",
+              "fipeReferencia"
             ]
           },
           "fonte": {
@@ -1500,7 +1520,9 @@
               "status_alterado",
               "distribuido",
               "rito_definido",
-              "registro_juridico"
+              "registro_juridico",
+              "verificacao_veicular",
+              "avistamento"
             ]
           },
           "statusDe": {
@@ -2022,6 +2044,148 @@
           "para",
           "rotulo",
           "pendencias"
+        ]
+      },
+      "ValorFipeInput": {
+        "type": "object",
+        "properties": {
+          "valor": {
+            "type": "number"
+          },
+          "codigoFipe": {
+            "type": "string"
+          },
+          "mesReferencia": {
+            "type": "string"
+          },
+          "marca": {
+            "type": "string"
+          },
+          "modelo": {
+            "type": "string"
+          },
+          "anoModelo": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "valor",
+          "codigoFipe",
+          "mesReferencia",
+          "marca",
+          "modelo",
+          "anoModelo"
+        ]
+      },
+      "VerificacaoVeicularInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "fornecedor": {
+            "type": "string"
+          },
+          "baseLegal": {
+            "type": "string"
+          },
+          "justificativa": {
+            "type": "string"
+          },
+          "situacao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "restricoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "renajud": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "rouboFurto": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "leilao": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "alienacaoFiduciaria": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "anoLicenciamento": {
+            "nullable": true,
+            "type": "number"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "verificadoEm": {}
+        },
+        "required": [
+          "id",
+          "fornecedor",
+          "baseLegal",
+          "justificativa",
+          "situacao",
+          "restricoes",
+          "renajud",
+          "rouboFurto",
+          "leilao",
+          "alienacaoFiduciaria",
+          "anoLicenciamento",
+          "usuarioNome",
+          "verificadoEm"
+        ]
+      },
+      "AvistamentoInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "observadoEm": {},
+          "registradoEm": {},
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "fonte": {
+            "type": "string",
+            "enum": [
+              "equipe_campo",
+              "credor",
+              "devedor",
+              "outro"
+            ]
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "observadoEm",
+          "registradoEm",
+          "latitude",
+          "longitude",
+          "descricao",
+          "fonte",
+          "usuarioNome"
         ]
       },
       "Erro": {
@@ -3527,6 +3691,22 @@
               "dataRecebimento": {
                 "type": "string",
                 "format": "date-time"
+              },
+              "renavam": {
+                "nullable": true,
+                "type": "string"
+              },
+              "valorFipe": {
+                "nullable": true,
+                "type": "number"
+              },
+              "fipeCodigo": {
+                "nullable": true,
+                "type": "string"
+              },
+              "fipeReferencia": {
+                "nullable": true,
+                "type": "string"
               }
             },
             "required": [
@@ -3535,7 +3715,11 @@
               "cor",
               "credorNome",
               "valorDivida",
-              "dataRecebimento"
+              "dataRecebimento",
+              "renavam",
+              "valorFipe",
+              "fipeCodigo",
+              "fipeReferencia"
             ],
             "additionalProperties": false
           },
@@ -3611,7 +3795,9 @@
               "status_alterado",
               "distribuido",
               "rito_definido",
-              "registro_juridico"
+              "registro_juridico",
+              "verificacao_veicular",
+              "avistamento"
             ]
           },
           "statusDe": {
@@ -4179,6 +4365,160 @@
           "para",
           "rotulo",
           "pendencias"
+        ],
+        "additionalProperties": false
+      },
+      "ValorFipe": {
+        "type": "object",
+        "properties": {
+          "valor": {
+            "type": "number"
+          },
+          "codigoFipe": {
+            "type": "string"
+          },
+          "mesReferencia": {
+            "type": "string"
+          },
+          "marca": {
+            "type": "string"
+          },
+          "modelo": {
+            "type": "string"
+          },
+          "anoModelo": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "valor",
+          "codigoFipe",
+          "mesReferencia",
+          "marca",
+          "modelo",
+          "anoModelo"
+        ],
+        "additionalProperties": false
+      },
+      "VerificacaoVeicular": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "fornecedor": {
+            "type": "string"
+          },
+          "baseLegal": {
+            "type": "string"
+          },
+          "justificativa": {
+            "type": "string"
+          },
+          "situacao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "restricoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "renajud": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "rouboFurto": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "leilao": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "alienacaoFiduciaria": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "anoLicenciamento": {
+            "nullable": true,
+            "type": "number"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "verificadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "fornecedor",
+          "baseLegal",
+          "justificativa",
+          "situacao",
+          "restricoes",
+          "renajud",
+          "rouboFurto",
+          "leilao",
+          "alienacaoFiduciaria",
+          "anoLicenciamento",
+          "usuarioNome",
+          "verificadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "Avistamento": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "observadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registradoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "fonte": {
+            "type": "string",
+            "enum": [
+              "equipe_campo",
+              "credor",
+              "devedor",
+              "outro"
+            ]
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "observadoEm",
+          "registradoEm",
+          "latitude",
+          "longitude",
+          "descricao",
+          "fonte",
+          "usuarioNome"
         ],
         "additionalProperties": false
       }
@@ -6358,6 +6698,603 @@
             }
           }
         },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fipe/{tipo}/marcas": {
+      "get": {
+        "tags": [
+          "fipe"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "carros",
+                "motos",
+                "caminhoes"
+              ]
+            },
+            "in": "path",
+            "name": "tipo",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "codigo": {
+                        "type": "string"
+                      },
+                      "nome": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "codigo",
+                      "nome"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fipe/{tipo}/marcas/{marca}/modelos": {
+      "get": {
+        "tags": [
+          "fipe"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "carros",
+                "motos",
+                "caminhoes"
+              ]
+            },
+            "in": "path",
+            "name": "tipo",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "marca",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "codigo": {
+                        "type": "string"
+                      },
+                      "nome": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "codigo",
+                      "nome"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/fipe/{tipo}/marcas/{marca}/modelos/{modelo}/anos": {
+      "get": {
+        "tags": [
+          "fipe"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "carros",
+                "motos",
+                "caminhoes"
+              ]
+            },
+            "in": "path",
+            "name": "tipo",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "marca",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "modelo",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "codigo": {
+                        "type": "string"
+                      },
+                      "nome": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "codigo",
+                      "nome"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/fipe": {
+      "post": {
+        "tags": [
+          "fipe"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tipo": {
+                    "type": "string",
+                    "enum": [
+                      "carros",
+                      "motos",
+                      "caminhoes"
+                    ]
+                  },
+                  "marca": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "modelo": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ano": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "tipo",
+                  "marca",
+                  "modelo",
+                  "ano"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValorFipe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/verificacao-veicular": {
+      "post": {
+        "tags": [
+          "veiculo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bureauId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "baseLegal": {
+                    "type": "string",
+                    "enum": [
+                      "execucao_contrato",
+                      "legitimo_interesse",
+                      "obrigacao_legal",
+                      "consentimento"
+                    ]
+                  },
+                  "justificativa": {
+                    "type": "string",
+                    "minLength": 10
+                  },
+                  "veiculo": {
+                    "type": "object",
+                    "properties": {
+                      "placa": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "chassi": {
+                        "type": "string"
+                      },
+                      "renavam": {
+                        "type": "string",
+                        "pattern": "^\\d{11}$"
+                      },
+                      "modelo": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "cor": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "anoFabricacao": {
+                        "type": "integer",
+                        "minimum": 1950,
+                        "maximum": 2100
+                      },
+                      "anoModelo": {
+                        "type": "integer",
+                        "minimum": 1950,
+                        "maximum": 2100
+                      },
+                      "situacao": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "placa"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "restricoes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "renajud": {
+                    "type": "boolean"
+                  },
+                  "rouboFurto": {
+                    "type": "boolean"
+                  },
+                  "leilao": {
+                    "type": "boolean"
+                  },
+                  "alienacaoFiduciaria": {
+                    "type": "boolean"
+                  },
+                  "anoLicenciamento": {
+                    "type": "integer",
+                    "minimum": 1950,
+                    "maximum": 2100
+                  }
+                },
+                "required": [
+                  "bureauId",
+                  "baseLegal",
+                  "justificativa",
+                  "veiculo"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/verificacoes-veiculares": {
+      "get": {
+        "tags": [
+          "veiculo"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VerificacaoVeicular"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/avistamentos": {
+      "get": {
+        "tags": [
+          "veiculo"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Avistamento"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "veiculo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "observadoEm": {},
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "minLength": 5
+                  },
+                  "fonte": {
+                    "type": "string",
+                    "enum": [
+                      "equipe_campo",
+                      "credor",
+                      "devedor",
+                      "outro"
+                    ]
+                  }
+                },
+                "required": [
+                  "observadoEm",
+                  "descricao",
+                  "fonte"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
         "responses": {
           "201": {
             "description": "Default Response",

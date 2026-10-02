@@ -353,3 +353,63 @@ export const cadastroCasoEntrada = z.discriminatedUnion('origem', [
     })
     .strict(),
 ]);
+
+// ---------------------------------------------------------------------------
+// Dados do veículo: FIPE, verificação de fornecedor e avistamentos
+// ---------------------------------------------------------------------------
+
+export const TIPOS_FIPE = ['carros', 'motos', 'caminhoes'] as const;
+
+export const consultaFipeEntrada = z
+  .object({
+    tipo: z.enum(TIPOS_FIPE),
+    marca: texto,
+    modelo: texto,
+    /** Código do ano na tabela, como "2016-1". */
+    ano: texto,
+  })
+  .strict();
+
+/** Verificação veicular de fornecedor contratado: só dados do veículo. */
+export const verificacaoVeicularEntrada = z
+  .object({
+    bureauId: texto,
+    baseLegal,
+    justificativa: z.string().trim().min(10, 'diga por que esta consulta, neste caso (ao menos 10 caracteres)'),
+    veiculo: z
+      .object({
+        placa: texto,
+        chassi: z.string().trim().refine(chassiValido, 'chassi inválido').optional(),
+        renavam: z.string().regex(/^\d{11}$/, 'Renavam com 11 dígitos').optional(),
+        modelo: texto.optional(),
+        cor: texto.optional(),
+        anoFabricacao: z.number().int().min(1950).max(2100).optional(),
+        anoModelo: z.number().int().min(1950).max(2100).optional(),
+        situacao: texto.optional(),
+      })
+      .strict(),
+    restricoes: z.array(texto).default([]),
+    renajud: z.boolean().optional(),
+    rouboFurto: z.boolean().optional(),
+    leilao: z.boolean().optional(),
+    alienacaoFiduciaria: z.boolean().optional(),
+    anoLicenciamento: z.number().int().min(1950).max(2100).optional(),
+  })
+  .strict();
+
+export const FONTES_AVISTAMENTO = ['equipe_campo', 'credor', 'devedor', 'outro'] as const;
+
+/** Onde o veículo foi visto. Localização do bem, não da pessoa. */
+export const avistamentoEntrada = z
+  .object({
+    observadoEm: z.coerce.date(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    descricao: z.string().trim().min(5, 'descreva o endereço ou a referência (ao menos 5 caracteres)'),
+    fonte: z.enum(FONTES_AVISTAMENTO),
+  })
+  .strict()
+  .refine((a) => (a.latitude === undefined) === (a.longitude === undefined), {
+    message: 'informe latitude e longitude juntas',
+    path: ['longitude'],
+  });

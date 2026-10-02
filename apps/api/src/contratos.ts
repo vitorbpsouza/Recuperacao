@@ -268,6 +268,10 @@ export const casoDetalhe = caso.extend({
     credorNome: z.string().nullable(),
     valorDivida: z.number().nullable(),
     dataRecebimento: z.date(),
+    renavam: z.string().nullable(),
+    valorFipe: z.number().nullable(),
+    fipeCodigo: z.string().nullable(),
+    fipeReferencia: z.string().nullable(),
   }),
   fonte: z.object({
     nome: z.string(),
@@ -278,7 +282,7 @@ export const casoDetalhe = caso.extend({
 
 export const eventoCaso = z.object({
   id: z.number().int(),
-  tipo: z.enum(['criado', 'status_alterado', 'distribuido', 'rito_definido', 'registro_juridico']),
+  tipo: z.enum(['criado', 'status_alterado', 'distribuido', 'rito_definido', 'registro_juridico', 'verificacao_veicular', 'avistamento']),
   statusDe: z.string().nullable(),
   statusPara: z.string().nullable(),
   usuarioNome: z.string().nullable(),
@@ -427,3 +431,45 @@ registrar({
   JuridicoCaso: juridicoCaso,
   AcaoCaso: acaoCaso,
 });
+
+// ---------------------------------------------------------------------------
+// Dados do veículo
+// ---------------------------------------------------------------------------
+
+export const valorFipe = z.object({
+  valor: z.number(),
+  codigoFipe: z.string(),
+  mesReferencia: z.string(),
+  marca: z.string(),
+  modelo: z.string(),
+  anoModelo: z.number(),
+});
+
+export const verificacaoVeicular = z.object({
+  id: z.number(),
+  fornecedor: z.string(),
+  baseLegal: z.string(),
+  justificativa: z.string(),
+  situacao: z.string().nullable(),
+  restricoes: z.array(z.string()),
+  renajud: z.boolean().nullable(),
+  rouboFurto: z.boolean().nullable(),
+  leilao: z.boolean().nullable(),
+  alienacaoFiduciaria: z.boolean().nullable(),
+  anoLicenciamento: z.number().nullable(),
+  usuarioNome: z.string().nullable(),
+  verificadoEm: z.coerce.date(),
+});
+
+export const avistamento = z.object({
+  id: z.number(),
+  observadoEm: z.coerce.date(),
+  registradoEm: z.coerce.date(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  descricao: z.string(),
+  fonte: z.enum(['equipe_campo', 'credor', 'devedor', 'outro']),
+  usuarioNome: z.string().nullable(),
+});
+
+registrar({ ValorFipe: valorFipe, VerificacaoVeicular: verificacaoVeicular, Avistamento: avistamento });

@@ -29,6 +29,10 @@ ADMIN_SENHA=<senha forte, 12 ou mais caracteres>
 - `sslmode=disable` só vale porque o banco está na rede interna do Easypanel. Nunca exponha a porta do Postgres para fora.
 - As senhas ficam só no Easypanel, nunca no repositório.
 
+## Saída para a internet
+
+A consulta FIPE sai do servidor para `parallelum.com.br` (HTTPS). Libere a saída se o servidor tiver firewall. A API pública aceita 500 consultas por dia por IP; a ReCredita guarda as listas em cache.
+
 ## 3. Domínio
 
 Em **Domínios**, configure o seu domínio com **HTTPS ligado** e porta de destino **8080**. Sem HTTPS o login não se mantém: o cookie de sessão é `__Host-sessao` (Secure).

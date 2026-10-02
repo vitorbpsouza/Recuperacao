@@ -29,6 +29,8 @@ import { rotasFicha } from './rotas/ficha.ts';
 import { rotasFinanceiro } from './rotas/financeiro.ts';
 import { rotasJuridico } from './rotas/juridico.ts';
 import { rotasCadastroCaso } from './rotas/cadastro-caso.ts';
+import { rotasVeiculo } from './rotas/veiculo.ts';
+import { criarClienteFipe, type ClienteFipe } from './integracoes/fipe.ts';
 import { rotasUsuarios } from './rotas/usuarios.ts';
 
 export interface OpcoesServidor {
@@ -36,6 +38,8 @@ export interface OpcoesServidor {
   ambiente: Ambiente;
   ia?: GoogleGenAI | null;
   logger?: FastifyServerOptions['logger'];
+  /** Tabela FIPE. Os testes passam uma falsa, para não depender da internet. */
+  fipe?: ClienteFipe;
 }
 
 /** Níveis do pino na escala do Cloud Logging, que lê `severity` (e não `level`). */
@@ -60,7 +64,7 @@ const LOG_DE_PRODUCAO = {
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
 };
 
-export const criarServidor = async ({ db, ambiente, ia = null, logger }: OpcoesServidor) => {
+export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe() }: OpcoesServidor) => {
   const producao = ambiente.NODE_ENV === 'production';
   const app = Fastify({
     logger: logger ?? (ambiente.NODE_ENV === 'test' ? false : producao ? LOG_DE_PRODUCAO : { level: 'debug' }),
@@ -109,6 +113,7 @@ export const criarServidor = async ({ db, ambiente, ia = null, logger }: OpcoesS
       await api.register(rotasFinanceiro);
       await api.register(rotasJuridico);
       await api.register(rotasCadastroCaso);
+      await api.register(rotasVeiculo, { fipe });
       await api.register(rotasAuditoria);
       await api.register(rotasCamila, { ia, modelo: ambiente.CAMILA_MODELO });
     },

@@ -48,7 +48,9 @@ import {
 } from '@/lib/api.ts';
 import { tomDoStatus } from '@/lib/status.ts';
 
+import { AbaAvistamentos } from './aba-avistamentos.tsx';
 import { AbaJuridico } from './aba-juridico.tsx';
+import { AbaVeiculo } from './aba-veiculo.tsx';
 import { DialogoDistribuir } from './dialogo-distribuir.tsx';
 import { LinhaDoTempo } from './linha-do-tempo.tsx';
 import { PainelAcoes } from './painel-acoes.tsx';
@@ -96,14 +98,19 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
       {caso && planoA ? <DialogoDistribuir caso={caso} aberto={distribuindo} aoMudar={setDistribuindo} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Tabs defaultValue="resumo" className="lg:col-span-2">
-          <TabsList>
-            <TabsTrigger value="resumo">Resumo</TabsTrigger>
-            {planoA ? <TabsTrigger value="juridico">Jurídico</TabsTrigger> : null}
-            <TabsTrigger value="linha-do-tempo">Linha do tempo</TabsTrigger>
-            <TabsTrigger value="pessoa">{canal === 'a' ? 'Devedor' : 'Vendedor'}</TabsTrigger>
-            {pode.auditar(sessao) ? <TabsTrigger value="acessos">Acessos</TabsTrigger> : null}
-          </TabsList>
+        <Tabs defaultValue="resumo" className="min-w-0 lg:col-span-2">
+          {/* No celular a barra rola de lado em vez de alargar a página. */}
+          <div className="-mx-1 overflow-x-auto px-1 pb-1">
+            <TabsList>
+              <TabsTrigger value="resumo">Resumo</TabsTrigger>
+              {planoA ? <TabsTrigger value="juridico">Jurídico</TabsTrigger> : null}
+              <TabsTrigger value="veiculo">Veículo</TabsTrigger>
+              {planoA ? <TabsTrigger value="avistamentos">Avistamentos</TabsTrigger> : null}
+              <TabsTrigger value="linha-do-tempo">Linha do tempo</TabsTrigger>
+              <TabsTrigger value="pessoa">{canal === 'a' ? 'Devedor' : 'Vendedor'}</TabsTrigger>
+              {pode.auditar(sessao) ? <TabsTrigger value="acessos">Acessos</TabsTrigger> : null}
+            </TabsList>
+          </div>
           <TabsContent value="resumo">
             <Card>
               <CardContent className="pt-1">{caso ? <Resumo caso={caso} /> : <Skeleton className="h-48" />}</CardContent>
@@ -112,6 +119,14 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
           {planoA ? (
             <TabsContent value="juridico">
               <AbaJuridico casoId={casoId} sessao={sessao} />
+            </TabsContent>
+          ) : null}
+          <TabsContent value="veiculo">
+            {caso ? <AbaVeiculo caso={caso} sessao={sessao} /> : <Skeleton className="h-48" />}
+          </TabsContent>
+          {planoA ? (
+            <TabsContent value="avistamentos">
+              <AbaAvistamentos casoId={casoId} sessao={sessao} />
             </TabsContent>
           ) : null}
           <TabsContent value="linha-do-tempo">
@@ -135,7 +150,7 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
           ) : null}
         </Tabs>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {caso && caso.origem === 'lead_proprio' ? <ParaTransferir casoId={casoId} /> : null}
           {caso && planoA ? (
             <PainelAcoes caso={caso} rito={juridico.data?.rito ?? null} sessao={sessao} aoDistribuir={() => setDistribuindo(true)} />

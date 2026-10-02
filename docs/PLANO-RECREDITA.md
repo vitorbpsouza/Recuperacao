@@ -500,6 +500,13 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
     - No Plano B, o RENAJUD é presumido ativo até ser verificado.
     - Testes: API 65 e E2E 12.
     - A importação em lote (planilha) segue pendente.
+  - **Dados do veículo com procedência (2026-10-02):**
+    - **Valor FIPE** pela API pública da Parallelum: marca, modelo, ano e valor, guardados no veículo com código e mês. A API da ReCredita guarda listas em cache para caber no limite de 500 consultas por dia, e falha da tabela aparece como erro, nunca como valor estimado.
+    - **Colar relatório do fornecedor:** a tela lê só os dados do veículo e as restrições, por lista explícita, e descarta dono, documento e localização por radar (avisando o usuário). Cada verificação vira consulta auditada (fornecedor contratado, base legal e justificativa) e completa chassi, Renavam, modelo, cor e ano. No Plano B, atualiza RENAJUD e gravame.
+    - **Avistamentos (Plano A):** onde o bem foi visto, por quem e quando, com GPS do aparelho e hora do servidor. São append-only e entram na linha do tempo.
+    - Ficha com as abas **Veículo** e **Avistamentos**; no celular, a barra de abas rola de lado.
+    - Migração 0006. Testes: domínio 35, banco 61, API 70 e E2E 14.
+    - **Política:** relatórios de painel de consulta sem origem legal (dono, CPF e radar de cerco eletrônico) não são fonte aceitável. A localização legítima vem do avistamento e de fornecedor com contrato e base legal.
   - **Pendente (próximas etapas do Plano A):**
     - Importação de carteira e arquivo de recall.
     - Enriquecimento com `dado_enriquecido`.

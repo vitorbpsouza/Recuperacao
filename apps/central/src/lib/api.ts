@@ -56,6 +56,8 @@ export type RecomendacaoCamila = Esquemas['RecomendacaoCamila'];
 export type JuridicoCaso = Esquemas['JuridicoCaso'];
 export type AcaoCaso = Esquemas['AcaoCaso'];
 export type Credor = Esquemas['Credor'];
+export type VerificacaoVeicular = Esquemas['VerificacaoVeicular'];
+export type Avistamento = Esquemas['Avistamento'];
 
 export const casoQuery = (id: string) =>
   queryOptions({
@@ -93,6 +95,18 @@ export const acoesQuery = (id: string) =>
   queryOptions({
     queryKey: ['caso', id, 'acoes'],
     queryFn: () => exigir(api.GET('/api/casos/{id}/acoes', { params: { path: { id } } })),
+  });
+
+export const verificacoesVeiculoQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'verificacoes-veiculares'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/verificacoes-veiculares', { params: { path: { id } } })),
+  });
+
+export const avistamentosQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'avistamentos'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/avistamentos', { params: { path: { id } } })),
   });
 
 export const credoresQuery = queryOptions({

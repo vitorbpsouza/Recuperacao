@@ -33,6 +33,10 @@ export const rotasFicha: FastifyPluginAsyncZod = async (app) => {
               credorNome: ativo.credorNome,
               valorDivida: ativo.valorDivida,
               dataRecebimento: ativo.dataRecebimento,
+              renavam: ativo.renavam,
+              valorFipe: ativo.valorFipe,
+              fipeCodigo: ativo.fipeCodigo,
+              fipeReferencia: ativo.fipeReferencia,
             },
             fonte: { nome: fonteAtivo.nome, tipo: fonteAtivo.tipo, credorNome: fonteAtivo.credorNome },
           })

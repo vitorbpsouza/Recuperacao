@@ -5,10 +5,19 @@ import { abrirBancoDeTeste } from '@workspace/db/teste';
 import type { OrigemCaso } from '@workspace/domain';
 
 import { lerAmbiente } from '../src/ambiente.ts';
+import type { ClienteFipe } from '../src/integracoes/fipe.ts';
 import { criarServidor, type Servidor } from '../src/servidor.ts';
 import { criarUsuario } from '../src/servicos/usuarios.ts';
 
 export const SENHA = 'senha-bem-longa-123';
+
+/** Tabela FIPE falsa: os testes não dependem da internet nem do limite diário. */
+export const FIPE_FALSA: ClienteFipe = {
+  marcas: async () => [{ codigo: '26', nome: 'Hyundai' }],
+  modelos: async () => [{ codigo: '1286', nome: 'Modelo Teste' }],
+  anos: async () => [{ codigo: '2016-1', nome: '2016 Gasolina' }],
+  valor: async () => ({ valor: 48900, codigoFipe: '015032-0', mesReferencia: 'outubro de 2026', marca: 'Hyundai', modelo: 'Modelo Teste', anoModelo: 2016 }),
+};
 
 const USUARIOS: Array<{ email: string; papel: 'admin' | 'operador' | 'auditor'; canais: OrigemCaso[] }> = [
   { email: 'admin@teste.local', papel: 'admin', canais: [] },
@@ -49,7 +58,7 @@ export const ambienteDeTeste = async (): Promise<Ambiente> => {
     }
   });
 
-  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false });
+  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false, fipe: FIPE_FALSA });
 
   const entrar = async (email: string, senha = SENHA): Promise<Sessao> => {
     const r = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email, senha } });
