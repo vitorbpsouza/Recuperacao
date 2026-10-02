@@ -74,6 +74,16 @@ O `postgres` é superusuário. O isolamento entre Plano A e B continua valendo, 
 
 Daí em diante, rode o passo 2 a cada versão que trouxer migração nova.
 
+## Implantação automática pelo CI
+
+O job `implantar` do CI chama o gatilho do Easypanel só na `main` e só depois de lint, tipos, testes, jornadas e imagem passarem.
+
+1. No Easypanel, copie a URL de **Gatilho de Implantação** (de preferência pelo domínio do painel, com HTTPS).
+2. No GitHub, abra **Settings → Secrets and variables → Actions → New repository secret** e crie `EASYPANEL_DEPLOY_URL` com essa URL.
+3. No Easypanel, **desligue o deploy automático no push**. Se ficar ligado, um commit quebrado é implantado mesmo com o CI vermelho.
+
+A URL é uma credencial: quem a tem dispara deploys. Se ela vazar, gere outra no Easypanel e atualize o segredo.
+
 ## Segurança
 
 - A senha do `postgres` circulou em conversa: **troque-a** (`alter role postgres password '…'`) e atualize-a no Easypanel.

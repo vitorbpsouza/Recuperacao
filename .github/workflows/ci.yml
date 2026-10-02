@@ -155,3 +155,23 @@ jobs:
           name: e2e-imagem
           path: e2e/test-results/
           retention-days: 7
+
+  implantar:
+    name: Implantar (Easypanel)
+    runs-on: ubuntu-latest
+    # Só da main, e só com tudo verde: commit quebrado não chega ao servidor.
+    needs: [verificar, e2e, imagem]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 5
+    steps:
+      - name: Dispara o gatilho de implantação
+        env:
+          # Settings → Secrets and variables → Actions → EASYPANEL_DEPLOY_URL
+          URL: ${{ secrets.EASYPANEL_DEPLOY_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "::notice::EASYPANEL_DEPLOY_URL não configurado: implantação automática desligada."
+            exit 0
+          fi
+          curl -fsS -X POST --max-time 30 "$URL" > /dev/null
+          echo "Implantação disparada."
