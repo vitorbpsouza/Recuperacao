@@ -18,3 +18,16 @@ graphify-out/
 
 # Exportações e pacotes locais: o código-fonte já está versionado.
 *.zip
+
+# Cache do Turborepo.
+.turbo/
+
+# Capturas e relatórios do Playwright, e a sessão que os testes reaproveitam
+# (contém o cookie de sessão).
+e2e/capturas/
+e2e/test-results/
+e2e/playwright-report/
+e2e/.auth/
+
+# Cache do plugin de rotas do TanStack.
+.tanstack/

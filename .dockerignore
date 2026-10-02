@@ -1,0 +1,21 @@
+# Só o que o build precisa entra no contexto do Docker. Segredo local (.env)
+# nunca: a imagem recebe configuração pelo ambiente do Cloud Run.
+**/.env
+**/.env.*
+!**/.env.example
+
+.git
+.github
+docs
+graphify-out
+*.zip
+**/*.log
+
+# Gerado: o build refaz dentro da imagem.
+**/node_modules
+**/dist
+**/.turbo
+**/.tanstack
+e2e/capturas
+e2e/test-results
+e2e/playwright-report

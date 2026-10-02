@@ -1,0 +1,156 @@
+# Verificação de todo push e pull request.
+#
+#   verificar  lint, tipos, testes (invariantes e API contra Postgres de verdade) e build
+#   e2e        jornadas no navegador, com API e central de desenvolvimento
+#   imagem     a imagem de produção sobe como no Cloud Run e passa pelas mesmas jornadas
+#
+# A infraestrutura que esta imagem alimenta está em docs/infra.md.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  verificar:
+    name: Lint, tipos, testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      # Cada arquivo de teste cria e apaga o próprio banco neste servidor.
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run lint typecheck test build
+
+      - name: Cliente da API em dia com a API
+        run: |
+          pnpm --filter @workspace/api openapi
+          pnpm --filter @workspace/api-client gerar
+          git diff --exit-code -- packages/api-client || {
+            echo "::error::A API mudou e o cliente gerado não. Rode 'pnpm --filter @workspace/api openapi && pnpm --filter @workspace/api-client gerar' e versione o resultado."
+            exit 1
+          }
+
+  e2e:
+    name: Jornadas (desenvolvimento)
+    runs-on: ubuntu-latest
+    needs: verificar
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/e2e exec playwright install --with-deps chromium
+      - run: pnpm --filter @workspace/e2e test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-desenvolvimento
+          path: e2e/test-results/
+          retention-days: 7
+
+  imagem:
+    name: Imagem de produção
+    runs-on: ubuntu-latest
+    needs: verificar
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      DONO: postgres://recredita_dono:dono-ci@localhost:5432/recredita
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: recredita:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Como no Cloud SQL: o dono das tabelas não é superusuário, e o login da
+      # API só tem o papel recredita_app (RLS vale para ele).
+      - name: Papéis e banco
+        run: |
+          psql -v ON_ERROR_STOP=1 \
+            -c "create role recredita_dono login createrole password 'dono-ci'" \
+            -c "create database recredita owner recredita_dono" \
+            -c "create role recredita_api login password 'api-ci'"
+      - name: Migrações (como o job de migração)
+        run: docker run --rm --network host -e DATABASE_URL="$DONO" -e LOGIN_DA_API=recredita_api recredita:ci node dist/migrar.js
+      - name: Seed sintético e admin das jornadas
+        run: |
+          docker run --rm --network host -e DATABASE_URL="$DONO" -e SEMEAR_DADOS_SINTETICOS=sim recredita:ci node dist/seed.js
+          docker run --rm --network host -e DATABASE_URL="$DONO" -e SENHA_INICIAL='senha-de-e2e-bem-longa' \
+            recredita:ci node dist/criar-usuario.js admin@e2e.local "Admin E2E" admin
+      - name: Sobe a imagem
+        run: |
+          docker run -d --name recredita --network host \
+            -e DATABASE_URL=postgres://recredita_api:api-ci@localhost:5432/recredita \
+            -e SEGREDO_SESSAO="$(openssl rand -hex 32)" \
+            recredita:ci
+          for i in $(seq 1 30); do curl -sf localhost:8080/api/saude && exit 0; sleep 1; done
+          docker logs recredita
+          exit 1
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/e2e exec playwright install --with-deps chromium
+      - run: pnpm --filter @workspace/e2e test:e2e
+        env:
+          E2E_BASE_URL: http://localhost:8080
+      - if: failure()
+        run: docker logs recredita
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-imagem
+          path: e2e/test-results/
+          retention-days: 7

@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Caminhos relativos a este arquivo: packages/ui/src/styles. */
+@source "../../../../apps/*/src/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
+
+/*
+ * Identidade de cor da ReCredita — a mesma paleta da interface anterior,
+ * agora como tokens do shadcn/ui. Cada valor é a cor do Tailwind v4 que as
+ * telas antigas usavam (comentada ao lado), com uma única mudança deliberada:
+ * o texto secundário sobe de slate-500 para slate-400, para atingir contraste
+ * AA em texto pequeno sobre slate-950.
+ *
+ * Tema escuro fixo: <html class="dark">.
+ */
+:root {
+  --background: oklch(0.129 0.042 264.695); /* slate-950 */
+  --foreground: oklch(0.929 0.013 255.508); /* slate-200 */
+  --card: oklch(0.208 0.042 265.755 / 50%); /* slate-900/50 */
+  --card-foreground: oklch(0.929 0.013 255.508);
+  --popover: oklch(0.208 0.042 265.755); /* slate-900 */
+  --popover-foreground: oklch(0.929 0.013 255.508);
+  --primary: oklch(0.546 0.245 262.881); /* blue-600 */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.279 0.041 260.031); /* slate-800 */
+  --secondary-foreground: oklch(0.984 0.003 247.858); /* slate-50 */
+  --muted: oklch(0.279 0.041 260.031); /* slate-800 */
+  --muted-foreground: oklch(0.704 0.04 256.788); /* slate-400 (era slate-500) */
+  --accent: oklch(1 0 0 / 5%); /* white/5 */
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.637 0.237 25.331); /* red-500 */
+  --border: oklch(1 0 0 / 10%); /* white/10 */
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.623 0.214 259.815); /* blue-500 */
+
+  /* Semânticos de status. */
+  --success: oklch(0.696 0.17 162.48); /* emerald-500 */
+  --warning: oklch(0.769 0.188 70.08); /* amber-500 */
+  --info: oklch(0.623 0.214 259.815); /* blue-500 */
+
+  /* Canal: o Plano A mantém o azul da marca; o Plano B usa o índigo que já
+     existia no avatar. Header e badges mostram sempre em que plano se está. */
+  --canal-a: oklch(0.546 0.245 262.881); /* blue-600 */
+  --canal-b: oklch(0.585 0.233 277.117); /* indigo-500 */
+
+  /* Gráficos: as cores do Dashboard anterior, na mesma ordem. */
+  --chart-1: oklch(0.623 0.214 259.815); /* blue-500 */
+  --chart-2: oklch(0.696 0.17 162.48); /* emerald-500 */
+  --chart-3: oklch(0.769 0.188 70.08); /* amber-500 */
+  --chart-4: oklch(0.637 0.237 25.331); /* red-500 */
+  --chart-5: oklch(0.585 0.233 277.117); /* indigo-500 */
+
+  /* rounded-lg = 0,75rem (botões e campos, como o rounded-xl antigo);
+     rounded-xl ≈ 1rem (cartões, como o rounded-2xl antigo). */
+  --radius: 0.75rem;
+
+  --sidebar: oklch(0.129 0.042 264.695); /* slate-950 */
+  --sidebar-foreground: oklch(0.929 0.013 255.508);
+  --sidebar-primary: oklch(0.546 0.245 262.881); /* blue-600 */
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(1 0 0 / 5%);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.623 0.214 259.815);
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-canal-a: var(--canal-a);
+  --color-canal-b: var(--canal-b);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  ::selection {
+    background-color: oklch(0.623 0.214 259.815 / 30%); /* blue-500/30, como antes */
+  }
+}
+
+@layer components {
+  /* Barra de rolagem discreta da interface anterior. */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: oklch(1 0 0 / 10%);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(1 0 0 / 20%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

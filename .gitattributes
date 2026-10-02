@@ -1,0 +1,4 @@
+# LF em todo checkout. O CI (Linux), a imagem Docker e os geradores (OpenAPI,
+# rotas) escrevem LF; com CRLF no checkout do Windows, o arquivo gerado e o
+# versionado divergiriam só por fim de linha.
+* text=auto eol=lf

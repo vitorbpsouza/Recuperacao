@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+  - e2e
+
+# pnpm bloqueia scripts de instalação por padrão. Liberar só o que precisa
+# baixar binário nativo da plataforma; negar o resto explicitamente.
+allowBuilds:
+  esbuild: true
+  '@google/genai': false
+  protobufjs: false
