@@ -11,7 +11,7 @@
  */
 import { z } from 'zod';
 
-import { cnpjValido, numeroCnjValido } from './documentos.ts';
+import { chassiValido, cnpjValido, cpfValido, numeroCnjValido, placaValida } from './documentos.ts';
 import { MODALIDADES_RETOMADA, RITOS } from './fluxos.ts';
 
 export const origemCaso = z.enum(['plataforma_credor', 'lead_proprio']);
@@ -302,3 +302,54 @@ export const resistenciaEntrada = z
     relato: z.string().trim().min(10, 'descreva o que aconteceu em ao menos 10 caracteres'),
   })
   .strict();
+
+// ---------------------------------------------------------------------------
+// Cadastro de caso com o bem
+// ---------------------------------------------------------------------------
+
+/** O veículo e a dívida, como chegam do credor ou do lead. */
+export const bemEntrada = z
+  .object({
+    placa: z.string().trim().refine(placaValida, 'placa inválida: use ABC1234 ou ABC1D23'),
+    chassi: z.string().trim().refine(chassiValido, 'chassi inválido: 17 caracteres, sem I, O nem Q').optional(),
+    modelo: texto,
+    ano: z.number().int().min(1950).max(2100).optional(),
+    cor: texto.optional(),
+    cidade: texto.optional(),
+    uf: z.string().regex(/^[A-Z]{2}$/, 'UF com duas letras maiúsculas').optional(),
+    devedorNome: texto.optional(),
+    devedorDoc: z
+      .string()
+      .trim()
+      .refine((d) => cpfValido(d) || cnpjValido(d), 'CPF ou CNPJ inválido: confira os dígitos')
+      .optional(),
+    valorDivida: z.number().nonnegative().optional(),
+  })
+  .strict();
+
+/**
+ * Bem e caso numa entrada só. O caso do Plano A nasce "Recebido", com o
+ * credor; o do Plano B nasce "Lead Recebido", com a evidência de origem.
+ */
+export const cadastroCasoEntrada = z.discriminatedUnion('origem', [
+  z
+    .object({
+      origem: z.literal('plataforma_credor'),
+      fonteId: texto,
+      credorId: texto,
+      bem: bemEntrada,
+    })
+    .strict(),
+  z
+    .object({
+      origem: z.literal('lead_proprio'),
+      fonteId: texto,
+      credorId: texto.optional(),
+      bem: bemEntrada,
+      canalLead: z.enum(['Inbound Site', 'WhatsApp', 'Indicação', 'Parceria', 'Anúncio']),
+      /** Como se prova que o lead não veio do dado de uma plataforma de credor. */
+      evidenciaLead: z.string().trim().min(10, 'descreva a evidência de origem em ao menos 10 caracteres'),
+      saldoDevedor: z.number().nonnegative().optional(),
+    })
+    .strict(),
+]);

@@ -6175,6 +6175,223 @@
         }
       }
     },
+    "/api/casos/cadastro": {
+      "post": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "origem": {
+                        "type": "string",
+                        "enum": [
+                          "plataforma_credor"
+                        ]
+                      },
+                      "fonteId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "credorId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "bem": {
+                        "type": "object",
+                        "properties": {
+                          "placa": {
+                            "type": "string"
+                          },
+                          "chassi": {
+                            "type": "string"
+                          },
+                          "modelo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "ano": {
+                            "type": "integer",
+                            "minimum": 1950,
+                            "maximum": 2100
+                          },
+                          "cor": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "cidade": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "uf": {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                          },
+                          "devedorNome": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "devedorDoc": {
+                            "type": "string"
+                          },
+                          "valorDivida": {
+                            "type": "number",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "placa",
+                          "modelo"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "origem",
+                      "fonteId",
+                      "credorId",
+                      "bem"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "origem": {
+                        "type": "string",
+                        "enum": [
+                          "lead_proprio"
+                        ]
+                      },
+                      "fonteId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "credorId": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "bem": {
+                        "type": "object",
+                        "properties": {
+                          "placa": {
+                            "type": "string"
+                          },
+                          "chassi": {
+                            "type": "string"
+                          },
+                          "modelo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "ano": {
+                            "type": "integer",
+                            "minimum": 1950,
+                            "maximum": 2100
+                          },
+                          "cor": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "cidade": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "uf": {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                          },
+                          "devedorNome": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "devedorDoc": {
+                            "type": "string"
+                          },
+                          "valorDivida": {
+                            "type": "number",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "placa",
+                          "modelo"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "canalLead": {
+                        "type": "string",
+                        "enum": [
+                          "Inbound Site",
+                          "WhatsApp",
+                          "Indicação",
+                          "Parceria",
+                          "Anúncio"
+                        ]
+                      },
+                      "evidenciaLead": {
+                        "type": "string",
+                        "minLength": 10
+                      },
+                      "saldoDevedor": {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "origem",
+                      "fonteId",
+                      "bem",
+                      "canalLead",
+                      "evidenciaLead"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/consultas": {
       "post": {
         "tags": [

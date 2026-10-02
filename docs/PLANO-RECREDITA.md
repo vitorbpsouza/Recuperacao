@@ -492,6 +492,14 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
       - O menu livre de status ficou só no Plano B.
     - Gestão → Fontes e credores: credores e mandatos.
     - Testes: API 60 e E2E 11 (jornada da retomada até o bloqueio da entrega pela purga).
+  - **Cadastro manual de casos (2026-10-02):**
+    - Botão "Novo caso" (Plano A) e "Novo lead" (Plano B) na lista de casos.
+    - Veículo e caso entram numa transação só, e o caso abre na ficha.
+    - Validações: placa no padrão antigo ou Mercosul; chassi com 17 caracteres e sem I, O nem Q; CPF ou CNPJ pelo dígito verificador.
+    - O sistema recusa uma segunda placa com caso aberto no mesmo plano.
+    - No Plano B, o RENAJUD é presumido ativo até ser verificado.
+    - Testes: API 65 e E2E 12.
+    - A importação em lote (planilha) segue pendente.
   - **Pendente (próximas etapas do Plano A):**
     - Importação de carteira e arquivo de recall.
     - Enriquecimento com `dado_enriquecido`.

@@ -74,3 +74,9 @@ export const formatarCnj = (valor: string): string => {
   const [, n, dd, a, j, tr, o] = partes;
   return `${n}-${dd}.${a}.${j}.${tr}.${o}`;
 };
+
+/** Placa no padrão antigo (ABC1234) ou Mercosul (ABC1D23), com ou sem hífen. */
+export const placaValida = (valor: string): boolean => /^[A-Z]{3}\d[A-Z0-9]\d{2}$/.test(valor.toUpperCase().replace(/[\s-]/g, ''));
+
+/** Chassi (VIN): 17 posições, letras e dígitos, sem I, O nem Q (ISO 3779). */
+export const chassiValido = (valor: string): boolean => /^[A-HJ-NPR-Z0-9]{17}$/.test(valor.toUpperCase().replace(/\s/g, ''));

@@ -90,6 +90,16 @@ export const ativo = pgTable('ativo', {
   criadoEm: criadoEm(),
 });
 
+/** Dono do bem e do contrato (migração 0005). */
+export const credor = pgTable('credor', {
+  id: id(),
+  tenantId: tenantId(),
+  nome: text('nome').notNull(),
+  cnpj: text('cnpj'),
+  ativo: boolean('ativo').notNull().default(true),
+  criadoEm: criadoEm(),
+});
+
 export const recuperador = pgTable('recuperador', {
   id: id(),
   tenantId: tenantId(),

@@ -93,6 +93,30 @@ test('Plano A: retomada pelo painel de próximos passos, e a entrega espera a pu
   await expect(page.getByText(/o devedor ainda pode purgar a mora até/)).toBeVisible();
 });
 
+test('cadastra um bem no Plano A e cai na ficha do caso novo', async ({ page }) => {
+  await page.goto('/a/casos');
+  await page.getByRole('button', { name: 'Novo caso' }).click();
+  const dialogo = page.getByRole('dialog');
+
+  await dialogo.getByRole('combobox').first().click();
+  await page.getByRole('option', { name: 'Plataforma de Bens (app do credor)' }).click();
+  await dialogo.getByRole('combobox').nth(1).click();
+  await page.getByRole('option', { name: 'Banco Alfa S.A.' }).click();
+
+  await dialogo.getByLabel('Placa').fill('ABC1234X');
+  await dialogo.getByLabel('Modelo').fill('CHEVROLET/ONIX LT');
+  await dialogo.getByRole('button', { name: 'Cadastrar' }).click();
+  await expect(dialogo.getByText('placa inválida')).toBeVisible();
+
+  await dialogo.getByLabel('Placa').fill('RCE4F56');
+  await dialogo.getByLabel('CPF ou CNPJ').fill('529.982.247-25');
+  await dialogo.getByRole('button', { name: 'Cadastrar' }).click();
+
+  await expect(page.getByRole('heading', { name: 'CHEVROLET/ONIX LT' })).toBeVisible();
+  await expect(page).toHaveURL(/\/a\/casos\/.+/);
+  await expect(page.getByText('Recebido', { exact: true }).first()).toBeVisible();
+});
+
 test.describe('sem sessão', () => {
   test.use({ storageState: SEM_SESSAO });
 
