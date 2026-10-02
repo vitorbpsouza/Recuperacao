@@ -27,6 +27,7 @@ import { rotasCasos } from './rotas/casos.ts';
 import { rotasColisoes } from './rotas/colisoes.ts';
 import { rotasFicha } from './rotas/ficha.ts';
 import { rotasFinanceiro } from './rotas/financeiro.ts';
+import { rotasJuridico } from './rotas/juridico.ts';
 import { rotasUsuarios } from './rotas/usuarios.ts';
 
 export interface OpcoesServidor {
@@ -105,6 +106,7 @@ export const criarServidor = async ({ db, ambiente, ia = null, logger }: OpcoesS
       await api.register(rotasColisoes);
       await api.register(rotasCadastros);
       await api.register(rotasFinanceiro);
+      await api.register(rotasJuridico);
       await api.register(rotasAuditoria);
       await api.register(rotasCamila, { ia, modelo: ambiente.CAMILA_MODELO });
     },

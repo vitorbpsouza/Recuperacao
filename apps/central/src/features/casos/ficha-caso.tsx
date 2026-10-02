@@ -5,11 +5,10 @@ import {
   CheckCircle2Icon,
   ChevronDownIcon,
   CircleAlertIcon,
-  SendIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 
-import { podeDistribuir, statusValidos } from '@workspace/domain';
+import { statusValidos } from '@workspace/domain';
 import { CanalBadge } from '@workspace/ui/brand/canal-badge';
 import { InfoTooltip } from '@workspace/ui/brand/info-tooltip';
 import { PlacaMercosul } from '@workspace/ui/brand/placa-mercosul';
@@ -40,6 +39,7 @@ import {
   casoQuery,
   eventosQuery,
   exigir,
+  juridicoQuery,
   pode,
   podeTransferirQuery,
   type Canal,
@@ -48,8 +48,10 @@ import {
 } from '@/lib/api.ts';
 import { tomDoStatus } from '@/lib/status.ts';
 
+import { AbaJuridico } from './aba-juridico.tsx';
 import { DialogoDistribuir } from './dialogo-distribuir.tsx';
 import { LinhaDoTempo } from './linha-do-tempo.tsx';
+import { PainelAcoes } from './painel-acoes.tsx';
 import { PainelDevedor } from './painel-devedor.tsx';
 
 interface Props {
@@ -61,6 +63,9 @@ interface Props {
 export function FichaCaso({ canal, casoId, sessao }: Props) {
   const consulta = useQuery(casoQuery(casoId));
   const eventos = useQuery(eventosQuery(casoId));
+  const planoA = canal === 'a';
+  const juridico = useQuery({ ...juridicoQuery(casoId), enabled: planoA });
+  const [distribuindo, setDistribuindo] = useState(false);
   const voltar = canal === 'a' ? '/a/casos' : '/b/casos';
 
   if (consulta.isError) {
@@ -88,11 +93,13 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
       </Button>
 
       {caso ? <Cabecalho caso={caso} canal={canal} sessao={sessao} /> : <Skeleton className="h-24 rounded-xl" />}
+      {caso && planoA ? <DialogoDistribuir caso={caso} aberto={distribuindo} aoMudar={setDistribuindo} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Tabs defaultValue="resumo" className="lg:col-span-2">
           <TabsList>
             <TabsTrigger value="resumo">Resumo</TabsTrigger>
+            {planoA ? <TabsTrigger value="juridico">Jurídico</TabsTrigger> : null}
             <TabsTrigger value="linha-do-tempo">Linha do tempo</TabsTrigger>
             <TabsTrigger value="pessoa">{canal === 'a' ? 'Devedor' : 'Vendedor'}</TabsTrigger>
             {pode.auditar(sessao) ? <TabsTrigger value="acessos">Acessos</TabsTrigger> : null}
@@ -102,6 +109,11 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
               <CardContent className="pt-1">{caso ? <Resumo caso={caso} /> : <Skeleton className="h-48" />}</CardContent>
             </Card>
           </TabsContent>
+          {planoA ? (
+            <TabsContent value="juridico">
+              <AbaJuridico casoId={casoId} sessao={sessao} />
+            </TabsContent>
+          ) : null}
           <TabsContent value="linha-do-tempo">
             <Card>
               <CardContent className="pt-2">
@@ -125,7 +137,10 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
 
         <div className="space-y-6">
           {caso && caso.origem === 'lead_proprio' ? <ParaTransferir casoId={casoId} /> : null}
-          {caso && caso.origem === 'plataforma_credor' ? <Prazos caso={caso} /> : null}
+          {caso && planoA ? (
+            <PainelAcoes caso={caso} rito={juridico.data?.rito ?? null} sessao={sessao} aoDistribuir={() => setDistribuindo(true)} />
+          ) : null}
+          {caso && planoA ? <Prazos caso={caso} /> : null}
         </div>
       </div>
     </div>
@@ -134,7 +149,6 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
 
 function Cabecalho({ caso, canal, sessao }: { caso: CasoDetalhe; canal: Canal; sessao: UsuarioSessao }) {
   const queryClient = useQueryClient();
-  const [distribuindo, setDistribuindo] = useState(false);
   const outrosStatus = statusValidos(caso.finalidade).filter((s) => s !== caso.status);
 
   const mudarStatus = useMutation({
@@ -162,14 +176,9 @@ function Cabecalho({ caso, canal, sessao }: { caso: CasoDetalhe; canal: Canal; s
           <StatusBadge status={caso.status} tom={tomDoStatus(caso.status)} />
         </div>
       </div>
-      {pode.escrever(sessao) ? (
+      {/* Plano A: as mudanças passam pelo painel de próximos passos, com as guardas do banco. */}
+      {pode.escrever(sessao) && canal === 'b' ? (
         <div className="flex flex-wrap gap-2">
-          {caso.origem === 'plataforma_credor' && podeDistribuir(caso.status) ? (
-            <Button onClick={() => setDistribuindo(true)}>
-              <SendIcon />
-              {caso.recuperadorId ? 'Redistribuir' : 'Distribuir'}
-            </Button>
-          ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" disabled={mudarStatus.isPending}>
@@ -178,7 +187,7 @@ function Cabecalho({ caso, canal, sessao }: { caso: CasoDetalhe; canal: Canal; s
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60">
-              <DropdownMenuLabel>Ciclo do {canal === 'a' ? 'Plano A' : 'Plano B'}</DropdownMenuLabel>
+              <DropdownMenuLabel>Ciclo do Plano B</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {outrosStatus.map((s) => (
                 <DropdownMenuItem key={s} onSelect={() => mudarStatus.mutate(s)}>
@@ -190,7 +199,6 @@ function Cabecalho({ caso, canal, sessao }: { caso: CasoDetalhe; canal: Canal; s
           </DropdownMenu>
         </div>
       ) : null}
-      <DialogoDistribuir caso={caso} aberto={distribuindo} aoMudar={setDistribuindo} />
     </Card>
   );
 }
@@ -251,7 +259,7 @@ function Resumo({ caso }: { caso: CasoDetalhe }) {
 
 // Depois do aceite, o prazo de aceite deixa de correr: mostrar contagem ali
 // seria dizer que o recuperador ainda pode recusar.
-const ACEITOS = new Set(['Aceito', 'Em Campo', 'Localizado', 'Recuperado', 'Encerrado']);
+const ACEITOS = new Set(['Aceito', 'Em Campo', 'Localizado', 'Retomado', 'Em Custódia', 'Entregue ao Credor', 'Encerrado']);
 
 /** Plano A: o relógio do caso. */
 function Prazos({ caso }: { caso: CasoDetalhe }) {

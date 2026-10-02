@@ -78,6 +78,21 @@ test('busca global abre a ficha pela placa', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'TOYOTA/COROLLA XEI' })).toBeVisible();
 });
 
+test('Plano A: retomada pelo painel de próximos passos, e a entrega espera a purga', async ({ page }) => {
+  await page.goto('/a/casos/caso-a-001');
+  await page.getByRole('tab', { name: 'Jurídico' }).click();
+  await expect(page.getByText('0000001-16.2026.8.13.9999')).toBeVisible();
+  await expect(page.getByText('Basta o envio ao endereço do contrato')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Registrar retomada' }).click();
+  await page.getByLabel('Comprovante').fill('Auto de busca e apreensão 123');
+  await page.getByRole('button', { name: 'Confirmar' }).click();
+  await expect(page.getByText('Caso em "Retomado".')).toBeVisible();
+
+  await expect(page.getByRole('button', { name: 'Entregar ao credor' })).toBeDisabled();
+  await expect(page.getByText(/o devedor ainda pode purgar a mora até/)).toBeVisible();
+});
+
 test.describe('sem sessão', () => {
   test.use({ storageState: SEM_SESSAO });
 

@@ -320,3 +320,110 @@ registrar({
   Distribuir: distribuirEntrada,
   RevelarDevedor: revelarDevedorEntrada,
 });
+
+// ---------------------------------------------------------------------------
+// Plano A — credor, rito e ciclo
+// ---------------------------------------------------------------------------
+
+/** Data do calendário (AAAA-MM-DD). Instantes vêm do SQL cru como texto: coerce. */
+const dataCivil = z.string();
+
+export const mandato = z.object({
+  id: z.string(),
+  credorId: z.string(),
+  inicio: dataCivil,
+  fim: dataCivil,
+  referencia: z.string(),
+  revogadoEm: z.coerce.date().nullable(),
+  vigente: z.boolean(),
+});
+
+export const credor = z.object({
+  id: z.string(),
+  nome: z.string(),
+  cnpj: z.string().nullable(),
+  ativo: z.boolean(),
+  mandatos: z.array(mandato),
+});
+
+export const processoJudicial = z.object({
+  numeroCnj: z.string(),
+  vara: z.string().nullable(),
+  comarca: z.string(),
+  uf: z.string(),
+  ajuizadoEm: dataCivil.nullable(),
+  liminar: z.enum(['pendente', 'deferida', 'indeferida', 'revogada']),
+  liminarEm: dataCivil.nullable(),
+  mandadoEm: dataCivil.nullable(),
+  atualizadoEm: z.coerce.date(),
+});
+
+export const procedimentoExtrajudicial = z.object({
+  via: z.enum(['rtd', 'detran']),
+  orgao: z.string(),
+  clausulaDestaque: z.boolean(),
+  notificadoEm: dataCivil.nullable(),
+  consolidadoEm: dataCivil.nullable(),
+  certidaoEm: dataCivil.nullable(),
+  /** Último dia para o devedor pagar após a notificação (20 dias, art. 8º-B). */
+  prazoNotificacao: dataCivil.nullable(),
+  atualizadoEm: z.coerce.date(),
+});
+
+export const provaMora = z.object({
+  meio: z.enum(['carta_ar', 'cartorio', 'protesto', 'eletronico']),
+  enviadaEm: dataCivil,
+  enderecoDoContrato: z.boolean(),
+  comprovante: z.string(),
+  atualizadoEm: z.coerce.date(),
+});
+
+export const verificacaoRj = z.object({
+  id: z.number(),
+  resultado: z.enum(['sem_registro', 'recuperacao_judicial', 'falencia']),
+  fonte: z.string(),
+  detalhe: z.string().nullable(),
+  liberadoPeloJuridico: z.boolean(),
+  justificativa: z.string().nullable(),
+  usuarioNome: z.string().nullable(),
+  verificadoEm: z.coerce.date(),
+});
+
+export const juridicoCaso = z.object({
+  status: z.string(),
+  rito: z.enum(['judicial', 'extrajudicial', 'amigavel']).nullable(),
+  credor: credor.omit({ mandatos: true }).nullable(),
+  mandatoVigente: mandato.nullable(),
+  /** Pelo tamanho do documento, como o banco decide: 14 posições é empresa. */
+  devedorTipo: z.enum(['PF', 'PJ']).nullable(),
+  processo: processoJudicial.nullable(),
+  extrajudicial: procedimentoExtrajudicial.nullable(),
+  mora: provaMora.nullable(),
+  verificacoesRj: z.array(verificacaoRj),
+  retomada: z
+    .object({
+      em: z.coerce.date(),
+      modalidade: z.enum(['apreensao_judicial', 'apreensao_extrajudicial', 'entrega_voluntaria']),
+      comprovante: z.string(),
+      purgaAte: z.coerce.date().nullable(),
+    })
+    .nullable(),
+});
+
+export const acaoCaso = z.object({
+  para: z.string(),
+  rotulo: z.string(),
+  /** O que falta para poder. Vazio: pode. */
+  pendencias: z.array(z.string()),
+});
+
+registrar({
+  Mandato: mandato,
+  Credor: credor,
+  ProcessoJudicial: processoJudicial,
+  ProcedimentoExtrajudicial: procedimentoExtrajudicial,
+  ProvaMora: provaMora,
+  VerificacaoRj: verificacaoRj,
+  JuridicoCaso: juridicoCaso,
+  AcaoCaso: acaoCaso,
+});

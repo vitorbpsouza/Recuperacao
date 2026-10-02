@@ -483,8 +483,16 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
       - Calendário com feriados nacionais e móveis, contagem do CC art. 132 e fuso de São Paulo.
     - **Painel A** com retomados, curados e taxa de cura. A fila de distribuição só mostra casos habilitados.
     - **Testes:** domínio 33, banco 60, API 50 e E2E 10.
+  - **Telas e rotas do motor jurídico (2026-10-02, segunda entrega):**
+    - API: credores e mandatos (cadastro e revogação só por admin), ficha jurídica do caso, registro de rito, processo, procedimento extrajudicial, prova da mora e verificação de RJ, próximos passos com pendências, transição e resistência.
+    - Ficha do caso no Plano A:
+      - aba **Jurídico** com os registros do rito;
+      - painel **Próximos passos**, em que cada ação mostra o que falta, nas palavras da guarda do banco;
+      - diálogos de retomada (com a declaração de conduta no extrajudicial), pátio e motivo, e de resistência.
+      - O menu livre de status ficou só no Plano B.
+    - Gestão → Fontes e credores: credores e mandatos.
+    - Testes: API 60 e E2E 11 (jornada da retomada até o bloqueio da entrega pela purga).
   - **Pendente (próximas etapas do Plano A):**
-    - Rotas e telas para registrar rito, processo, procedimento, mora, verificação de RJ, credores e mandatos, e o painel "Ações" da ficha mostrando as pendências de cada transição. Hoje esses registros existem no banco e no seed; a ficha ainda usa a troca de status simples, que o banco valida.
     - Importação de carteira e arquivo de recall.
     - Enriquecimento com `dado_enriquecido`.
     - Distribuição v2.

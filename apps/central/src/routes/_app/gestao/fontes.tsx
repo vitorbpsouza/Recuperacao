@@ -6,5 +6,10 @@ import { fontesQuery } from '@/lib/api.ts';
 export const Route = createFileRoute('/_app/gestao/fontes')({
   loader: ({ context }) => void context.queryClient.prefetchQuery(fontesQuery),
   staticData: { titulo: 'Fontes e credores' },
-  component: PaginaFontes,
+  component: Pagina,
 });
+
+function Pagina() {
+  const { sessao } = Route.useRouteContext();
+  return <PaginaFontes sessao={sessao} />;
+}

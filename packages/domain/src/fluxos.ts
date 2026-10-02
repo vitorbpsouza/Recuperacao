@@ -117,3 +117,18 @@ export const ACAO_PARA: Record<StatusRecuperacao, string> = {
   'Removido pelo Banco': 'Registrar recall do credor',
   Encerrado: 'Encerrar',
 };
+
+/**
+ * Rótulo do botão considerando de onde o caso sai: voltar para trás não é o
+ * mesmo gesto que avançar (de "Distribuído", "Pronto para Campo" é devolver o
+ * caso à fila, não habilitá-lo).
+ */
+export const rotuloDaAcao = (de: StatusRecuperacao, para: StatusRecuperacao): string => {
+  const depoisDoPreparo = !(STATUS_DE_PREPARO as readonly string[]).includes(de);
+  if (para === 'Pronto para Campo' && de !== 'Em Análise') return 'Devolver à fila de distribuição';
+  if (para === 'Em Análise' && depoisDoPreparo) return 'Devolver para análise';
+  if (para === 'Em Enriquecimento' && de === 'Em Análise') return 'Voltar ao enriquecimento';
+  if (para === 'Distribuído' && de !== 'Pronto para Campo') return 'Redistribuir';
+  if (para === 'Em Campo' && de === 'Localizado') return 'Voltar a campo (perdeu o bem de vista)';
+  return ACAO_PARA[para];
+};

@@ -1637,6 +1637,393 @@
         ],
         "additionalProperties": false
       },
+      "MandatoInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "credorId": {
+            "type": "string"
+          },
+          "inicio": {
+            "type": "string"
+          },
+          "fim": {
+            "type": "string"
+          },
+          "referencia": {
+            "type": "string"
+          },
+          "revogadoEm": {
+            "nullable": true
+          },
+          "vigente": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "credorId",
+          "inicio",
+          "fim",
+          "referencia",
+          "revogadoEm",
+          "vigente"
+        ]
+      },
+      "CredorInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "cnpj": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "mandatos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MandatoInput"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "cnpj",
+          "ativo",
+          "mandatos"
+        ]
+      },
+      "ProcessoJudicialInput": {
+        "type": "object",
+        "properties": {
+          "numeroCnj": {
+            "type": "string"
+          },
+          "vara": {
+            "nullable": true,
+            "type": "string"
+          },
+          "comarca": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string"
+          },
+          "ajuizadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "liminar": {
+            "type": "string",
+            "enum": [
+              "pendente",
+              "deferida",
+              "indeferida",
+              "revogada"
+            ]
+          },
+          "liminarEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mandadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "atualizadoEm": {}
+        },
+        "required": [
+          "numeroCnj",
+          "vara",
+          "comarca",
+          "uf",
+          "ajuizadoEm",
+          "liminar",
+          "liminarEm",
+          "mandadoEm",
+          "atualizadoEm"
+        ]
+      },
+      "ProcedimentoExtrajudicialInput": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "rtd",
+              "detran"
+            ]
+          },
+          "orgao": {
+            "type": "string"
+          },
+          "clausulaDestaque": {
+            "type": "boolean"
+          },
+          "notificadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "consolidadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "certidaoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "prazoNotificacao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "atualizadoEm": {}
+        },
+        "required": [
+          "via",
+          "orgao",
+          "clausulaDestaque",
+          "notificadoEm",
+          "consolidadoEm",
+          "certidaoEm",
+          "prazoNotificacao",
+          "atualizadoEm"
+        ]
+      },
+      "ProvaMoraInput": {
+        "type": "object",
+        "properties": {
+          "meio": {
+            "type": "string",
+            "enum": [
+              "carta_ar",
+              "cartorio",
+              "protesto",
+              "eletronico"
+            ]
+          },
+          "enviadaEm": {
+            "type": "string"
+          },
+          "enderecoDoContrato": {
+            "type": "boolean"
+          },
+          "comprovante": {
+            "type": "string"
+          },
+          "atualizadoEm": {}
+        },
+        "required": [
+          "meio",
+          "enviadaEm",
+          "enderecoDoContrato",
+          "comprovante",
+          "atualizadoEm"
+        ]
+      },
+      "VerificacaoRjInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "resultado": {
+            "type": "string",
+            "enum": [
+              "sem_registro",
+              "recuperacao_judicial",
+              "falencia"
+            ]
+          },
+          "fonte": {
+            "type": "string"
+          },
+          "detalhe": {
+            "nullable": true,
+            "type": "string"
+          },
+          "liberadoPeloJuridico": {
+            "type": "boolean"
+          },
+          "justificativa": {
+            "nullable": true,
+            "type": "string"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "verificadoEm": {}
+        },
+        "required": [
+          "id",
+          "resultado",
+          "fonte",
+          "detalhe",
+          "liberadoPeloJuridico",
+          "justificativa",
+          "usuarioNome",
+          "verificadoEm"
+        ]
+      },
+      "JuridicoCasoInput": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "rito": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "judicial",
+              "extrajudicial",
+              "amigavel"
+            ]
+          },
+          "credor": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "nome": {
+                "type": "string"
+              },
+              "cnpj": {
+                "nullable": true,
+                "type": "string"
+              },
+              "ativo": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "nome",
+              "cnpj",
+              "ativo"
+            ]
+          },
+          "mandatoVigente": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MandatoInput"
+              }
+            ]
+          },
+          "devedorTipo": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "PF",
+              "PJ"
+            ]
+          },
+          "processo": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProcessoJudicialInput"
+              }
+            ]
+          },
+          "extrajudicial": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProcedimentoExtrajudicialInput"
+              }
+            ]
+          },
+          "mora": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProvaMoraInput"
+              }
+            ]
+          },
+          "verificacoesRj": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VerificacaoRjInput"
+            }
+          },
+          "retomada": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "em": {},
+              "modalidade": {
+                "type": "string",
+                "enum": [
+                  "apreensao_judicial",
+                  "apreensao_extrajudicial",
+                  "entrega_voluntaria"
+                ]
+              },
+              "comprovante": {
+                "type": "string"
+              },
+              "purgaAte": {
+                "nullable": true
+              }
+            },
+            "required": [
+              "em",
+              "modalidade",
+              "comprovante",
+              "purgaAte"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "rito",
+          "credor",
+          "mandatoVigente",
+          "devedorTipo",
+          "processo",
+          "extrajudicial",
+          "mora",
+          "verificacoesRj",
+          "retomada"
+        ]
+      },
+      "AcaoCasoInput": {
+        "type": "object",
+        "properties": {
+          "para": {
+            "type": "string"
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "pendencias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "para",
+          "rotulo",
+          "pendencias"
+        ]
+      },
       "Erro": {
         "type": "object",
         "properties": {
@@ -3378,6 +3765,422 @@
           "finalidade"
         ],
         "additionalProperties": false
+      },
+      "Mandato": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "credorId": {
+            "type": "string"
+          },
+          "inicio": {
+            "type": "string"
+          },
+          "fim": {
+            "type": "string"
+          },
+          "referencia": {
+            "type": "string"
+          },
+          "revogadoEm": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "vigente": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "credorId",
+          "inicio",
+          "fim",
+          "referencia",
+          "revogadoEm",
+          "vigente"
+        ],
+        "additionalProperties": false
+      },
+      "Credor": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "cnpj": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "mandatos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mandato"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "cnpj",
+          "ativo",
+          "mandatos"
+        ],
+        "additionalProperties": false
+      },
+      "ProcessoJudicial": {
+        "type": "object",
+        "properties": {
+          "numeroCnj": {
+            "type": "string"
+          },
+          "vara": {
+            "nullable": true,
+            "type": "string"
+          },
+          "comarca": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string"
+          },
+          "ajuizadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "liminar": {
+            "type": "string",
+            "enum": [
+              "pendente",
+              "deferida",
+              "indeferida",
+              "revogada"
+            ]
+          },
+          "liminarEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mandadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "numeroCnj",
+          "vara",
+          "comarca",
+          "uf",
+          "ajuizadoEm",
+          "liminar",
+          "liminarEm",
+          "mandadoEm",
+          "atualizadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "ProcedimentoExtrajudicial": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "rtd",
+              "detran"
+            ]
+          },
+          "orgao": {
+            "type": "string"
+          },
+          "clausulaDestaque": {
+            "type": "boolean"
+          },
+          "notificadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "consolidadoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "certidaoEm": {
+            "nullable": true,
+            "type": "string"
+          },
+          "prazoNotificacao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "via",
+          "orgao",
+          "clausulaDestaque",
+          "notificadoEm",
+          "consolidadoEm",
+          "certidaoEm",
+          "prazoNotificacao",
+          "atualizadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "ProvaMora": {
+        "type": "object",
+        "properties": {
+          "meio": {
+            "type": "string",
+            "enum": [
+              "carta_ar",
+              "cartorio",
+              "protesto",
+              "eletronico"
+            ]
+          },
+          "enviadaEm": {
+            "type": "string"
+          },
+          "enderecoDoContrato": {
+            "type": "boolean"
+          },
+          "comprovante": {
+            "type": "string"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "meio",
+          "enviadaEm",
+          "enderecoDoContrato",
+          "comprovante",
+          "atualizadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "VerificacaoRj": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "resultado": {
+            "type": "string",
+            "enum": [
+              "sem_registro",
+              "recuperacao_judicial",
+              "falencia"
+            ]
+          },
+          "fonte": {
+            "type": "string"
+          },
+          "detalhe": {
+            "nullable": true,
+            "type": "string"
+          },
+          "liberadoPeloJuridico": {
+            "type": "boolean"
+          },
+          "justificativa": {
+            "nullable": true,
+            "type": "string"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "verificadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "resultado",
+          "fonte",
+          "detalhe",
+          "liberadoPeloJuridico",
+          "justificativa",
+          "usuarioNome",
+          "verificadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "JuridicoCaso": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "rito": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "judicial",
+              "extrajudicial",
+              "amigavel"
+            ]
+          },
+          "credor": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "nome": {
+                "type": "string"
+              },
+              "cnpj": {
+                "nullable": true,
+                "type": "string"
+              },
+              "ativo": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "nome",
+              "cnpj",
+              "ativo"
+            ],
+            "additionalProperties": false
+          },
+          "mandatoVigente": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Mandato"
+              }
+            ]
+          },
+          "devedorTipo": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "PF",
+              "PJ"
+            ]
+          },
+          "processo": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProcessoJudicial"
+              }
+            ]
+          },
+          "extrajudicial": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProcedimentoExtrajudicial"
+              }
+            ]
+          },
+          "mora": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProvaMora"
+              }
+            ]
+          },
+          "verificacoesRj": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VerificacaoRj"
+            }
+          },
+          "retomada": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "em": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "modalidade": {
+                "type": "string",
+                "enum": [
+                  "apreensao_judicial",
+                  "apreensao_extrajudicial",
+                  "entrega_voluntaria"
+                ]
+              },
+              "comprovante": {
+                "type": "string"
+              },
+              "purgaAte": {
+                "nullable": true,
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "em",
+              "modalidade",
+              "comprovante",
+              "purgaAte"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "status",
+          "rito",
+          "credor",
+          "mandatoVigente",
+          "devedorTipo",
+          "processo",
+          "extrajudicial",
+          "mora",
+          "verificacoesRj",
+          "retomada"
+        ],
+        "additionalProperties": false
+      },
+      "AcaoCaso": {
+        "type": "object",
+        "properties": {
+          "para": {
+            "type": "string"
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "pendencias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "para",
+          "rotulo",
+          "pendencias"
+        ],
+        "additionalProperties": false
       }
     }
   },
@@ -4293,6 +5096,1051 @@
                       "enum": [
                         "Pago"
                       ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/credores": {
+      "get": {
+        "tags": [
+          "credores"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Credor"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "credores"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "cnpj": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "nome"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/credores/{id}/mandatos": {
+      "post": {
+        "tags": [
+          "credores"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "inicio": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "fim": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "referencia": {
+                    "type": "string",
+                    "minLength": 3
+                  }
+                },
+                "required": [
+                  "inicio",
+                  "fim",
+                  "referencia"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mandatos/{id}/revogar": {
+      "post": {
+        "tags": [
+          "credores"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    null
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/juridico": {
+      "get": {
+        "tags": [
+          "casos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JuridicoCaso"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/rito": {
+      "put": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rito": {
+                    "type": "string",
+                    "enum": [
+                      "judicial",
+                      "extrajudicial",
+                      "amigavel"
+                    ]
+                  },
+                  "credorId": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "rito",
+                  "credorId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/processo": {
+      "put": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "numeroCnj": {
+                    "type": "string"
+                  },
+                  "vara": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "comarca": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uf": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "ajuizadoEm": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "liminar": {
+                    "type": "string",
+                    "enum": [
+                      "pendente",
+                      "deferida",
+                      "indeferida",
+                      "revogada"
+                    ]
+                  },
+                  "liminarEm": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "mandadoEm": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  }
+                },
+                "required": [
+                  "numeroCnj",
+                  "comarca",
+                  "uf",
+                  "liminar"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/extrajudicial": {
+      "put": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "via": {
+                    "type": "string",
+                    "enum": [
+                      "rtd",
+                      "detran"
+                    ]
+                  },
+                  "orgao": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "clausulaDestaque": {
+                    "type": "boolean"
+                  },
+                  "notificadoEm": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "consolidadoEm": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "certidaoEm": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  }
+                },
+                "required": [
+                  "via",
+                  "orgao",
+                  "clausulaDestaque"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/mora": {
+      "put": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "meio": {
+                    "type": "string",
+                    "enum": [
+                      "carta_ar",
+                      "cartorio",
+                      "protesto",
+                      "eletronico"
+                    ]
+                  },
+                  "enviadaEm": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "enderecoDoContrato": {
+                    "type": "boolean"
+                  },
+                  "comprovante": {
+                    "type": "string",
+                    "minLength": 3
+                  }
+                },
+                "required": [
+                  "meio",
+                  "enviadaEm",
+                  "enderecoDoContrato",
+                  "comprovante"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/verificacoes-rj": {
+      "post": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resultado": {
+                    "type": "string",
+                    "enum": [
+                      "sem_registro",
+                      "recuperacao_judicial",
+                      "falencia"
+                    ]
+                  },
+                  "fonte": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "detalhe": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "liberadoPeloJuridico": {
+                    "default": false,
+                    "type": "boolean"
+                  },
+                  "justificativa": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "resultado",
+                  "fonte"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/acoes": {
+      "get": {
+        "tags": [
+          "casos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AcaoCaso"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/transicao": {
+      "post": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "para": {
+                        "type": "string",
+                        "enum": [
+                          "Retomado"
+                        ]
+                      },
+                      "em": {},
+                      "modalidade": {
+                        "type": "string",
+                        "enum": [
+                          "apreensao_judicial",
+                          "apreensao_extrajudicial",
+                          "entrega_voluntaria"
+                        ]
+                      },
+                      "comprovante": {
+                        "type": "string",
+                        "minLength": 3
+                      },
+                      "condutaConforme": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "para",
+                      "em",
+                      "modalidade",
+                      "comprovante"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "para": {
+                        "type": "string",
+                        "enum": [
+                          "Em Custódia"
+                        ]
+                      },
+                      "local": {
+                        "type": "string",
+                        "minLength": 3
+                      }
+                    },
+                    "required": [
+                      "para",
+                      "local"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "para": {
+                        "type": "string",
+                        "enum": [
+                          "Suspenso",
+                          "Curado",
+                          "Removido pelo Banco",
+                          "Não Localizado",
+                          "Encerrado"
+                        ]
+                      },
+                      "motivo": {
+                        "type": "string",
+                        "minLength": 10
+                      }
+                    },
+                    "required": [
+                      "para",
+                      "motivo"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "para": {
+                        "type": "string",
+                        "enum": [
+                          "Em Enriquecimento",
+                          "Enriquecido",
+                          "Em Análise",
+                          "Pronto para Campo",
+                          "Aceito",
+                          "Em Campo",
+                          "Localizado",
+                          "Entregue ao Credor"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "para"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/resistencia": {
+      "post": {
+        "tags": [
+          "casos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "relato": {
+                    "type": "string",
+                    "minLength": 10
+                  }
+                },
+                "required": [
+                  "relato"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
                     }
                   },
                   "required": [

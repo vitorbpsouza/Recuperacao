@@ -53,6 +53,9 @@ export type Colisao = Esquemas['Colisao'];
 export type Fonte = Esquemas['Fonte'];
 export type UsuarioCriado = Esquemas['UsuarioCriado'];
 export type RecomendacaoCamila = Esquemas['RecomendacaoCamila'];
+export type JuridicoCaso = Esquemas['JuridicoCaso'];
+export type AcaoCaso = Esquemas['AcaoCaso'];
+export type Credor = Esquemas['Credor'];
 
 export const casoQuery = (id: string) =>
   queryOptions({
@@ -77,6 +80,25 @@ export const podeTransferirQuery = (id: string) =>
     queryKey: ['caso', id, 'pode-transferir'],
     queryFn: () => exigir(api.GET('/api/casos/{id}/pode-transferir', { params: { path: { id } } })),
   });
+
+/** Plano A: rito, credor, prova da mora, processo e retomada. */
+export const juridicoQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'juridico'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/juridico', { params: { path: { id } } })),
+  });
+
+/** Plano A: próximos passos do caso, cada um com o que falta (calculado pelo banco). */
+export const acoesQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'acoes'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/acoes', { params: { path: { id } } })),
+  });
+
+export const credoresQuery = queryOptions({
+  queryKey: ['credores'],
+  queryFn: () => exigir(api.GET('/api/credores')),
+});
 
 export const recuperadoresQuery = queryOptions({
   queryKey: ['recuperadores'],

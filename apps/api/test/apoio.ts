@@ -29,7 +29,7 @@ export interface Ambiente {
   /** Requisição autenticada: cookie de sessão e, se alterar dado, o token CSRF. */
   chamar: (
     s: Sessao,
-    metodo: 'GET' | 'POST',
+    metodo: 'GET' | 'POST' | 'PUT',
     url: string,
     corpo?: unknown,
   ) => Promise<LightMyRequestResponse>;
@@ -49,7 +49,7 @@ export const ambienteDeTeste = async (): Promise<Ambiente> => {
     }
   });
 
-  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }) });
+  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false });
 
   const entrar = async (email: string, senha = SENHA): Promise<Sessao> => {
     const r = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email, senha } });

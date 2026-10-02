@@ -1054,6 +1054,774 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/credores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Credor"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome: string;
+                        cnpj?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/credores/{id}/mandatos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        inicio: string;
+                        fim: string;
+                        referencia: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/mandatos/{id}/revogar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": null;
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/juridico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["JuridicoCaso"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/rito": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        rito: "judicial" | "extrajudicial" | "amigavel";
+                        credorId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            status: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/processo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        numeroCnj: string;
+                        vara?: string;
+                        comarca: string;
+                        uf: string;
+                        ajuizadoEm?: string;
+                        /** @enum {string} */
+                        liminar: "pendente" | "deferida" | "indeferida" | "revogada";
+                        liminarEm?: string;
+                        mandadoEm?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            status: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/extrajudicial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        via: "rtd" | "detran";
+                        orgao: string;
+                        clausulaDestaque: boolean;
+                        notificadoEm?: string;
+                        consolidadoEm?: string;
+                        certidaoEm?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            status: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/mora": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        meio: "carta_ar" | "cartorio" | "protesto" | "eletronico";
+                        enviadaEm: string;
+                        enderecoDoContrato: boolean;
+                        comprovante: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            status: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/verificacoes-rj": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        resultado: "sem_registro" | "recuperacao_judicial" | "falencia";
+                        fonte: string;
+                        detalhe?: string;
+                        /** @default false */
+                        liberadoPeloJuridico?: boolean;
+                        justificativa?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/acoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AcaoCaso"][];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/transicao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        para: "Retomado";
+                        em: unknown;
+                        /** @enum {string} */
+                        modalidade: "apreensao_judicial" | "apreensao_extrajudicial" | "entrega_voluntaria";
+                        comprovante: string;
+                        condutaConforme?: boolean;
+                    } | {
+                        /** @enum {string} */
+                        para: "Em Custódia";
+                        local: string;
+                    } | {
+                        /** @enum {string} */
+                        para: "Suspenso" | "Curado" | "Removido pelo Banco" | "Não Localizado" | "Encerrado";
+                        motivo: string;
+                    } | {
+                        /** @enum {string} */
+                        para: "Em Enriquecimento" | "Enriquecido" | "Em Análise" | "Pronto para Campo" | "Aceito" | "Em Campo" | "Localizado" | "Entregue ao Credor";
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            status: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/resistencia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        relato: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: string;
+                            status: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/consultas": {
         parameters: {
             query?: never;
@@ -1636,6 +2404,94 @@ export interface components {
         RevelarDevedorInput: {
             finalidade: string;
         };
+        MandatoInput: {
+            id: string;
+            credorId: string;
+            inicio: string;
+            fim: string;
+            referencia: string;
+            revogadoEm: unknown;
+            vigente: boolean;
+        };
+        CredorInput: {
+            id: string;
+            nome: string;
+            cnpj: string | null;
+            ativo: boolean;
+            mandatos: components["schemas"]["MandatoInput"][];
+        };
+        ProcessoJudicialInput: {
+            numeroCnj: string;
+            vara: string | null;
+            comarca: string;
+            uf: string;
+            ajuizadoEm: string | null;
+            /** @enum {string} */
+            liminar: "pendente" | "deferida" | "indeferida" | "revogada";
+            liminarEm: string | null;
+            mandadoEm: string | null;
+            atualizadoEm: unknown;
+        };
+        ProcedimentoExtrajudicialInput: {
+            /** @enum {string} */
+            via: "rtd" | "detran";
+            orgao: string;
+            clausulaDestaque: boolean;
+            notificadoEm: string | null;
+            consolidadoEm: string | null;
+            certidaoEm: string | null;
+            prazoNotificacao: string | null;
+            atualizadoEm: unknown;
+        };
+        ProvaMoraInput: {
+            /** @enum {string} */
+            meio: "carta_ar" | "cartorio" | "protesto" | "eletronico";
+            enviadaEm: string;
+            enderecoDoContrato: boolean;
+            comprovante: string;
+            atualizadoEm: unknown;
+        };
+        VerificacaoRjInput: {
+            id: number;
+            /** @enum {string} */
+            resultado: "sem_registro" | "recuperacao_judicial" | "falencia";
+            fonte: string;
+            detalhe: string | null;
+            liberadoPeloJuridico: boolean;
+            justificativa: string | null;
+            usuarioNome: string | null;
+            verificadoEm: unknown;
+        };
+        JuridicoCasoInput: {
+            status: string;
+            /** @enum {string|null} */
+            rito: "judicial" | "extrajudicial" | "amigavel" | null;
+            credor: {
+                id: string;
+                nome: string;
+                cnpj: string | null;
+                ativo: boolean;
+            } | null;
+            mandatoVigente: components["schemas"]["MandatoInput"] | null;
+            /** @enum {string|null} */
+            devedorTipo: "PF" | "PJ" | null;
+            processo: components["schemas"]["ProcessoJudicialInput"] | null;
+            extrajudicial: components["schemas"]["ProcedimentoExtrajudicialInput"] | null;
+            mora: components["schemas"]["ProvaMoraInput"] | null;
+            verificacoesRj: components["schemas"]["VerificacaoRjInput"][];
+            retomada: {
+                em: unknown;
+                /** @enum {string} */
+                modalidade: "apreensao_judicial" | "apreensao_extrajudicial" | "entrega_voluntaria";
+                comprovante: string;
+                purgaAte: unknown;
+            } | null;
+        };
+        AcaoCasoInput: {
+            para: string;
+            rotulo: string;
+            pendencias: string[];
+        };
         Erro: {
             erro: string;
         };
@@ -2056,6 +2912,101 @@ export interface components {
         };
         RevelarDevedor: {
             finalidade: string;
+        };
+        Mandato: {
+            id: string;
+            credorId: string;
+            inicio: string;
+            fim: string;
+            referencia: string;
+            /** Format: date-time */
+            revogadoEm: string | null;
+            vigente: boolean;
+        };
+        Credor: {
+            id: string;
+            nome: string;
+            cnpj: string | null;
+            ativo: boolean;
+            mandatos: components["schemas"]["Mandato"][];
+        };
+        ProcessoJudicial: {
+            numeroCnj: string;
+            vara: string | null;
+            comarca: string;
+            uf: string;
+            ajuizadoEm: string | null;
+            /** @enum {string} */
+            liminar: "pendente" | "deferida" | "indeferida" | "revogada";
+            liminarEm: string | null;
+            mandadoEm: string | null;
+            /** Format: date-time */
+            atualizadoEm: string;
+        };
+        ProcedimentoExtrajudicial: {
+            /** @enum {string} */
+            via: "rtd" | "detran";
+            orgao: string;
+            clausulaDestaque: boolean;
+            notificadoEm: string | null;
+            consolidadoEm: string | null;
+            certidaoEm: string | null;
+            prazoNotificacao: string | null;
+            /** Format: date-time */
+            atualizadoEm: string;
+        };
+        ProvaMora: {
+            /** @enum {string} */
+            meio: "carta_ar" | "cartorio" | "protesto" | "eletronico";
+            enviadaEm: string;
+            enderecoDoContrato: boolean;
+            comprovante: string;
+            /** Format: date-time */
+            atualizadoEm: string;
+        };
+        VerificacaoRj: {
+            id: number;
+            /** @enum {string} */
+            resultado: "sem_registro" | "recuperacao_judicial" | "falencia";
+            fonte: string;
+            detalhe: string | null;
+            liberadoPeloJuridico: boolean;
+            justificativa: string | null;
+            usuarioNome: string | null;
+            /** Format: date-time */
+            verificadoEm: string;
+        };
+        JuridicoCaso: {
+            status: string;
+            /** @enum {string|null} */
+            rito: "judicial" | "extrajudicial" | "amigavel" | null;
+            credor: {
+                id: string;
+                nome: string;
+                cnpj: string | null;
+                ativo: boolean;
+            } | null;
+            mandatoVigente: components["schemas"]["Mandato"] | null;
+            /** @enum {string|null} */
+            devedorTipo: "PF" | "PJ" | null;
+            processo: components["schemas"]["ProcessoJudicial"] | null;
+            extrajudicial: components["schemas"]["ProcedimentoExtrajudicial"] | null;
+            mora: components["schemas"]["ProvaMora"] | null;
+            verificacoesRj: components["schemas"]["VerificacaoRj"][];
+            retomada: {
+                /** Format: date-time */
+                em: string;
+                /** @enum {string} */
+                modalidade: "apreensao_judicial" | "apreensao_extrajudicial" | "entrega_voluntaria";
+                comprovante: string;
+                /** Format: date-time */
+                purgaAte: string | null;
+            } | null;
+        };
+        AcaoCaso: {
+            para: string;
+            rotulo: string;
+            pendencias: string[];
         };
     };
     responses: never;

@@ -8,7 +8,9 @@ import { Card } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 
 import { CabecalhoDePagina, ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
-import { fontesQuery } from '@/lib/api.ts';
+import { fontesQuery, type UsuarioSessao } from '@/lib/api.ts';
+
+import { SecaoCredores } from './secao-credores.tsx';
 
 const INGESTAO: Record<string, string> = {
   Manual: 'Cadastro manual',
@@ -18,9 +20,9 @@ const INGESTAO: Record<string, string> = {
 
 /**
  * De onde cada caso vem e o limite de finalidade que a fonte impõe. Os
- * contratos por credor (honorários, SLA, ritos) chegam na Fase 2b.
+ * contratos por credor (honorários, SLA) chegam na Fase 2b; credores e mandatos já estão aqui.
  */
-export function PaginaFontes() {
+export function PaginaFontes({ sessao }: { sessao: UsuarioSessao }) {
   const consulta = useQuery(fontesQuery);
   return (
     <>
@@ -78,6 +80,7 @@ export function PaginaFontes() {
               ))}
         </div>
       )}
+      <SecaoCredores sessao={sessao} />
     </>
   );
 }
