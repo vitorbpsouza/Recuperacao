@@ -3476,6 +3476,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/mensagens/{id}/midia/baixar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MidiaBaixada"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/painel/recuperacao": {
         parameters: {
             query?: never;
@@ -4942,11 +5015,17 @@ export interface components {
             temArquivo: boolean;
             latitude: number | null;
             longitude: number | null;
+            midiaFalha: string | null;
+            podeBaixar: boolean;
         };
         ContatoConversaInput: {
             numero: string;
             nome: string | null;
             casoId: string | null;
+        };
+        MidiaBaixadaInput: {
+            ok: boolean;
+            detalhe: string;
         };
         PontoMapaInput: {
             casoId: string;
@@ -5953,11 +6032,17 @@ export interface components {
             temArquivo: boolean;
             latitude: number | null;
             longitude: number | null;
+            midiaFalha: string | null;
+            podeBaixar: boolean;
         };
         ContatoConversa: {
             numero: string;
             nome: string | null;
             casoId: string | null;
+        };
+        MidiaBaixada: {
+            ok: boolean;
+            detalhe: string;
         };
         PontoMapa: {
             casoId: string;

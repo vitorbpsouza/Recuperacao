@@ -748,7 +748,13 @@ export const mensagem = z.object({
   temArquivo: z.boolean(),
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
+  /** Por que a mídia não foi guardada. */
+  midiaFalha: z.string().nullable(),
+  /** A mídia falta e pode ser baixada de novo da Evolution. */
+  podeBaixar: z.boolean(),
 });
+
+export const midiaBaixada = z.object({ ok: z.boolean(), detalhe: z.string() });
 
 export const contatoConversa = z.object({
   numero: z.string(),
@@ -764,6 +770,7 @@ registrar({
   Conversa: conversa,
   Mensagem: mensagem,
   ContatoConversa: contatoConversa,
+  MidiaBaixada: midiaBaixada,
 });
 
 // ---------------------------------------------------------------------------

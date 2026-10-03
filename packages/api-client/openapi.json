@@ -3347,6 +3347,13 @@
           "longitude": {
             "nullable": true,
             "type": "number"
+          },
+          "midiaFalha": {
+            "nullable": true,
+            "type": "string"
+          },
+          "podeBaixar": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -3362,7 +3369,9 @@
           "midiaNome",
           "temArquivo",
           "latitude",
-          "longitude"
+          "longitude",
+          "midiaFalha",
+          "podeBaixar"
         ]
       },
       "ContatoConversaInput": {
@@ -3384,6 +3393,21 @@
           "numero",
           "nome",
           "casoId"
+        ]
+      },
+      "MidiaBaixadaInput": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "detalhe": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "detalhe"
         ]
       },
       "PontoMapaInput": {
@@ -7763,6 +7787,13 @@
           "longitude": {
             "nullable": true,
             "type": "number"
+          },
+          "midiaFalha": {
+            "nullable": true,
+            "type": "string"
+          },
+          "podeBaixar": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -7778,7 +7809,9 @@
           "midiaNome",
           "temArquivo",
           "latitude",
-          "longitude"
+          "longitude",
+          "midiaFalha",
+          "podeBaixar"
         ],
         "additionalProperties": false
       },
@@ -7801,6 +7834,22 @@
           "numero",
           "nome",
           "casoId"
+        ],
+        "additionalProperties": false
+      },
+      "MidiaBaixada": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "detalhe": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "detalhe"
         ],
         "additionalProperties": false
       },
@@ -12891,6 +12940,77 @@
             }
           },
           "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mensagens/{id}/midia/baixar": {
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MidiaBaixada"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
             "description": "Default Response",
             "content": {
               "application/json": {

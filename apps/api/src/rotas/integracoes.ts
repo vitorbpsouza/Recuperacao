@@ -36,6 +36,7 @@ import {
   mimeSimples,
   numeroWhatsapp,
   type CredenciaisEvolution,
+  type OrigemDaMidia,
   type TipoDeMidia,
 } from '../integracoes/evolution.ts';
 import { conteudoDoBase64, guardarMidia, LIMITE_MIDIA } from '../servicos/midia-whatsapp.ts';
@@ -397,7 +398,8 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
           sql`select * from (
                 select m.id::int as id, m.direcao, m.texto, m.caso_id as "casoId", a.placa, u.nome as "usuarioNome", m.criado_em as "criadoEm",
                        m.midia_tipo as "midiaTipo", m.midia_mime as "midiaMime", m.midia_nome as "midiaNome",
-                       (m.midia_arquivo is not null) as "temArquivo", m.latitude::float8 as latitude, m.longitude::float8 as longitude
+                       (m.midia_arquivo is not null) as "temArquivo", m.latitude::float8 as latitude, m.longitude::float8 as longitude,
+                       m.midia_falha as "midiaFalha", (m.midia_arquivo is null and m.midia_origem is not null) as "podeBaixar"
                   from mensagem_whatsapp m
                   left join usuario u on u.id = m.usuario_id
                   left join caso k on k.id = m.caso_id
@@ -587,6 +589,60 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
     },
   );
 
+  /** Baixa de novo, da Evolution, a mídia que não foi guardada quando chegou. */
+  app.post(
+    '/mensagens/:id/midia/baixar',
+    {
+      schema: {
+        tags: ['integracoes'],
+        params: z.object({ id: z.coerce.number().int() }),
+        response: { 200: c.midiaBaixada, 404: c.erro, 409: c.erro, 502: c.erro, 503: c.erro },
+      },
+    },
+    async (req, reply) => {
+      if (!fotosDir) return reply.code(503).send({ erro: 'servidor sem volume para mídias: configure FOTOS_DIR' });
+      const dados = await req.banco(async (tx) => {
+        const [m] = await consultar<{ integracaoId: string; origem: OrigemDaMidia | null; arquivo: string | null; mime: string | null }>(
+          tx,
+          sql`select integracao_id as "integracaoId", midia_origem as origem, midia_arquivo as arquivo, midia_mime as mime
+                from mensagem_whatsapp where id = ${req.params.id}`,
+        );
+        if (!m) return null;
+        const [i] = await consultar<LinhaIntegracao>(
+          tx,
+          sql`select id, tipo, nome, base_url as "baseUrl", credenciais_cifradas as credenciais, config, bureau_id as "bureauId", ativo
+                from integracao where id = ${m.integracaoId}`,
+        );
+        return { m, i };
+      });
+      if (!dados) return reply.code(404).send({ erro: 'mensagem não encontrada' });
+      const { m, i } = dados;
+      if (m.arquivo) return { ok: true, detalhe: 'a mídia já estava guardada' };
+      if (!m.origem) return reply.code(409).send({ erro: 'esta mensagem chegou antes de a origem da mídia ser guardada: peça para reenviar' });
+      if (!i) return reply.code(409).send({ erro: 'a conexão da Evolution desta mensagem não existe mais' });
+
+      let base64: string | null = null;
+      let mime = m.mime;
+      try {
+        const baixada = await clienteEvolution(i).baixarMidia(m.origem);
+        base64 = baixada.base64 ?? null;
+        mime = mimeSimples(baixada.mimetype) ?? mime;
+      } catch (e) {
+        const falha = e instanceof Error ? e.message : 'falha desconhecida';
+        await req.banco((tx) => tx.execute(sql`update mensagem_whatsapp set midia_falha = ${falha.slice(0, 500)} where id = ${req.params.id}`));
+        return reply.code(502).send({ erro: falha });
+      }
+      if (!base64) return reply.code(502).send({ erro: 'a Evolution não devolveu o arquivo' });
+      const g = await guardarMidia(fotosDir, req.contexto!.tenantId, conteudoDoBase64(base64), mime);
+      await req.banco((tx) =>
+        tx.execute(sql`update mensagem_whatsapp
+                          set midia_arquivo = ${g.arquivo}, midia_sha256 = ${g.sha256}, midia_tamanho = ${g.tamanho}, midia_mime = ${mime}, midia_falha = null
+                        where id = ${req.params.id} and midia_arquivo is null`),
+      );
+      return { ok: true, detalhe: 'mídia guardada' };
+    },
+  );
+
   /**
    * Webhook da Evolution: sem sessão, autenticado pelo token na URL. Responde
    * 200 sempre — quem não tem o token não descobre se acertou.
@@ -612,6 +668,11 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
       if (m.midia) {
         const { base64: _base64, ...descricao } = m.midia;
         midia = descricao;
+        if (m.midia.tipo !== 'localizacao') {
+          // Guardada mesmo quando a mídia baixa agora: é o que permite baixar de novo.
+          midia.origem = m.origem;
+          if (!fotosDir) midia.falha = 'servidor sem volume para mídias (FOTOS_DIR)';
+        }
         if (m.midia.tipo !== 'localizacao' && fotosDir) {
           const [i] = await semSessao((tx) =>
             consultar<{ tenant_id: string; base_url: string; credenciais_cifradas: string; config: { instancia?: string } }>(
@@ -625,13 +686,15 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
             let mime = m.midia.mime;
             if (!base64) {
               const evolution = criarClienteEvolution(i.base_url, i.config.instancia ?? '', decifrar<CredenciaisEvolution>(chave, i.credenciais_cifradas), executar);
-              const baixada = await evolution.baixarMidia(m.chave);
+              const baixada = await evolution.baixarMidia(m.origem);
               base64 = baixada.base64 ?? null;
               mime = mimeSimples(baixada.mimetype) ?? mime;
             }
             if (base64) midia = { ...midia, mime, ...(await guardarMidia(fotosDir, i.tenant_id, conteudoDoBase64(base64), mime)) };
+            else midia.falha = 'a Evolution não devolveu o arquivo';
           } catch (e) {
-            // A mensagem entra mesmo sem o arquivo: a tela mostra que a mídia não foi guardada.
+            // A mensagem entra mesmo sem o arquivo: a tela mostra o motivo e oferece baixar de novo.
+            midia.falha = e instanceof Error ? e.message : 'falha desconhecida';
             req.log.warn({ err: e }, 'mídia do WhatsApp não guardada');
           }
         }

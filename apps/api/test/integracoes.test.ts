@@ -180,6 +180,29 @@ describe('WhatsApp pela Evolution', () => {
     expect(atual).toMatchObject({ nomeWhatsapp: 'Zé do Guincho', ultimaMidia: 'localizacao' });
   });
 
+  it('foto que a Evolution não devolveu fica com o motivo e pode ser baixada de novo pela mensagem original', async () => {
+    const [conversa] = (await amb.chamar(opA, 'GET', '/api/conversas')).json();
+    // Primeira tentativa: a Evolution responde sem o arquivo.
+    await postarWebhook(evento(conversa.numero, 'MIDIA-4', { imageMessage: { mimetype: 'image/jpeg', mediaKey: 'chave-da-midia', jpegThumbnail: 'miniatura' } }));
+    let [foto] = (await amb.chamar(opA, 'GET', `/api/conversas/${conversa.numero}`)).json().slice(-1);
+    expect(foto).toMatchObject({ midiaTipo: 'imagem', temArquivo: false, podeBaixar: true, midiaFalha: 'a Evolution não devolveu o arquivo' });
+
+    externo.chamadas.length = 0;
+    externo.responder = () => ({ base64: Buffer.from('foto-baixada-de-novo').toString('base64'), mimetype: 'image/jpeg' });
+    const r = await amb.chamar(opA, 'POST', `/api/mensagens/${foto.id}/midia/baixar`);
+    expect(r.statusCode).toBe(200);
+    // Vai a mensagem original (com a chave de mídia), sem miniatura nem base64.
+    const corpo = externo.chamadas[0]!.corpo as { message: { key: { id: string }; message: { imageMessage: Record<string, unknown> } } };
+    expect(corpo.message.key.id).toBe('MIDIA-4');
+    expect(corpo.message.message.imageMessage).toEqual({ mimetype: 'image/jpeg', mediaKey: 'chave-da-midia' });
+
+    [foto] = (await amb.chamar(opA, 'GET', `/api/conversas/${conversa.numero}`)).json().slice(-1);
+    expect(foto).toMatchObject({ temArquivo: true, podeBaixar: false, midiaFalha: null });
+    expect((await amb.chamar(opA, 'GET', `/api/mensagens/${foto.id}/midia`)).body).toBe('foto-baixada-de-novo');
+    // Completar a mídia é a única alteração aceita.
+    await expect(amb.banco.bruta.query(`update mensagem_whatsapp set texto = 'adulterado' where id = ${foto.id}`)).rejects.toThrow(/append-only/);
+  });
+
   it('mensagem mandada do celular entra como enviada; o eco do que a central mandou não duplica', async () => {
     const [conversa] = (await amb.chamar(opA, 'GET', '/api/conversas')).json();
     const antes = conversa.total;

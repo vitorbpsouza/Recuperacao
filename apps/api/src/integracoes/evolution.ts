@@ -4,7 +4,9 @@
  *   - enviar texto: POST /message/sendText/{instancia} { number, text };
  *   - enviar mídia: POST /message/sendMedia/{instancia} { number, mediatype, mimetype, media (base64), fileName, caption };
  *   - enviar áudio de voz: POST /message/sendWhatsAppAudio/{instancia} { number, audio (base64) };
- *   - baixar mídia recebida: POST /chat/getBase64FromMediaMessage/{instancia} { message: { key } };
+ *   - baixar mídia recebida: POST /chat/getBase64FromMediaMessage/{instancia} { message: { key, message } } —
+ *     com a mensagem original a Evolution baixa direto do WhatsApp; só com a
+ *     chave, ela precisa ter guardado a mensagem no banco dela;
  *   - conferir se o número tem WhatsApp: POST /chat/whatsappNumbers/{instancia} { numbers };
  *   - estado da conexão: GET /instance/connectionState/{instancia};
  *   - webhook: POST /webhook/set/{instancia}, evento MESSAGES_UPSERT.
@@ -72,8 +74,8 @@ export const criarClienteEvolution = (
     /** Áudio como mensagem de voz: a Evolution converte para o formato do WhatsApp. */
     enviarAudio: (numero: string, base64: string) =>
       chamar<{ key?: { id?: string } }>('POST', '/message/sendWhatsAppAudio', { number: numeroWhatsapp(numero), audio: base64 }, 120_000),
-    baixarMidia: (chave: unknown) =>
-      chamar<{ base64?: string; mimetype?: string }>('POST', '/chat/getBase64FromMediaMessage', { message: { key: chave }, convertToMp4: false }, 60_000),
+    baixarMidia: (origem: OrigemDaMidia) =>
+      chamar<{ base64?: string; mimetype?: string }>('POST', '/chat/getBase64FromMediaMessage', { message: origem, convertToMp4: false }, 60_000),
     temWhatsapp: async (numeros: string[]) => {
       const r = await chamar<{ exists: boolean; number: string }[]>('POST', '/chat/whatsappNumbers', {
         numbers: numeros.map(numeroWhatsapp),
@@ -88,6 +90,13 @@ export const criarClienteEvolution = (
   };
 };
 
+/** A mensagem como o WhatsApp a entregou (sem o base64): o que a Evolution precisa para baixar a mídia. */
+export interface OrigemDaMidia {
+  key: unknown;
+  message?: unknown;
+  messageTimestamp?: unknown;
+}
+
 export type TipoDeMidia = 'imagem' | 'audio' | 'video' | 'documento' | 'figurinha' | 'localizacao';
 
 export interface MensagemDoWebhook {
@@ -97,8 +106,8 @@ export interface MensagemDoWebhook {
   externoId: string | null;
   /** pushName: em mensagem enviada, é o nome da própria operação. */
   nome: string | null;
-  /** A chave da mensagem, para baixar a mídia da Evolution. */
-  chave: unknown;
+  /** A mensagem original, para baixar a mídia da Evolution. */
+  origem: OrigemDaMidia;
   midia: {
     tipo: TipoDeMidia;
     mime: string | null;
@@ -136,6 +145,17 @@ const desembrulhar = (m: Conteudo | undefined): Conteudo | undefined => {
   return interno ? { ...interno, base64: m?.base64 ?? interno.base64 } : interno;
 };
 
+/** A mensagem sem o base64 e sem as miniaturas: fica guardada pequena, e basta para baixar de novo. */
+const semBinario = (valor: unknown): unknown => {
+  if (Array.isArray(valor)) return valor.map(semBinario);
+  if (!valor || typeof valor !== 'object') return valor;
+  return Object.fromEntries(
+    Object.entries(valor as Record<string, unknown>)
+      .filter(([k]) => k !== 'base64' && k !== 'jpegThumbnail' && k !== 'thumbnail')
+      .map(([k, v]) => [k, semBinario(v)]),
+  );
+};
+
 /** Só o tipo, sem parâmetros (audio/ogg; codecs=opus → audio/ogg). */
 export const mimeSimples = (mime: string | undefined | null) => {
   const t = mime?.split(';')[0]?.trim().toLowerCase();
@@ -160,6 +180,8 @@ export const lerMensagemDoWebhook = (corpo: unknown): MensagemDoWebhook | null =
       key?: { remoteJid?: string; remoteJidAlt?: string; senderPn?: string; fromMe?: boolean; id?: string };
       pushName?: string;
       message?: Conteudo;
+      messageTimestamp?: unknown;
+      base64?: string;
     };
   };
   if (!c?.event || !/messages[._]upsert/i.test(c.event)) return null;
@@ -171,7 +193,7 @@ export const lerMensagemDoWebhook = (corpo: unknown): MensagemDoWebhook | null =
 
   const m = desembrulhar(d.message);
   if (!m) return null;
-  const base64 = m.base64 ?? null;
+  const base64 = m.base64 ?? d.base64 ?? null;
   let texto = m.conversation ?? m.extendedTextMessage?.text ?? '';
   let midia: MensagemDoWebhook['midia'] = null;
 
@@ -205,7 +227,7 @@ export const lerMensagemDoWebhook = (corpo: unknown): MensagemDoWebhook | null =
     texto,
     externoId: d.key.id ?? null,
     nome: d.pushName ?? null,
-    chave: d.key,
+    origem: { key: d.key, message: semBinario(d.message), messageTimestamp: d.messageTimestamp },
     midia,
   };
 };

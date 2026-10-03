@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router';
 import {
   CarIcon,
   CheckIcon,
+  DownloadIcon,
   FileTextIcon,
   ImageIcon,
   MapPinIcon,
@@ -303,10 +304,7 @@ function Bolha({ mensagem: m }: { mensagem: MensagemWhatsapp }) {
     }
     if (!m.temArquivo) {
       return (
-        <p className="flex items-center gap-2 italic opacity-80">
-          {midia ? <midia.Icone className="size-4" /> : null}
-          {midia?.rotulo} não guardado no servidor
-        </p>
+        <MidiaFaltando mensagem={m} rotulo={midia?.rotulo ?? 'Mídia'} Icone={midia?.Icone ?? FileTextIcon} />
       );
     }
     switch (m.midiaTipo) {
@@ -352,6 +350,39 @@ function Bolha({ mensagem: m }: { mensagem: MensagemWhatsapp }) {
           {m.placa ? ` · caso ${m.placa}` : ''}
         </p>
       </div>
+    </div>
+  );
+}
+
+/** Mídia que não foi guardada: o motivo e, quando dá, baixar de novo da Evolution. */
+function MidiaFaltando({
+  mensagem: m,
+  rotulo,
+  Icone,
+}: {
+  mensagem: MensagemWhatsapp;
+  rotulo: string;
+  Icone: ComponentType<{ className?: string }>;
+}) {
+  const queryClient = useQueryClient();
+  const baixar = useMutation({
+    mutationFn: () => exigir(api.POST('/api/mensagens/{id}/midia/baixar', { params: { path: { id: m.id } } })),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['conversas'] }),
+    onError: (e) => toast.error(`Não foi possível baixar: ${e.message}`),
+  });
+  return (
+    <div className="space-y-1">
+      <p className="flex items-center gap-2 italic opacity-80">
+        <Icone className="size-4" />
+        {rotulo} não guardado no servidor
+      </p>
+      {m.midiaFalha ? <p className="text-[11px] opacity-70">{m.midiaFalha}</p> : null}
+      {m.podeBaixar ? (
+        <Button size="sm" variant="secondary" className="h-7" onClick={() => baixar.mutate()} disabled={baixar.isPending}>
+          {baixar.isPending ? <Spinner /> : <DownloadIcon />}
+          Baixar de novo
+        </Button>
+      ) : null}
     </div>
   );
 }
