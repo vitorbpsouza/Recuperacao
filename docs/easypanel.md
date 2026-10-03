@@ -4,7 +4,13 @@ Alternativa ao Google Cloud ([infra.md](infra.md)) para rodar a ReCredita num se
 
 ## Armazenamento (montagens)
 
-**O aplicativo não precisa de montagem nenhuma.** O container não grava nada em disco: todo dado vive no Postgres. Deixe a tela "Armazenamento" do app vazia.
+**O aplicativo precisa de uma montagem: as fotos de campo.** Todo o resto vive no Postgres; as fotos (o arquivo original, prova da diligência) ficam em disco.
+
+1. No app, **Armazenamento → Adicionar volume**: nome `fotos`, caminho de montagem `/app/dados`.
+2. Em **Environment**: `FOTOS_DIR=/app/dados/fotos`.
+3. Inclua esse volume nos **backups**, junto com o do banco.
+
+Sem `FOTOS_DIR`, a API recusa o envio de foto (com aviso na tela) em vez de gravar no disco do container, que some no próximo deploy.
 
 O que precisa persistir é o **serviço Postgres** (`db-recuperacao`). O Easypanel já cria um volume para ele. Configure ali os **backups**: é o único dado da operação.
 

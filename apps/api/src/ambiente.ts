@@ -21,6 +21,13 @@ const esquema = z.object({
    * Ausente em produção: derivada do SEGREDO_SESSAO.
    */
   CHAVE_SEGREDOS: z.string().min(32).optional(),
+  /**
+   * Pasta das fotos de campo. Em produção, um volume montado (no Easypanel:
+   * Armazenamento → volume em /app/dados, e FOTOS_DIR=/app/dados/fotos). Sem
+   * ela, em produção, o envio de foto é recusado: o disco do container some
+   * no próximo deploy. Fora de produção: ~/.recredita/fotos.
+   */
+  FOTOS_DIR: z.string().optional(),
   /** Endereço público da API (https://…), para montar a URL do webhook da Evolution. */
   URL_PUBLICA: z.string().url().optional(),
   // CAMILA: Vertex AI quando houver projeto; chave do Gemini só em desenvolvimento.

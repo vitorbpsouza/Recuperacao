@@ -61,6 +61,7 @@ const TELAS = [
   '/a/operacao',
   '/a/casos/novo',
   '/a/casos/caso-a-001',
+  '/a/casos/caso-a-003',
   '/b',
   '/b/casos',
   '/gestao/dados',

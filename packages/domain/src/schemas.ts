@@ -437,7 +437,7 @@ export const verificacaoVeicularEntrada = z
   })
   .strict();
 
-export const FONTES_AVISTAMENTO = ['equipe_campo', 'credor', 'devedor', 'outro'] as const;
+export const FONTES_AVISTAMENTO = ['equipe_campo', 'camera', 'credor', 'devedor', 'outro'] as const;
 
 /** Onde o veículo foi visto. Localização do bem, não da pessoa. */
 export const avistamentoEntrada = z
@@ -532,3 +532,52 @@ export const enviarMensagemEntrada = z
     integracaoId: texto.optional(),
   })
   .strict();
+
+// ---------------------------------------------------------------------------
+// Foto de campo e link para terceiros
+// ---------------------------------------------------------------------------
+
+export const TIPOS_DE_FOTO = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'] as const;
+
+/** Foto em base64 (até ~20 MB). Coordenada do aparelho só como reserva: a do EXIF vale mais. */
+export const novaFotoEntrada = z
+  .object({
+    imagem: z.string().min(100, 'foto vazia').max(28_000_000, 'foto grande demais (máximo de 20 MB)'),
+    tipoMime: z.enum(TIPOS_DE_FOTO, 'formato de imagem não aceito'),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    precisao: z.number().min(0).max(100_000).optional(),
+    descricao: z.string().trim().max(500).optional(),
+  })
+  .strict()
+  .refine((f) => (f.latitude === undefined) === (f.longitude === undefined), {
+    message: 'informe latitude e longitude juntas',
+    path: ['longitude'],
+  });
+
+export const novoLinkCampoEntrada = z
+  .object({
+    recuperadorId: texto.optional(),
+    /** Nome ou telefone de quem recebe, quando não é um recuperador cadastrado. */
+    destinatario: z.string().trim().min(2).optional(),
+    /** Validade do link em horas (máximo de 7 dias). */
+    horas: z.number().int().min(1).max(168).default(72),
+    /** Envia o link pelo WhatsApp da operação (Evolution). */
+    enviarWhatsapp: z.boolean().default(false),
+  })
+  .strict()
+  .refine((l) => l.recuperadorId || l.destinatario, { message: 'escolha o recuperador ou diga para quem é o link', path: ['destinatario'] });
+
+/** Avistamento enviado pelo link, sem foto. */
+export const avistamentoCampoEntrada = z
+  .object({
+    descricao: z.string().trim().min(5, 'descreva onde o veículo está (ao menos 5 caracteres)'),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    precisao: z.number().min(0).max(100_000).optional(),
+  })
+  .strict()
+  .refine((a) => (a.latitude === undefined) === (a.longitude === undefined), {
+    message: 'informe latitude e longitude juntas',
+    path: ['longitude'],
+  });

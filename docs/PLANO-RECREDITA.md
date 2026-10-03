@@ -525,6 +525,13 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
       - **API Brasil:** `POST /vehicles/dados` (Bearer + DeviceToken) ou `/consulta/veiculos/credits`. A conexão cria o fornecedor (contrato e custo); cada consulta exige base legal e justificativa, guarda o JSON original e passa pelo mesmo leitor — campo novo da API aparece em Campos novos.
       - **Evolution:** envio (`/message/sendText`), conferência de WhatsApp dos celulares da pessoa (`/chat/whatsappNumbers`) e webhook `MESSAGES_UPSERT` em `/api/webhooks/evolution/{token}` (token só em hash no banco). Tela Operação com as conversas da rede de campo; o modelo de mensagem de caso não leva a dívida (CDC art. 42).
     - Testes: domínio 50, banco 62, API 95 e E2E 14.
+  - **Inteligência de localização (2026-10-03, migração 0010):**
+    - **Onde procurar** (`packages/domain/src/localizacao.ts`): junta endereços cadastrados e avistamentos (radar, câmera de terceiro, equipe, foto) e devolve lugares ranqueados com o porquê. Pesos por fonte (foto 1,0 > equipe 0,9 > câmera 0,8 > radar 0,7 > credor 0,5 > endereço 0,45 > endereço de parente 0,25); meia-vida de 14 dias; agrupamento em 300 m; bônus quando endereço cadastrado é confirmado por avistamento; janela de 2 horas com mais sinais; perfil pernoite (19h–7h), diurno ou misto. Regra determinística e auditável — a CAMILA pode resumir, não decide.
+    - **Endereços no mapa:** OpenStreetMap (Nominatim, uma consulta por segundo, User-Agent identificado) e, sem resultado, a coordenada do CEP pela BrasilAPI. A precisão (número, rua, CEP) fica gravada.
+    - **Foto de campo:** o arquivo original vai para `FOTOS_DIR` (volume), com SHA-256 (cadeia de custódia). O EXIF (GPS, hora, aparelho) é lido no servidor; sem GPS na foto (o iPhone costuma tirar), vale a localização do aparelho, marcada como tal. A placa é lida pelo Gemini Vision (mesmo cliente da CAMILA: Vertex AI em produção) e comparada com a do caso; placa de outro caso da carteira gera aviso e não vira avistamento deste. Foto com coordenada vira avistamento com fonte "foto".
+    - **Link de campo:** o recuperador terceiro recebe (pelo WhatsApp da Evolution, se quiser) um link de um caso só, com validade de 12 h a 7 dias e token só em hash. Sem login, ele vê placa, modelo, cor e região — nunca devedor nem dívida — e envia foto e localização. Tudo entra com o link como autor; o link pode ser revogado.
+    - Fontes de avistamento novas: `camera` (câmera de condomínio, comércio, LPR de parceiro) e `foto`.
+    - Testes: domínio 57, banco 62, API 105 e E2E 15.
   - **Pendente (próximas etapas do Plano A):**
     - Importação de carteira e arquivo de recall.
     - Enriquecimento com `dado_enriquecido`.

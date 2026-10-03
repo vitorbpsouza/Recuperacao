@@ -15,6 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppARouteImport } from './routes/_app/a'
 import { Route as AppBRouteImport } from './routes/_app/b'
 import { Route as AppGestaoRouteImport } from './routes/_app/gestao'
+import { Route as CampoTokenRouteImport } from './routes/campo.$token'
 import { Route as AppAIndexRouteImport } from './routes/_app/a/index'
 import { Route as AppACasosRouteImport } from './routes/_app/a/casos'
 import { Route as AppADistribuicaoRouteImport } from './routes/_app/a/distribuicao'
@@ -65,6 +66,11 @@ const AppGestaoRoute = AppGestaoRouteImport.update({
   id: '/gestao',
   path: '/gestao',
   getParentRoute: () => AppRoute,
+} as any)
+const CampoTokenRoute = CampoTokenRouteImport.update({
+  id: '/campo/$token',
+  path: '/campo/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppAIndexRoute = AppAIndexRouteImport.update({
   id: '/',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/a': typeof AppARouteWithChildren
   '/b': typeof AppBRouteWithChildren
   '/gestao': typeof AppGestaoRouteWithChildren
+  '/campo/$token': typeof CampoTokenRoute
   '/a/casos': typeof AppACasosRouteWithChildren
   '/a/distribuicao': typeof AppADistribuicaoRoute
   '/a/operacao': typeof AppAOperacaoRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/gestao': typeof AppGestaoRouteWithChildren
+  '/campo/$token': typeof CampoTokenRoute
   '/': typeof AppIndexRoute
   '/a/distribuicao': typeof AppADistribuicaoRoute
   '/a/operacao': typeof AppAOperacaoRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/_app/a': typeof AppARouteWithChildren
   '/_app/b': typeof AppBRouteWithChildren
   '/_app/gestao': typeof AppGestaoRouteWithChildren
+  '/campo/$token': typeof CampoTokenRoute
   '/_app/': typeof AppIndexRoute
   '/_app/a/casos': typeof AppACasosRouteWithChildren
   '/_app/a/distribuicao': typeof AppADistribuicaoRoute
@@ -262,6 +271,7 @@ export interface FileRouteTypes {
     | '/a'
     | '/b'
     | '/gestao'
+    | '/campo/$token'
     | '/a/casos'
     | '/a/distribuicao'
     | '/a/operacao'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/gestao'
+    | '/campo/$token'
     | '/'
     | '/a/distribuicao'
     | '/a/operacao'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/_app/a'
     | '/_app/b'
     | '/_app/gestao'
+    | '/campo/$token'
     | '/_app/'
     | '/_app/a/casos'
     | '/_app/a/distribuicao'
@@ -341,6 +353,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  CampoTokenRoute: typeof CampoTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -386,6 +399,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/gestao'
       preLoaderRoute: typeof AppGestaoRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/campo/$token': {
+      id: '/campo/$token'
+      path: '/campo/$token'
+      fullPath: '/campo/$token'
+      preLoaderRoute: typeof CampoTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/a/': {
       id: '/_app/a/'
@@ -644,6 +664,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  CampoTokenRoute: CampoTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

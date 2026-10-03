@@ -20,6 +20,10 @@ export interface PontoDoMapa {
   linhas?: string[];
   /** Ação do balão ("Abrir caso"). */
   acao?: { rotulo: string; aoClicar: () => void };
+  /** Diâmetro do marcador em px (padrão 14). */
+  tamanho?: number;
+  /** Texto curto dentro do marcador (posição no ranking). */
+  rotulo?: string;
 }
 
 const ESTILO = 'https://tiles.openfreemap.org/styles/dark';
@@ -90,8 +94,12 @@ export function Mapa({
     for (const mk of marcadores.current) mk.remove();
     marcadores.current = pontos.map((p) => {
       const el = document.createElement('div');
-      el.className = 'size-3.5 rounded-full ring-2 ring-white/80 shadow-lg cursor-pointer';
+      const tamanho = p.tamanho ?? 14;
+      el.className = 'flex items-center justify-center rounded-full ring-2 ring-white/80 shadow-lg cursor-pointer text-[11px] font-bold text-white';
+      el.style.width = `${tamanho}px`;
+      el.style.height = `${tamanho}px`;
       el.style.background = p.cor ?? '#3b82f6';
+      if (p.rotulo) el.textContent = p.rotulo;
       return new maplibregl.Marker({ element: el })
         .setLngLat([p.longitude, p.latitude])
         .setPopup(new maplibregl.Popup({ offset: 12, closeButton: false, className: 'mapa-balao' }).setDOMContent(balao(p)))

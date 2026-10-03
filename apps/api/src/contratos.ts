@@ -492,8 +492,10 @@ export const avistamento = z.object({
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
   descricao: z.string(),
-  fonte: z.enum(['equipe_campo', 'credor', 'devedor', 'outro', 'radar']),
+  fonte: z.enum(['equipe_campo', 'credor', 'devedor', 'outro', 'radar', 'camera', 'foto']),
   usuarioNome: z.string().nullable(),
+  fotoId: z.number().int().nullable(),
+  origemCoordenada: z.enum(['aparelho', 'exif', 'radar', 'manual']).nullable(),
 });
 
 registrar({ ValorFipe: valorFipe, VerificacaoVeicular: verificacaoVeicular, Avistamento: avistamento });
@@ -805,4 +807,114 @@ registrar({
   AlertaCaso: alertaCaso,
   PontoEvolucao: pontoEvolucao,
   PainelRecuperacao: painelRecuperacao,
+});
+
+// ---------------------------------------------------------------------------
+// Localização, fotos e link de campo
+// ---------------------------------------------------------------------------
+
+const tipoSinal = z.enum(['foto', 'equipe_campo', 'camera', 'radar', 'credor', 'devedor', 'outro', 'endereco', 'endereco_parente']);
+
+export const lugarProvavel = z.object({
+  latitude: z.number(),
+  longitude: z.number(),
+  raioMetros: z.number(),
+  confianca: z.number(),
+  pontuacao: z.number(),
+  descricao: z.string(),
+  sinais: z.number().int(),
+  porTipo: z.record(z.string(), z.number()),
+  primeiro: z.string().optional(),
+  ultimo: z.string().optional(),
+  endereco: z.string().optional(),
+  confirmadoPorAvistamento: z.boolean(),
+  janela: z.object({ inicio: z.number(), fim: z.number(), sinais: z.number() }).optional(),
+  perfil: z.enum(['pernoite', 'diurno', 'misto', 'sem_horario']),
+  horas: z.array(z.number()),
+  explicacao: z.array(z.string()),
+});
+
+export const localizacaoCaso = z.object({
+  lugares: z.array(lugarProvavel),
+  sinais: z.array(z.object({ tipo: tipoSinal, latitude: z.number(), longitude: z.number(), quando: z.string().nullable(), descricao: z.string() })),
+  enderecosSemCoordenada: z.number().int(),
+});
+
+export const resultadoGeocodificacao = z.object({ localizados: z.number().int(), falharam: z.number().int(), restantes: z.number().int() });
+
+export const fotoEnviada = z.object({
+  id: z.number().int(),
+  repetida: z.boolean(),
+  placaLida: z.string().nullable(),
+  placaConfere: z.boolean().nullable(),
+  outroCaso: z.object({ id: z.string(), placa: z.string() }).nullable(),
+  origemCoordenada: z.enum(['exif', 'aparelho']).nullable(),
+  avistamentoId: z.string().nullable(),
+  ocrStatus: z.enum(['lida', 'ilegivel', 'sem_modelo', 'erro']),
+});
+
+export const foto = z.object({
+  id: z.number().int(),
+  sha256: z.string(),
+  tipoMime: z.string(),
+  tamanhoBytes: z.number().int(),
+  exif: z.record(z.string(), z.unknown()),
+  tiradaEm: z.coerce.date().nullable(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  precisaoM: z.number().nullable(),
+  origemCoordenada: z.enum(['exif', 'aparelho']).nullable(),
+  placaLida: z.string().nullable(),
+  placaConfere: z.boolean().nullable(),
+  ocr: z.record(z.string(), z.unknown()).nullable(),
+  ocrStatus: z.enum(['pendente', 'lida', 'ilegivel', 'sem_modelo', 'erro']),
+  descricao: z.string().nullable(),
+  autor: z.string().nullable(),
+  peloLink: z.boolean(),
+  enviadoEm: z.coerce.date(),
+});
+
+export const linkCriado = z.object({
+  id: z.string(),
+  /** Aparece só agora: o banco guarda o hash do token. */
+  url: z.string(),
+  expiraEm: z.date(),
+  whatsapp: z.string().nullable(),
+});
+
+export const linkCampo = z.object({
+  id: z.string(),
+  destinatario: z.string(),
+  expiraEm: z.coerce.date(),
+  revogadoEm: z.coerce.date().nullable(),
+  usos: z.number().int(),
+  ultimoUsoEm: z.coerce.date().nullable(),
+  criadoPor: z.string().nullable(),
+  criadoEm: z.coerce.date(),
+  fotos: z.number().int(),
+  avistamentos: z.number().int(),
+});
+
+/** O que o terceiro vê pelo link: só o que identifica o bem. */
+export const casoDoLink = z.object({
+  placa: z.string(),
+  modelo: z.string().nullable(),
+  cor: z.string().nullable(),
+  cidade: z.string().nullable(),
+  uf: z.string().nullable(),
+  destinatario: z.string(),
+  expiraEm: z.date(),
+  fotos: z.number().int(),
+  avistamentos: z.number().int(),
+});
+
+registrar({
+  LugarProvavel: lugarProvavel,
+  LocalizacaoCaso: localizacaoCaso,
+  ResultadoGeocodificacao: resultadoGeocodificacao,
+  FotoEnviada: fotoEnviada,
+  Foto: foto,
+  LinkCriado: linkCriado,
+  LinkCampo: linkCampo,
+  CasoDoLink: casoDoLink,
 });

@@ -71,6 +71,10 @@ export type Conversa = Esquemas['Conversa'];
 export type Mensagem = Esquemas['Mensagem'];
 export type PainelRecuperacao = Esquemas['PainelRecuperacao'];
 export type AlertaCaso = Esquemas['AlertaCaso'];
+export type LugarProvavel = Esquemas['LugarProvavel'];
+export type Foto = Esquemas['Foto'];
+export type FotoEnviada = Esquemas['FotoEnviada'];
+export type LinkCampo = Esquemas['LinkCampo'];
 
 export const casoQuery = (id: string) =>
   queryOptions({
@@ -167,6 +171,27 @@ export const painelRecuperacaoQuery = queryOptions({
   queryKey: ['painel', 'recuperacao'],
   queryFn: () => exigir(api.GET('/api/painel/recuperacao')),
 });
+
+export const localizacaoQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'localizacao'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/localizacao', { params: { path: { id } } })),
+  });
+
+export const fotosQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'fotos'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/fotos', { params: { path: { id } } })),
+  });
+
+export const linksCampoQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'links-campo'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/links-campo', { params: { path: { id } } })),
+  });
+
+/** Endereço da imagem da foto (mesma origem, cookie de sessão). */
+export const urlDaFoto = (id: number) => `/api/fotos/${id}/arquivo`;
 
 export const credoresQuery = queryOptions({
   queryKey: ['credores'],

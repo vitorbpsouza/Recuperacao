@@ -169,6 +169,39 @@ test('colar na ficha: guarda proprietário e radar, que vira ponto no mapa', asy
   await expect(page.getByText('Proprietário atual')).toBeVisible();
 });
 
+test('onde procurar: link de campo abre sem login e o terceiro envia a localização', async ({ page, browser }) => {
+  await page.goto('/a/casos/caso-a-002');
+  await page.getByRole('tab', { name: 'Onde procurar' }).click();
+  await expect(page.getByText('Lugares prováveis')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Novo link' }).click();
+  const dialogo = page.getByRole('dialog');
+  await dialogo.getByLabel('Nome ou WhatsApp de quem recebe').fill('Parceiro E2E');
+  await dialogo.getByRole('switch').click();
+  await dialogo.getByRole('button', { name: 'Gerar link' }).click();
+  const url = await dialogo.locator('code').innerText();
+  expect(url).toMatch(/\/campo\/[\w-]{20,}$/);
+  await dialogo.getByRole('button', { name: 'Pronto' }).click();
+
+  // O terceiro: outro navegador, sem sessão, com localização liberada.
+  const terceiro = await browser.newContext({ storageState: SEM_SESSAO, geolocation: { latitude: -23.55, longitude: -46.63 }, permissions: ['geolocation'] });
+  const celular = await terceiro.newPage();
+  await celular.goto(new URL(url).pathname);
+  await expect(celular.getByText('VW/T-CROSS 200 TSI')).toBeVisible();
+  await expect(celular.getByText(/Devedor/)).toHaveCount(0);
+  await celular.getByLabel('Onde está o veículo').fill('estacionado na Rua Augusta, perto do 900');
+  await celular.getByRole('button', { name: 'Usar minha localização' }).click();
+  await expect(celular.getByText(/±\d+ m/)).toBeVisible();
+  await celular.getByRole('button', { name: 'Enviar localização' }).click();
+  await expect(celular.getByText('Localização enviada. Obrigado.')).toBeVisible();
+  await terceiro.close();
+
+  await page.reload();
+  await page.getByRole('tab', { name: 'Avistamentos' }).click();
+  await expect(page.getByText('estacionado na Rua Augusta, perto do 900')).toBeVisible();
+  await expect(page.getByText(/registrado por Parceiro E2E/)).toBeVisible();
+});
+
 test('avistamento fica registrado com autor e hora', async ({ page }) => {
   await page.goto('/a/casos/caso-a-002');
   await page.getByRole('tab', { name: 'Avistamentos' }).click();

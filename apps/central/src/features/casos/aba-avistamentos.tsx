@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ClipboardPasteIcon, ExternalLinkIcon, LocateFixedIcon, MapPinIcon, PlusIcon, RadarIcon } from 'lucide-react';
+import { CameraIcon, ClipboardPasteIcon, ExternalLinkIcon, LocateFixedIcon, MapPinIcon, PlusIcon, RadarIcon, VideoIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
+
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog';
 
 import { avistamentoEntrada, FONTES_AVISTAMENTO } from '@workspace/domain';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
@@ -16,8 +18,9 @@ import { formatarDataHora } from '@workspace/ui/lib/formato';
 import { toast } from '@workspace/ui/lib/toast';
 
 import { ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
+import { CapturaFoto } from '@/components/captura-foto.tsx';
 import { Mapa } from '@/components/mapa.tsx';
-import { api, avistamentosQuery, exigir, pode, type Avistamento, type UsuarioSessao } from '@/lib/api.ts';
+import { api, avistamentosQuery, exigir, pode, urlDaFoto, type Avistamento, type UsuarioSessao } from '@/lib/api.ts';
 
 import { useAtualizarCaso } from './painel-acoes.tsx';
 
@@ -27,11 +30,15 @@ const ROTULO_FONTE: Record<Avistamento['fonte'], string> = {
   devedor: 'Devedor',
   outro: 'Outro',
   radar: 'Radar',
+  camera: 'Câmera',
+  foto: 'Foto de campo',
 };
 
 /** Cor no mapa e na lista: radar violeta, campo azul, o resto âmbar. */
 export const COR_FONTE: Record<Avistamento['fonte'], string> = {
   radar: '#a78bfa',
+  foto: '#38bdf8',
+  camera: '#22d3ee',
   equipe_campo: '#3b82f6',
   credor: '#f59e0b',
   devedor: '#f59e0b',
@@ -52,6 +59,8 @@ export function AbaAvistamentos({ casoId, sessao, aoColar }: { casoId: string; s
   const consulta = useQuery(avistamentosQuery(casoId));
   const [registrando, setRegistrando] = useState(false);
   const [filtro, setFiltro] = useState<'todos' | 'radar' | 'campo'>('todos');
+  const [fotografando, setFotografando] = useState(false);
+  const atualizar = useAtualizarCaso(casoId);
   const lista = useMemo(
     () => (consulta.data ?? []).filter((a) => filtro === 'todos' || (filtro === 'radar' ? a.fonte === 'radar' : a.fonte !== 'radar')),
     [consulta.data, filtro],
@@ -92,6 +101,10 @@ export function AbaAvistamentos({ casoId, sessao, aoColar }: { casoId: string; s
               <Button variant="ghost" size="sm" onClick={aoColar}>
                 <ClipboardPasteIcon />
                 Colar radar
+              </Button>
+              <Button size="sm" onClick={() => setFotografando(true)}>
+                <CameraIcon />
+                Tirar foto
               </Button>
               {!registrando ? (
                 <Button variant="outline" size="sm" onClick={() => setRegistrando(true)}>
@@ -135,6 +148,21 @@ export function AbaAvistamentos({ casoId, sessao, aoColar }: { casoId: string; s
         </CardContent>
       </Card>
 
+      <Dialog open={fotografando} onOpenChange={setFotografando}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Foto do veículo</DialogTitle>
+            <DialogDescription>
+              O GPS e a hora saem da própria foto; a placa é lida e comparada com a do caso. Fotografe em via pública, sem pessoas em foco.
+            </DialogDescription>
+          </DialogHeader>
+          <CapturaFoto
+            enviar={(corpo) => exigir(api.POST('/api/casos/{id}/fotos', { params: { path: { id: casoId } }, body: corpo }))}
+            aoConcluir={() => atualizar()}
+          />
+        </DialogContent>
+      </Dialog>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-white">Histórico</CardTitle>
@@ -151,8 +179,14 @@ export function AbaAvistamentos({ casoId, sessao, aoColar }: { casoId: string; s
             <ol className="grid gap-2 xl:grid-cols-2">
               {lista.map((a) => (
                 <li key={a.id} className="flex gap-3 rounded-lg bg-white/3 p-3 ring-1 ring-white/5">
-                  {a.fonte === 'radar' ? (
+                  {a.fotoId ? (
+                    <a href={urlDaFoto(a.fotoId)} target="_blank" rel="noreferrer" className="shrink-0">
+                      <img src={urlDaFoto(a.fotoId)} alt={`Foto: ${a.descricao}`} className="size-20 rounded-lg object-cover ring-1 ring-white/10" loading="lazy" />
+                    </a>
+                  ) : a.fonte === 'radar' ? (
                     <RadarIcon className="mt-0.5 size-4 shrink-0 text-violet-300" aria-hidden />
+                  ) : a.fonte === 'camera' ? (
+                    <VideoIcon className="mt-0.5 size-4 shrink-0 text-cyan-300" aria-hidden />
                   ) : (
                     <MapPinIcon className="mt-0.5 size-4 shrink-0 text-blue-300" aria-hidden />
                   )}
@@ -160,6 +194,7 @@ export function AbaAvistamentos({ casoId, sessao, aoColar }: { casoId: string; s
                     <p className="text-sm font-medium text-white">{a.descricao}</p>
                     <p className="mt-1 text-xs text-muted-foreground tabular-nums">
                       visto em {formatarDataHora(a.observadoEm)} · {ROTULO_FONTE[a.fonte]} · registrado por {a.usuarioNome ?? '—'}
+                      {a.origemCoordenada === 'exif' ? ' · GPS da foto' : a.origemCoordenada === 'aparelho' ? ' · GPS do aparelho' : ''}
                     </p>
                     {a.latitude != null && a.longitude != null ? (
                       <a

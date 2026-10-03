@@ -2275,7 +2275,7 @@ export interface paths {
                         longitude?: number;
                         descricao: string;
                         /** @enum {string} */
-                        fonte: "equipe_campo" | "credor" | "devedor" | "outro";
+                        fonte: "equipe_campo" | "camera" | "credor" | "devedor" | "outro";
                     };
                 };
             };
@@ -3244,6 +3244,479 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/casos/{id}/localizacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LocalizacaoCaso"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/geocodificar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResultadoGeocodificacao"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/fotos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Foto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        imagem: string;
+                        /** @enum {string} */
+                        tipoMime: "image/jpeg" | "image/png" | "image/webp" | "image/heic" | "image/heif";
+                        latitude?: number;
+                        longitude?: number;
+                        precisao?: number;
+                        descricao?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FotoEnviada"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/links-campo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LinkCampo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        recuperadorId?: string;
+                        destinatario?: string;
+                        /** @default 72 */
+                        horas?: number;
+                        /** @default false */
+                        enviarWhatsapp?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LinkCriado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/links-campo/{linkId}/revogar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    linkId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campo/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CasoDoLink"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campo/{token}/fotos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        imagem: string;
+                        /** @enum {string} */
+                        tipoMime: "image/jpeg" | "image/png" | "image/webp" | "image/heic" | "image/heif";
+                        latitude?: number;
+                        longitude?: number;
+                        precisao?: number;
+                        descricao?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FotoEnviada"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campo/{token}/avistamentos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        descricao: string;
+                        latitude?: number;
+                        longitude?: number;
+                        precisao?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/consultas": {
         parameters: {
             query?: never;
@@ -3963,8 +4436,11 @@ export interface components {
             longitude: number | null;
             descricao: string;
             /** @enum {string} */
-            fonte: "equipe_campo" | "credor" | "devedor" | "outro" | "radar";
+            fonte: "equipe_campo" | "credor" | "devedor" | "outro" | "radar" | "camera" | "foto";
             usuarioNome: string | null;
+            fotoId: number | null;
+            /** @enum {string|null} */
+            origemCoordenada: "aparelho" | "exif" | "radar" | "manual" | null;
         };
         ResumoImportacaoInput: {
             relatorioId: number;
@@ -4238,6 +4714,118 @@ export interface components {
             recuperadores: components["schemas"]["DesempenhoRecuperadorInput"][];
             alertas: components["schemas"]["AlertaCasoInput"][];
             evolucao: components["schemas"]["PontoEvolucaoInput"][];
+        };
+        LugarProvavelInput: {
+            latitude: number;
+            longitude: number;
+            raioMetros: number;
+            confianca: number;
+            pontuacao: number;
+            descricao: string;
+            sinais: number;
+            porTipo: {
+                [key: string]: number;
+            };
+            primeiro?: string;
+            ultimo?: string;
+            endereco?: string;
+            confirmadoPorAvistamento: boolean;
+            janela?: {
+                inicio: number;
+                fim: number;
+                sinais: number;
+            };
+            /** @enum {string} */
+            perfil: "pernoite" | "diurno" | "misto" | "sem_horario";
+            horas: number[];
+            explicacao: string[];
+        };
+        LocalizacaoCasoInput: {
+            lugares: components["schemas"]["LugarProvavelInput"][];
+            sinais: {
+                /** @enum {string} */
+                tipo: "foto" | "equipe_campo" | "camera" | "radar" | "credor" | "devedor" | "outro" | "endereco" | "endereco_parente";
+                latitude: number;
+                longitude: number;
+                quando: string | null;
+                descricao: string;
+            }[];
+            enderecosSemCoordenada: number;
+        };
+        ResultadoGeocodificacaoInput: {
+            localizados: number;
+            falharam: number;
+            restantes: number;
+        };
+        FotoEnviadaInput: {
+            id: number;
+            repetida: boolean;
+            placaLida: string | null;
+            placaConfere: boolean | null;
+            outroCaso: {
+                id: string;
+                placa: string;
+            } | null;
+            /** @enum {string|null} */
+            origemCoordenada: "exif" | "aparelho" | null;
+            avistamentoId: string | null;
+            /** @enum {string} */
+            ocrStatus: "lida" | "ilegivel" | "sem_modelo" | "erro";
+        };
+        FotoInput: {
+            id: number;
+            sha256: string;
+            tipoMime: string;
+            tamanhoBytes: number;
+            exif: {
+                [key: string]: unknown;
+            };
+            tiradaEm: unknown;
+            latitude: number | null;
+            longitude: number | null;
+            precisaoM: number | null;
+            /** @enum {string|null} */
+            origemCoordenada: "exif" | "aparelho" | null;
+            placaLida: string | null;
+            placaConfere: boolean | null;
+            ocr: {
+                [key: string]: unknown;
+            } | null;
+            /** @enum {string} */
+            ocrStatus: "pendente" | "lida" | "ilegivel" | "sem_modelo" | "erro";
+            descricao: string | null;
+            autor: string | null;
+            peloLink: boolean;
+            enviadoEm: unknown;
+        };
+        LinkCriadoInput: {
+            id: string;
+            url: string;
+            expiraEm: unknown;
+            whatsapp: string | null;
+        };
+        LinkCampoInput: {
+            id: string;
+            destinatario: string;
+            expiraEm: unknown;
+            revogadoEm: unknown;
+            usos: number;
+            ultimoUsoEm: unknown;
+            criadoPor: string | null;
+            criadoEm: unknown;
+            fotos: number;
+            avistamentos: number;
+        };
+        CasoDoLinkInput: {
+            placa: string;
+            modelo: string | null;
+            cor: string | null;
+            cidade: string | null;
+            uf: string | null;
+            destinatario: string;
+            expiraEm: unknown;
+            fotos: number;
+            avistamentos: number;
         };
         Erro: {
             erro: string;
@@ -4807,8 +5395,11 @@ export interface components {
             longitude: number | null;
             descricao: string;
             /** @enum {string} */
-            fonte: "equipe_campo" | "credor" | "devedor" | "outro" | "radar";
+            fonte: "equipe_campo" | "credor" | "devedor" | "outro" | "radar" | "camera" | "foto";
             usuarioNome: string | null;
+            fotoId: number | null;
+            /** @enum {string|null} */
+            origemCoordenada: "aparelho" | "exif" | "radar" | "manual" | null;
         };
         ResumoImportacao: {
             relatorioId: number;
@@ -5096,6 +5687,126 @@ export interface components {
             recuperadores: components["schemas"]["DesempenhoRecuperador"][];
             alertas: components["schemas"]["AlertaCaso"][];
             evolucao: components["schemas"]["PontoEvolucao"][];
+        };
+        LugarProvavel: {
+            latitude: number;
+            longitude: number;
+            raioMetros: number;
+            confianca: number;
+            pontuacao: number;
+            descricao: string;
+            sinais: number;
+            porTipo: {
+                [key: string]: number;
+            };
+            primeiro?: string;
+            ultimo?: string;
+            endereco?: string;
+            confirmadoPorAvistamento: boolean;
+            janela?: {
+                inicio: number;
+                fim: number;
+                sinais: number;
+            };
+            /** @enum {string} */
+            perfil: "pernoite" | "diurno" | "misto" | "sem_horario";
+            horas: number[];
+            explicacao: string[];
+        };
+        LocalizacaoCaso: {
+            lugares: components["schemas"]["LugarProvavel"][];
+            sinais: {
+                /** @enum {string} */
+                tipo: "foto" | "equipe_campo" | "camera" | "radar" | "credor" | "devedor" | "outro" | "endereco" | "endereco_parente";
+                latitude: number;
+                longitude: number;
+                quando: string | null;
+                descricao: string;
+            }[];
+            enderecosSemCoordenada: number;
+        };
+        ResultadoGeocodificacao: {
+            localizados: number;
+            falharam: number;
+            restantes: number;
+        };
+        FotoEnviada: {
+            id: number;
+            repetida: boolean;
+            placaLida: string | null;
+            placaConfere: boolean | null;
+            outroCaso: {
+                id: string;
+                placa: string;
+            } | null;
+            /** @enum {string|null} */
+            origemCoordenada: "exif" | "aparelho" | null;
+            avistamentoId: string | null;
+            /** @enum {string} */
+            ocrStatus: "lida" | "ilegivel" | "sem_modelo" | "erro";
+        };
+        Foto: {
+            id: number;
+            sha256: string;
+            tipoMime: string;
+            tamanhoBytes: number;
+            exif: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            tiradaEm: string | null;
+            latitude: number | null;
+            longitude: number | null;
+            precisaoM: number | null;
+            /** @enum {string|null} */
+            origemCoordenada: "exif" | "aparelho" | null;
+            placaLida: string | null;
+            placaConfere: boolean | null;
+            ocr: {
+                [key: string]: unknown;
+            } | null;
+            /** @enum {string} */
+            ocrStatus: "pendente" | "lida" | "ilegivel" | "sem_modelo" | "erro";
+            descricao: string | null;
+            autor: string | null;
+            peloLink: boolean;
+            /** Format: date-time */
+            enviadoEm: string;
+        };
+        LinkCriado: {
+            id: string;
+            url: string;
+            /** Format: date-time */
+            expiraEm: string;
+            whatsapp: string | null;
+        };
+        LinkCampo: {
+            id: string;
+            destinatario: string;
+            /** Format: date-time */
+            expiraEm: string;
+            /** Format: date-time */
+            revogadoEm: string | null;
+            usos: number;
+            /** Format: date-time */
+            ultimoUsoEm: string | null;
+            criadoPor: string | null;
+            /** Format: date-time */
+            criadoEm: string;
+            fotos: number;
+            avistamentos: number;
+        };
+        CasoDoLink: {
+            placa: string;
+            modelo: string | null;
+            cor: string | null;
+            cidade: string | null;
+            uf: string | null;
+            destinatario: string;
+            /** Format: date-time */
+            expiraEm: string;
+            fotos: number;
+            avistamentos: number;
         };
     };
     responses: never;

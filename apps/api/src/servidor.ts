@@ -1,3 +1,6 @@
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+
 import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
@@ -30,6 +33,7 @@ import { rotasFinanceiro } from './rotas/financeiro.ts';
 import { rotasJuridico } from './rotas/juridico.ts';
 import { rotasCadastroCaso } from './rotas/cadastro-caso.ts';
 import { rotasIntegracoes } from './rotas/integracoes.ts';
+import { rotasLocalizacao } from './rotas/localizacao.ts';
 import { rotasPainel } from './rotas/painel.ts';
 import { rotasRelatorios } from './rotas/relatorios.ts';
 import { rotasVeiculo } from './rotas/veiculo.ts';
@@ -45,7 +49,12 @@ export interface OpcoesServidor {
   fipe?: ClienteFipe;
   /** HTTP das integrações (API Brasil, Evolution). Os testes passam um falso. */
   executar?: typeof fetch;
+  /** Pasta das fotos. Ausente: FOTOS_DIR; fora de produção, ~/.recredita/fotos. */
+  fotosDir?: string | null;
 }
+
+const pastaDasFotos = (ambiente: Ambiente) =>
+  ambiente.FOTOS_DIR ?? (ambiente.NODE_ENV === 'production' ? null : join(homedir(), '.recredita', 'fotos'));
 
 /** Níveis do pino na escala do Cloud Logging, que lê `severity` (e não `level`). */
 const SEVERIDADE: Record<string, string> = {
@@ -69,7 +78,7 @@ const LOG_DE_PRODUCAO = {
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
 };
 
-export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe(), executar }: OpcoesServidor) => {
+export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe(), executar, fotosDir }: OpcoesServidor) => {
   const producao = ambiente.NODE_ENV === 'production';
   const app = Fastify({
     logger: logger ?? (ambiente.NODE_ENV === 'test' ? false : producao ? LOG_DE_PRODUCAO : { level: 'debug' }),
@@ -132,6 +141,15 @@ export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = cr
       await api.register(rotasRelatorios);
       await api.register(rotasIntegracoes, { db, chave: ambiente.CHAVE_SEGREDOS, urlPublica: ambiente.URL_PUBLICA, executar });
       await api.register(rotasPainel);
+      await api.register(rotasLocalizacao, {
+        db,
+        ia,
+        modelo: ambiente.CAMILA_MODELO,
+        fotosDir: fotosDir === undefined ? pastaDasFotos(ambiente) : fotosDir,
+        chave: ambiente.CHAVE_SEGREDOS,
+        urlPublica: ambiente.URL_PUBLICA,
+        executar,
+      });
       await api.register(rotasAuditoria);
       await api.register(rotasCamila, { ia, modelo: ambiente.CAMILA_MODELO });
     },

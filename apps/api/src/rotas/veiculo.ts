@@ -103,8 +103,8 @@ export const rotasVeiculo: FastifyPluginAsyncZod<{ fipe: ClienteFipe }> = async 
           tx,
           sql`select a.id::int as id, a.observado_em as "observadoEm", a.registrado_em as "registradoEm",
                      a.latitude::float8 as latitude, a.longitude::float8 as longitude, a.descricao, a.fonte,
-                     u.nome as "usuarioNome"
-                from avistamento a left join usuario u on u.id = a.usuario_id
+                     coalesce(u.nome, l.destinatario) as "usuarioNome", a.foto_id::int as "fotoId", a.origem_coordenada as "origemCoordenada"
+                from avistamento a left join usuario u on u.id = a.usuario_id left join link_campo l on l.id = a.link_id
                where a.caso_id = ${req.params.id}
                order by a.observado_em desc, a.id desc`,
         ),

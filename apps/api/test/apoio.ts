@@ -1,3 +1,8 @@
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import type { GoogleGenAI } from '@google/genai';
 import type { LightMyRequestResponse } from 'fastify';
 
 import { comoDono, semear, TENANT_RECREDITA, type Banco } from '@workspace/db';
@@ -63,7 +68,14 @@ export interface Ambiente {
  * API completa com o seed sintético e um usuário de cada papel. Banco em
  * PGlite, ou num Postgres de servidor quando há TEST_DATABASE_URL (CI).
  */
-export const ambienteDeTeste = async (): Promise<Ambiente> => {
+/** Gemini falso: devolve a leitura de placa que o teste combinar. */
+export const iaFalsa = { resposta: {} as Record<string, unknown> };
+const IA_FALSA = {
+  models: { generateContent: async () => ({ text: JSON.stringify(iaFalsa.resposta) }) },
+} as unknown as GoogleGenAI;
+
+export const ambienteDeTeste = async (opcoes: { comIa?: boolean } = {}): Promise<Ambiente & { fotosDir: string }> => {
+  const fotosDir = await mkdtemp(join(tmpdir(), 'recredita-fotos-'));
   const banco = await abrirBancoDeTeste();
   await semear(banco.db);
   await comoDono(banco.db, TENANT_RECREDITA.id, async (tx) => {
@@ -72,7 +84,7 @@ export const ambienteDeTeste = async (): Promise<Ambiente> => {
     }
   });
 
-  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false, fipe: FIPE_FALSA, executar: FETCH_FALSO });
+  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false, fipe: FIPE_FALSA, executar: FETCH_FALSO, ia: opcoes.comIa ? IA_FALSA : null, fotosDir });
 
   const entrar = async (email: string, senha = SENHA): Promise<Sessao> => {
     const r = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email, senha } });
@@ -92,6 +104,7 @@ export const ambienteDeTeste = async (): Promise<Ambiente> => {
     });
 
   return {
+    fotosDir,
     app,
     banco,
     entrar,

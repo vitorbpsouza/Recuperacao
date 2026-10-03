@@ -52,6 +52,7 @@ import { tomDoStatus } from '@/lib/status.ts';
 import { DialogoColar } from '../relatorio/dialogo-colar.tsx';
 import { AbaAvistamentos } from './aba-avistamentos.tsx';
 import { AbaJuridico } from './aba-juridico.tsx';
+import { AbaOndeProcurar } from './aba-onde-procurar.tsx';
 import { AbaPessoas } from './aba-pessoas.tsx';
 import { AbaTextos } from './aba-textos.tsx';
 import { AbaVeiculo } from './aba-veiculo.tsx';
@@ -115,6 +116,7 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
           <div className="-mx-1 overflow-x-auto px-1 pb-1">
             <TabsList>
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
+              {planoA ? <TabsTrigger value="onde-procurar">Onde procurar</TabsTrigger> : null}
               {planoA ? <TabsTrigger value="juridico">Jurídico</TabsTrigger> : null}
               <TabsTrigger value="veiculo">Veículo</TabsTrigger>
               {planoA ? <TabsTrigger value="avistamentos">Avistamentos</TabsTrigger> : null}
@@ -129,6 +131,11 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
               <CardContent className="pt-1">{caso ? <Resumo caso={caso} /> : <Skeleton className="h-48" />}</CardContent>
             </Card>
           </TabsContent>
+          {planoA ? (
+            <TabsContent value="onde-procurar">
+              <AbaOndeProcurar casoId={casoId} sessao={sessao} planoA={planoA} />
+            </TabsContent>
+          ) : null}
           {planoA ? (
             <TabsContent value="juridico">
               <AbaJuridico casoId={casoId} sessao={sessao} />

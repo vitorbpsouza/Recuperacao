@@ -2249,12 +2249,30 @@
               "credor",
               "devedor",
               "outro",
-              "radar"
+              "radar",
+              "camera",
+              "foto"
             ]
           },
           "usuarioNome": {
             "nullable": true,
             "type": "string"
+          },
+          "fotoId": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "origemCoordenada": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "aparelho",
+              "exif",
+              "radar",
+              "manual"
+            ]
           }
         },
         "required": [
@@ -2265,7 +2283,9 @@
           "longitude",
           "descricao",
           "fonte",
-          "usuarioNome"
+          "usuarioNome",
+          "fotoId",
+          "origemCoordenada"
         ]
       },
       "ResumoImportacaoInput": {
@@ -3523,6 +3543,486 @@
           "recuperadores",
           "alertas",
           "evolucao"
+        ]
+      },
+      "LugarProvavelInput": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "raioMetros": {
+            "type": "number"
+          },
+          "confianca": {
+            "type": "number"
+          },
+          "pontuacao": {
+            "type": "number"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "sinais": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "porTipo": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "primeiro": {
+            "type": "string"
+          },
+          "ultimo": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          },
+          "confirmadoPorAvistamento": {
+            "type": "boolean"
+          },
+          "janela": {
+            "type": "object",
+            "properties": {
+              "inicio": {
+                "type": "number"
+              },
+              "fim": {
+                "type": "number"
+              },
+              "sinais": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "inicio",
+              "fim",
+              "sinais"
+            ]
+          },
+          "perfil": {
+            "type": "string",
+            "enum": [
+              "pernoite",
+              "diurno",
+              "misto",
+              "sem_horario"
+            ]
+          },
+          "horas": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "explicacao": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "raioMetros",
+          "confianca",
+          "pontuacao",
+          "descricao",
+          "sinais",
+          "porTipo",
+          "confirmadoPorAvistamento",
+          "perfil",
+          "horas",
+          "explicacao"
+        ]
+      },
+      "LocalizacaoCasoInput": {
+        "type": "object",
+        "properties": {
+          "lugares": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LugarProvavelInput"
+            }
+          },
+          "sinais": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "foto",
+                    "equipe_campo",
+                    "camera",
+                    "radar",
+                    "credor",
+                    "devedor",
+                    "outro",
+                    "endereco",
+                    "endereco_parente"
+                  ]
+                },
+                "latitude": {
+                  "type": "number"
+                },
+                "longitude": {
+                  "type": "number"
+                },
+                "quando": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "descricao": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "tipo",
+                "latitude",
+                "longitude",
+                "quando",
+                "descricao"
+              ]
+            }
+          },
+          "enderecosSemCoordenada": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "lugares",
+          "sinais",
+          "enderecosSemCoordenada"
+        ]
+      },
+      "ResultadoGeocodificacaoInput": {
+        "type": "object",
+        "properties": {
+          "localizados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "falharam": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "restantes": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "localizados",
+          "falharam",
+          "restantes"
+        ]
+      },
+      "FotoEnviadaInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "repetida": {
+            "type": "boolean"
+          },
+          "placaLida": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placaConfere": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "outroCaso": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "placa": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "placa"
+            ]
+          },
+          "origemCoordenada": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "exif",
+              "aparelho"
+            ]
+          },
+          "avistamentoId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ocrStatus": {
+            "type": "string",
+            "enum": [
+              "lida",
+              "ilegivel",
+              "sem_modelo",
+              "erro"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "repetida",
+          "placaLida",
+          "placaConfere",
+          "outroCaso",
+          "origemCoordenada",
+          "avistamentoId",
+          "ocrStatus"
+        ]
+      },
+      "FotoInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "tipoMime": {
+            "type": "string"
+          },
+          "tamanhoBytes": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "exif": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "tiradaEm": {
+            "nullable": true
+          },
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "precisaoM": {
+            "nullable": true,
+            "type": "number"
+          },
+          "origemCoordenada": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "exif",
+              "aparelho"
+            ]
+          },
+          "placaLida": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placaConfere": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "ocr": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "ocrStatus": {
+            "type": "string",
+            "enum": [
+              "pendente",
+              "lida",
+              "ilegivel",
+              "sem_modelo",
+              "erro"
+            ]
+          },
+          "descricao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "autor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "peloLink": {
+            "type": "boolean"
+          },
+          "enviadoEm": {}
+        },
+        "required": [
+          "id",
+          "sha256",
+          "tipoMime",
+          "tamanhoBytes",
+          "exif",
+          "tiradaEm",
+          "latitude",
+          "longitude",
+          "precisaoM",
+          "origemCoordenada",
+          "placaLida",
+          "placaConfere",
+          "ocr",
+          "ocrStatus",
+          "descricao",
+          "autor",
+          "peloLink",
+          "enviadoEm"
+        ]
+      },
+      "LinkCriadoInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "expiraEm": {},
+          "whatsapp": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "expiraEm",
+          "whatsapp"
+        ]
+      },
+      "LinkCampoInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "expiraEm": {},
+          "revogadoEm": {
+            "nullable": true
+          },
+          "usos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ultimoUsoEm": {
+            "nullable": true
+          },
+          "criadoPor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "criadoEm": {},
+          "fotos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "avistamentos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "destinatario",
+          "expiraEm",
+          "revogadoEm",
+          "usos",
+          "ultimoUsoEm",
+          "criadoPor",
+          "criadoEm",
+          "fotos",
+          "avistamentos"
+        ]
+      },
+      "CasoDoLinkInput": {
+        "type": "object",
+        "properties": {
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cidade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "expiraEm": {},
+          "fotos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "avistamentos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "placa",
+          "modelo",
+          "cor",
+          "cidade",
+          "uf",
+          "destinatario",
+          "expiraEm",
+          "fotos",
+          "avistamentos"
         ]
       },
       "Erro": {
@@ -5919,12 +6419,30 @@
               "credor",
               "devedor",
               "outro",
-              "radar"
+              "radar",
+              "camera",
+              "foto"
             ]
           },
           "usuarioNome": {
             "nullable": true,
             "type": "string"
+          },
+          "fotoId": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "origemCoordenada": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "aparelho",
+              "exif",
+              "radar",
+              "manual"
+            ]
           }
         },
         "required": [
@@ -5935,7 +6453,9 @@
           "longitude",
           "descricao",
           "fonte",
-          "usuarioNome"
+          "usuarioNome",
+          "fotoId",
+          "origemCoordenada"
         ],
         "additionalProperties": false
       },
@@ -7261,6 +7781,518 @@
           "recuperadores",
           "alertas",
           "evolucao"
+        ],
+        "additionalProperties": false
+      },
+      "LugarProvavel": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "raioMetros": {
+            "type": "number"
+          },
+          "confianca": {
+            "type": "number"
+          },
+          "pontuacao": {
+            "type": "number"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "sinais": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "porTipo": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "primeiro": {
+            "type": "string"
+          },
+          "ultimo": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          },
+          "confirmadoPorAvistamento": {
+            "type": "boolean"
+          },
+          "janela": {
+            "type": "object",
+            "properties": {
+              "inicio": {
+                "type": "number"
+              },
+              "fim": {
+                "type": "number"
+              },
+              "sinais": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "inicio",
+              "fim",
+              "sinais"
+            ],
+            "additionalProperties": false
+          },
+          "perfil": {
+            "type": "string",
+            "enum": [
+              "pernoite",
+              "diurno",
+              "misto",
+              "sem_horario"
+            ]
+          },
+          "horas": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "explicacao": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "raioMetros",
+          "confianca",
+          "pontuacao",
+          "descricao",
+          "sinais",
+          "porTipo",
+          "confirmadoPorAvistamento",
+          "perfil",
+          "horas",
+          "explicacao"
+        ],
+        "additionalProperties": false
+      },
+      "LocalizacaoCaso": {
+        "type": "object",
+        "properties": {
+          "lugares": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LugarProvavel"
+            }
+          },
+          "sinais": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "foto",
+                    "equipe_campo",
+                    "camera",
+                    "radar",
+                    "credor",
+                    "devedor",
+                    "outro",
+                    "endereco",
+                    "endereco_parente"
+                  ]
+                },
+                "latitude": {
+                  "type": "number"
+                },
+                "longitude": {
+                  "type": "number"
+                },
+                "quando": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "descricao": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "tipo",
+                "latitude",
+                "longitude",
+                "quando",
+                "descricao"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "enderecosSemCoordenada": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "lugares",
+          "sinais",
+          "enderecosSemCoordenada"
+        ],
+        "additionalProperties": false
+      },
+      "ResultadoGeocodificacao": {
+        "type": "object",
+        "properties": {
+          "localizados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "falharam": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "restantes": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "localizados",
+          "falharam",
+          "restantes"
+        ],
+        "additionalProperties": false
+      },
+      "FotoEnviada": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "repetida": {
+            "type": "boolean"
+          },
+          "placaLida": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placaConfere": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "outroCaso": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "placa": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "placa"
+            ],
+            "additionalProperties": false
+          },
+          "origemCoordenada": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "exif",
+              "aparelho"
+            ]
+          },
+          "avistamentoId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ocrStatus": {
+            "type": "string",
+            "enum": [
+              "lida",
+              "ilegivel",
+              "sem_modelo",
+              "erro"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "repetida",
+          "placaLida",
+          "placaConfere",
+          "outroCaso",
+          "origemCoordenada",
+          "avistamentoId",
+          "ocrStatus"
+        ],
+        "additionalProperties": false
+      },
+      "Foto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "tipoMime": {
+            "type": "string"
+          },
+          "tamanhoBytes": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "exif": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "tiradaEm": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "precisaoM": {
+            "nullable": true,
+            "type": "number"
+          },
+          "origemCoordenada": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "exif",
+              "aparelho"
+            ]
+          },
+          "placaLida": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placaConfere": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "ocr": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "ocrStatus": {
+            "type": "string",
+            "enum": [
+              "pendente",
+              "lida",
+              "ilegivel",
+              "sem_modelo",
+              "erro"
+            ]
+          },
+          "descricao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "autor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "peloLink": {
+            "type": "boolean"
+          },
+          "enviadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "sha256",
+          "tipoMime",
+          "tamanhoBytes",
+          "exif",
+          "tiradaEm",
+          "latitude",
+          "longitude",
+          "precisaoM",
+          "origemCoordenada",
+          "placaLida",
+          "placaConfere",
+          "ocr",
+          "ocrStatus",
+          "descricao",
+          "autor",
+          "peloLink",
+          "enviadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "LinkCriado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "expiraEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "whatsapp": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "expiraEm",
+          "whatsapp"
+        ],
+        "additionalProperties": false
+      },
+      "LinkCampo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "expiraEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revogadoEm": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "usos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ultimoUsoEm": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "criadoPor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fotos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "avistamentos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "destinatario",
+          "expiraEm",
+          "revogadoEm",
+          "usos",
+          "ultimoUsoEm",
+          "criadoPor",
+          "criadoEm",
+          "fotos",
+          "avistamentos"
+        ],
+        "additionalProperties": false
+      },
+      "CasoDoLink": {
+        "type": "object",
+        "properties": {
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cidade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "expiraEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fotos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "avistamentos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "placa",
+          "modelo",
+          "cor",
+          "cidade",
+          "uf",
+          "destinatario",
+          "expiraEm",
+          "fotos",
+          "avistamentos"
         ],
         "additionalProperties": false
       }
@@ -10019,6 +11051,7 @@
                     "type": "string",
                     "enum": [
                       "equipe_campo",
+                      "camera",
                       "credor",
                       "devedor",
                       "outro"
@@ -11173,6 +12206,580 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PainelRecuperacao"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/localizacao": {
+      "get": {
+        "tags": [
+          "localizacao"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalizacaoCaso"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/geocodificar": {
+      "post": {
+        "tags": [
+          "localizacao"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoGeocodificacao"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/fotos": {
+      "post": {
+        "tags": [
+          "localizacao"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "imagem": {
+                    "type": "string",
+                    "minLength": 100,
+                    "maxLength": 28000000
+                  },
+                  "tipoMime": {
+                    "type": "string",
+                    "enum": [
+                      "image/jpeg",
+                      "image/png",
+                      "image/webp",
+                      "image/heic",
+                      "image/heif"
+                    ]
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "precisao": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100000
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "imagem",
+                  "tipoMime"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FotoEnviada"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "localizacao"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Foto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/links-campo": {
+      "post": {
+        "tags": [
+          "localizacao"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "recuperadorId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "destinatario": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "horas": {
+                    "default": 72,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 168
+                  },
+                  "enviarWhatsapp": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkCriado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "localizacao"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LinkCampo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/links-campo/{linkId}/revogar": {
+      "post": {
+        "tags": [
+          "localizacao"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "linkId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campo/{token}": {
+      "get": {
+        "tags": [
+          "campo"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 64
+            },
+            "in": "path",
+            "name": "token",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CasoDoLink"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campo/{token}/fotos": {
+      "post": {
+        "tags": [
+          "campo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "imagem": {
+                    "type": "string",
+                    "minLength": 100,
+                    "maxLength": 28000000
+                  },
+                  "tipoMime": {
+                    "type": "string",
+                    "enum": [
+                      "image/jpeg",
+                      "image/png",
+                      "image/webp",
+                      "image/heic",
+                      "image/heif"
+                    ]
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "precisao": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100000
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "imagem",
+                  "tipoMime"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 64
+            },
+            "in": "path",
+            "name": "token",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FotoEnviada"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campo/{token}/avistamentos": {
+      "post": {
+        "tags": [
+          "campo"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "descricao": {
+                    "type": "string",
+                    "minLength": 5
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "precisao": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100000
+                  }
+                },
+                "required": [
+                  "descricao"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 64
+            },
+            "in": "path",
+            "name": "token",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
                 }
               }
             }
