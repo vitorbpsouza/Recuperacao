@@ -24,7 +24,7 @@ import { Route as AppARedeRouteImport } from './routes/_app/a/rede'
 import { Route as AppARepassesRouteImport } from './routes/_app/a/repasses'
 import { Route as AppBIndexRouteImport } from './routes/_app/b/index'
 import { Route as AppBCasosRouteImport } from './routes/_app/b/casos'
-import { Route as AppGestaoCamposNovosRouteImport } from './routes/_app/gestao/campos-novos'
+import { Route as AppGestaoCamposRouteImport } from './routes/_app/gestao/campos'
 import { Route as AppGestaoColisoesRouteImport } from './routes/_app/gestao/colisoes'
 import { Route as AppGestaoDadosRouteImport } from './routes/_app/gestao/dados'
 import { Route as AppGestaoFontesRouteImport } from './routes/_app/gestao/fontes'
@@ -112,9 +112,9 @@ const AppBCasosRoute = AppBCasosRouteImport.update({
   path: '/casos',
   getParentRoute: () => AppBRoute,
 } as any)
-const AppGestaoCamposNovosRoute = AppGestaoCamposNovosRouteImport.update({
-  id: '/campos-novos',
-  path: '/campos-novos',
+const AppGestaoCamposRoute = AppGestaoCamposRouteImport.update({
+  id: '/campos',
+  path: '/campos',
   getParentRoute: () => AppGestaoRoute,
 } as any)
 const AppGestaoColisoesRoute = AppGestaoColisoesRouteImport.update({
@@ -191,7 +191,7 @@ export interface FileRoutesByFullPath {
   '/a/rede': typeof AppARedeRoute
   '/a/repasses': typeof AppARepassesRoute
   '/b/casos': typeof AppBCasosRouteWithChildren
-  '/gestao/campos-novos': typeof AppGestaoCamposNovosRoute
+  '/gestao/campos': typeof AppGestaoCamposRoute
   '/gestao/colisoes': typeof AppGestaoColisoesRoute
   '/gestao/dados': typeof AppGestaoDadosRoute
   '/gestao/fontes': typeof AppGestaoFontesRoute
@@ -216,7 +216,7 @@ export interface FileRoutesByTo {
   '/a/operacao': typeof AppAOperacaoRoute
   '/a/rede': typeof AppARedeRoute
   '/a/repasses': typeof AppARepassesRoute
-  '/gestao/campos-novos': typeof AppGestaoCamposNovosRoute
+  '/gestao/campos': typeof AppGestaoCamposRoute
   '/gestao/colisoes': typeof AppGestaoColisoesRoute
   '/gestao/dados': typeof AppGestaoDadosRoute
   '/gestao/fontes': typeof AppGestaoFontesRoute
@@ -247,7 +247,7 @@ export interface FileRoutesById {
   '/_app/a/rede': typeof AppARedeRoute
   '/_app/a/repasses': typeof AppARepassesRoute
   '/_app/b/casos': typeof AppBCasosRouteWithChildren
-  '/_app/gestao/campos-novos': typeof AppGestaoCamposNovosRoute
+  '/_app/gestao/campos': typeof AppGestaoCamposRoute
   '/_app/gestao/colisoes': typeof AppGestaoColisoesRoute
   '/_app/gestao/dados': typeof AppGestaoDadosRoute
   '/_app/gestao/fontes': typeof AppGestaoFontesRoute
@@ -278,7 +278,7 @@ export interface FileRouteTypes {
     | '/a/rede'
     | '/a/repasses'
     | '/b/casos'
-    | '/gestao/campos-novos'
+    | '/gestao/campos'
     | '/gestao/colisoes'
     | '/gestao/dados'
     | '/gestao/fontes'
@@ -303,7 +303,7 @@ export interface FileRouteTypes {
     | '/a/operacao'
     | '/a/rede'
     | '/a/repasses'
-    | '/gestao/campos-novos'
+    | '/gestao/campos'
     | '/gestao/colisoes'
     | '/gestao/dados'
     | '/gestao/fontes'
@@ -333,7 +333,7 @@ export interface FileRouteTypes {
     | '/_app/a/rede'
     | '/_app/a/repasses'
     | '/_app/b/casos'
-    | '/_app/gestao/campos-novos'
+    | '/_app/gestao/campos'
     | '/_app/gestao/colisoes'
     | '/_app/gestao/dados'
     | '/_app/gestao/fontes'
@@ -463,11 +463,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBCasosRouteImport
       parentRoute: typeof AppBRoute
     }
-    '/_app/gestao/campos-novos': {
-      id: '/_app/gestao/campos-novos'
-      path: '/campos-novos'
-      fullPath: '/gestao/campos-novos'
-      preLoaderRoute: typeof AppGestaoCamposNovosRouteImport
+    '/_app/gestao/campos': {
+      id: '/_app/gestao/campos'
+      path: '/campos'
+      fullPath: '/gestao/campos'
+      preLoaderRoute: typeof AppGestaoCamposRouteImport
       parentRoute: typeof AppGestaoRoute
     }
     '/_app/gestao/colisoes': {
@@ -622,7 +622,7 @@ const AppBRouteChildren: AppBRouteChildren = {
 const AppBRouteWithChildren = AppBRoute._addFileChildren(AppBRouteChildren)
 
 interface AppGestaoRouteChildren {
-  AppGestaoCamposNovosRoute: typeof AppGestaoCamposNovosRoute
+  AppGestaoCamposRoute: typeof AppGestaoCamposRoute
   AppGestaoColisoesRoute: typeof AppGestaoColisoesRoute
   AppGestaoDadosRoute: typeof AppGestaoDadosRoute
   AppGestaoFontesRoute: typeof AppGestaoFontesRoute
@@ -632,7 +632,7 @@ interface AppGestaoRouteChildren {
 }
 
 const AppGestaoRouteChildren: AppGestaoRouteChildren = {
-  AppGestaoCamposNovosRoute: AppGestaoCamposNovosRoute,
+  AppGestaoCamposRoute: AppGestaoCamposRoute,
   AppGestaoColisoesRoute: AppGestaoColisoesRoute,
   AppGestaoDadosRoute: AppGestaoDadosRoute,
   AppGestaoFontesRoute: AppGestaoFontesRoute,

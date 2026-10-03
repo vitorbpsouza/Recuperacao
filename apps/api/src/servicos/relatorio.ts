@@ -337,6 +337,14 @@ export const importarRelatorio = async (tx: Tx, operadorId: string, pedido: Pedi
 
   extras += await inserirExtras(tx, pedido.casoId, relatorioId, leitura.outros, null);
 
+  // Campo novo vira campo oficial na hora (catálogo de campos dinâmicos).
+  for (const n of novos.filter((x) => !x.sensivel)) {
+    await tx.execute(sql`
+      insert into campo_dinamico (entidade, chave, secao, rotulo_original, rotulo)
+      values (${n.entidade}, ${n.chave}, ${n.secao}, ${n.rotulo}, ${n.rotulo})
+      on conflict (tenant_id, entidade, chave) do nothing`);
+  }
+
   return {
     relatorioId,
     veiculo: v ? { campos: camposDoVeiculo, restricoes: v.restricoes.length } : null,

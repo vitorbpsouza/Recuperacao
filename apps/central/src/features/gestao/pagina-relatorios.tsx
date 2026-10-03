@@ -17,7 +17,7 @@ import { toast } from '@workspace/ui/lib/toast';
 import { cn } from '@workspace/ui/lib/utils';
 
 import { CabecalhoDePagina, ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
-import { auditoriaQuery, casosQuery, painelRecuperacaoQuery, pode, repassesQuery, type UsuarioSessao } from '@/lib/api.ts';
+import { auditoriaQuery, casosQuery, painelRecuperacaoQuery, pode, repassesQuery, valoresDeCamposQuery, type Caso, type UsuarioSessao } from '@/lib/api.ts';
 import { baixarCsv, gerarCsv } from '@/lib/csv.ts';
 import { tomDoStatus } from '@/lib/status.ts';
 
@@ -171,6 +171,21 @@ export function PaginaRelatorios({ sessao }: { sessao: UsuarioSessao }) {
   const painel = useQuery({ ...painelRecuperacaoQuery, enabled: veA });
   const repasses = useQuery({ ...repassesQuery, enabled: veA });
   const auditoria = useQuery({ ...auditoriaQuery, enabled: auditor });
+  const valoresDoVeiculo = useQuery({ ...valoresDeCamposQuery('veiculo'), enabled: veA || veB });
+
+  // Campos que os relatórios trouxeram viram colunas da carteira e das negociações.
+  const colunasDinamicas = useMemo(() => {
+    const porCaso = new Map<string, Map<number, string>>();
+    const campos = new Map<number, string>();
+    for (const v of valoresDoVeiculo.data ?? []) {
+      campos.set(v.campoId, v.rotulo);
+      if (!porCaso.has(v.casoId)) porCaso.set(v.casoId, new Map());
+      porCaso.get(v.casoId)!.set(v.campoId, v.valor);
+    }
+    return [...campos.entries()]
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([id, rotulo]): Coluna<Caso> => ({ titulo: rotulo, valor: (c) => porCaso.get(c.id)?.get(id) ?? null }));
+  }, [valoresDoVeiculo.data]);
   const [statusA, setStatusA] = useState('todos');
   const [statusB, setStatusB] = useState('todos');
   const [statusRepasse, setStatusRepasse] = useState('todos');
@@ -226,6 +241,7 @@ export function PaginaRelatorios({ sessao }: { sessao: UsuarioSessao }) {
                 { titulo: 'Recuperador', valor: (c) => c.recuperadorNome },
                 { titulo: 'Prazo máximo', valor: (c) => c.prazoMaximo, celula: (c) => (c.prazoMaximo ? formatarDataHora(c.prazoMaximo) : '—') },
                 { titulo: 'Recebido em', valor: (c) => c.criadoEm, celula: (c) => formatarData(c.criadoEm) },
+                ...colunasDinamicas,
               ]}
             />
           </TabsContent>
@@ -351,6 +367,7 @@ export function PaginaRelatorios({ sessao }: { sessao: UsuarioSessao }) {
                 { titulo: 'Anuência', valor: (c) => c.anuenciaCredor },
                 { titulo: 'RENAJUD ativo', valor: (c) => c.renajudAtivo },
                 { titulo: 'Gravame baixado', valor: (c) => c.gravameBaixado },
+                ...colunasDinamicas,
               ]}
             />
           </TabsContent>

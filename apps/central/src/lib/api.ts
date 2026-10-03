@@ -65,7 +65,8 @@ export type PessoasDoCaso = Esquemas['PessoasDoCaso'];
 export type PessoaRevelada = Esquemas['PessoaRevelada'];
 export type ContatoPessoa = Esquemas['ContatoPessoa'];
 export type EnderecoPessoa = Esquemas['EnderecoPessoa'];
-export type CampoNovo = Esquemas['CampoNovo'];
+export type CampoDinamico = Esquemas['CampoDinamico'];
+export type ValorDeCampo = Esquemas['ValorDeCampo'];
 export type Integracao = Esquemas['Integracao'];
 export type Conversa = Esquemas['Conversa'];
 export type Mensagem = Esquemas['Mensagem'];
@@ -144,10 +145,23 @@ export const pessoasQuery = (id: string) =>
     queryFn: () => exigir(api.GET('/api/casos/{id}/pessoas', { params: { path: { id } } })),
   });
 
-export const camposNovosQuery = queryOptions({
-  queryKey: ['campos-novos'],
-  queryFn: () => exigir(api.GET('/api/campos-novos')),
+/** Catálogo de campos dinâmicos: todo rótulo novo dos relatórios, já como campo. */
+export const camposDinamicosQuery = queryOptions({
+  queryKey: ['campos-dinamicos'],
+  queryFn: () => exigir(api.GET('/api/campos-dinamicos')),
 });
+
+export const camposDoCasoQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'campos'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/campos', { params: { path: { id } } })),
+  });
+
+export const valoresDeCamposQuery = (entidade: 'veiculo' | 'caso') =>
+  queryOptions({
+    queryKey: ['campos-dinamicos', 'valores', entidade],
+    queryFn: () => exigir(api.GET('/api/campos-dinamicos/valores', { params: { query: { entidade } } })),
+  });
 
 export const integracoesQuery = queryOptions({
   queryKey: ['integracoes'],

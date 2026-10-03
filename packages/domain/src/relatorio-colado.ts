@@ -157,7 +157,7 @@ export interface LeituraDeRelatorio {
 // ---------------------------------------------------------------------------
 
 /** Rótulo normalizado → campo do veículo. Rótulo fora daqui, em seção de veículo, é campo novo. */
-export const CAMPOS_VEICULO: Record<string, keyof VeiculoLido | 'anoFabMod' | 'restricao' | 'conhecido'> = {
+export const CAMPOS_VEICULO: Record<string, keyof VeiculoLido | 'anoFabMod' | 'restricao' | 'emplacamento' | 'conhecido'> = {
   placa: 'placa',
   chassi: 'chassi',
   renavam: 'renavam',
@@ -191,6 +191,8 @@ export const CAMPOS_VEICULO: Record<string, keyof VeiculoLido | 'anoFabMod' | 'r
   cidade: 'municipio',
   uf: 'uf',
   'uf de emplacamento': 'uf',
+  emplacamento: 'emplacamento',
+  'local de emplacamento': 'emplacamento',
   'ano licenciamento': 'anoLicenciamento',
   'ano de licenciamento': 'anoLicenciamento',
   'ultimo licenciamento': 'anoLicenciamento',
@@ -445,7 +447,7 @@ const classificarSecao = (titulo: string): TipoSecao => {
   const t = semAcento(titulo);
   if (/radar|passagem|ocr|cerco/.test(t)) return 'radar';
   if (/propriet/.test(t)) return 'proprietario';
-  if (/veiculo|restric|indicador|gravame|debito|multa|licenc/.test(t)) return 'veiculo';
+  if (/veiculo|restric|indicador|gravame|debito|multa|licenc|importa|emplacamento|caracteristic|especificac/.test(t)) return 'veiculo';
   if (/telefone|operadora|celular|contato/.test(t)) return 'telefones';
   if (/endereco/.test(t)) return 'enderecos';
   if (/parente|vinculo|familia/.test(t)) return 'parentes';
@@ -462,7 +464,10 @@ const lerCabecalho = (linha: string): string | null => {
   if (tracos) return tracos[1]!.replace(/:$/, '').trim();
   if (/^-{3,}$/.test(linha)) return '';
   if (!linha.includes(':') && /^\p{Extended_Pictographic}/u.test(linha)) {
-    const titulo = linha.replace(/[^\p{L}\p{N}\s&/()-]/gu, '').trim();
+    const titulo = linha
+      .replace(/[\p{Extended_Pictographic}️‍]/gu, '')
+      .replace(/[^\p{L}\p{N}\s&/()-]/gu, '')
+      .trim();
     return titulo || null;
   }
   return null;
@@ -530,6 +535,8 @@ export const lerRelatorio = (textoOriginal: string): LeituraDeRelatorio => {
   let tipo: TipoSecao = 'nenhuma';
   /** "[ANATEL 2026]" e "[SIPNI]": sub-bloco dentro da seção. */
   let subBloco: string | undefined;
+  /** De quem são as seções em volta: decide o dono de uma seção desconhecida. */
+  let contexto: 'veiculo' | 'pessoa' | null = null;
   /** Grupos aninhados de perfil ("TODOS FLAGS" › "Financeiro"). */
   let grupo: { nome: string; pai?: string; itens: number } | undefined;
 
@@ -661,6 +668,10 @@ export const lerRelatorio = (textoOriginal: string): LeituraDeRelatorio => {
       else veiculo[campo] = b;
     } else if (campo === 'uf') {
       veiculo.uf = valor.trim().toUpperCase().slice(0, 2);
+    } else if (campo === 'emplacamento') {
+      const [cidade, uf] = valor.split('/').map((x) => x.trim());
+      if (cidade) veiculo.municipio = cidade;
+      if (uf && /^[A-Z]{2}$/i.test(uf)) veiculo.uf = uf.toUpperCase();
     } else if (campo !== 'restricoes') {
       (veiculo as unknown as Record<string, string>)[campo] = valor.replace(/\s+/g, ' ').trim();
     }
@@ -675,6 +686,11 @@ export const lerRelatorio = (textoOriginal: string): LeituraDeRelatorio => {
     if (cabecalho !== null) {
       titulo = cabecalho;
       tipo = cabecalho ? classificarSecao(cabecalho) : 'nenhuma';
+      // Seção que o leitor não conhece é do mesmo dono das vizinhas: logo depois
+      // do veículo ("ℹ OUTROS ℹ" com a financeira do gravame), é do veículo.
+      if (tipo === 'desconhecida' && contexto === 'veiculo') tipo = 'veiculo';
+      if (tipo === 'veiculo' || tipo === 'proprietario' || tipo === 'radar') contexto = 'veiculo';
+      else if (tipo !== 'desconhecida' && tipo !== 'nenhuma' && tipo !== 'documentos') contexto = 'pessoa';
       subBloco = undefined;
       grupo = undefined;
       if (cabecalho) secoes.push(cabecalho);
@@ -749,6 +765,13 @@ export const lerRelatorio = (textoOriginal: string): LeituraDeRelatorio => {
 
       case 'veiculo':
       case 'documentos': {
+        if (pares.length === 1 && pares[0]![1] === '') {
+          grupo = { nome: pares[0]![0], pai: recuo > 0 ? grupo?.nome : undefined, itens: 0 };
+          break;
+        }
+        // Linha sem recuo fecha o grupo aberto.
+        if (recuo === 0) grupo = undefined;
+        else if (grupo) grupo.itens++;
         for (const [rotulo, valor] of pares) {
           const k = semAcento(rotulo);
           // "DOCUMENTOS" existe nos dois relatórios: PIS e RG são da pessoa; licenciamento, do veículo.

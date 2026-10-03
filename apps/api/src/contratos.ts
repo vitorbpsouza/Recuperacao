@@ -630,18 +630,34 @@ export const pessoasReveladas = z.object({
   pessoas: z.array(pessoaRevelada),
 });
 
-export const campoNovo = z.object({
+export const campoDinamico = z.object({
+  id: z.number().int(),
   entidade: z.enum(['veiculo', 'pessoa', 'caso']),
-  secao: z.string(),
   chave: z.string(),
+  secao: z.string(),
+  rotuloOriginal: z.string(),
   rotulo: z.string(),
+  oculto: z.boolean(),
+  juntoDe: z.number().int().nullable(),
+  ordem: z.number().int(),
+  criadoEm: z.coerce.date(),
   ocorrencias: z.number().int(),
   casos: z.number().int(),
   /** Último valor visto; nulo quando o campo é sensível. */
   exemplo: z.string().nullable(),
-  primeiraVez: z.coerce.date(),
-  ultimaVez: z.coerce.date(),
+  ultimaVez: z.coerce.date().nullable(),
 });
+
+export const valorDeCampo = z.object({
+  campoId: z.number().int(),
+  rotulo: z.string(),
+  entidade: z.enum(['veiculo', 'caso']),
+  secao: z.string(),
+  valor: z.string(),
+  atualizadoEm: z.coerce.date(),
+});
+
+export const valorDeCampoDoCaso = z.object({ casoId: z.string(), campoId: z.number().int(), rotulo: z.string(), valor: z.string() });
 
 registrar({
   ResumoImportacao: resumoImportacao,
@@ -653,7 +669,9 @@ registrar({
   EnderecoPessoa: enderecoPessoa,
   PessoaRevelada: pessoaRevelada,
   PessoasReveladas: pessoasReveladas,
-  CampoNovo: campoNovo,
+  CampoDinamico: campoDinamico,
+  ValorDeCampo: valorDeCampo,
+  ValorDeCampoDoCaso: valorDeCampoDoCaso,
 });
 
 // ---------------------------------------------------------------------------

@@ -2647,7 +2647,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/campos-novos": {
+    "/api/campos-dinamicos": {
         parameters: {
             query?: never;
             header?: never;
@@ -2669,7 +2669,145 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["CampoNovo"][];
+                        "application/json": components["schemas"]["CampoDinamico"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campos-dinamicos/{campoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    campoId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        rotulo?: string;
+                        oculto?: boolean;
+                        juntoDe?: number | null;
+                        ordem?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/campos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValorDeCampo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campos-dinamicos/valores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    entidade: "veiculo" | "caso";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValorDeCampoDoCaso"][];
                     };
                 };
             };
@@ -4572,17 +4710,37 @@ export interface components {
             sensivelLiberado: boolean;
             pessoas: components["schemas"]["PessoaReveladaInput"][];
         };
-        CampoNovoInput: {
+        CampoDinamicoInput: {
+            id: number;
             /** @enum {string} */
             entidade: "veiculo" | "pessoa" | "caso";
-            secao: string;
             chave: string;
+            secao: string;
+            rotuloOriginal: string;
             rotulo: string;
+            oculto: boolean;
+            juntoDe: number | null;
+            ordem: number;
+            criadoEm: unknown;
             ocorrencias: number;
             casos: number;
             exemplo: string | null;
-            primeiraVez: unknown;
             ultimaVez: unknown;
+        };
+        ValorDeCampoInput: {
+            campoId: number;
+            rotulo: string;
+            /** @enum {string} */
+            entidade: "veiculo" | "caso";
+            secao: string;
+            valor: string;
+            atualizadoEm: unknown;
+        };
+        ValorDeCampoDoCasoInput: {
+            casoId: string;
+            campoId: number;
+            rotulo: string;
+            valor: string;
         };
         IntegracaoInput: {
             id: string;
@@ -5536,19 +5694,40 @@ export interface components {
             sensivelLiberado: boolean;
             pessoas: components["schemas"]["PessoaRevelada"][];
         };
-        CampoNovo: {
+        CampoDinamico: {
+            id: number;
             /** @enum {string} */
             entidade: "veiculo" | "pessoa" | "caso";
-            secao: string;
             chave: string;
+            secao: string;
+            rotuloOriginal: string;
             rotulo: string;
+            oculto: boolean;
+            juntoDe: number | null;
+            ordem: number;
+            /** Format: date-time */
+            criadoEm: string;
             ocorrencias: number;
             casos: number;
             exemplo: string | null;
             /** Format: date-time */
-            primeiraVez: string;
+            ultimaVez: string | null;
+        };
+        ValorDeCampo: {
+            campoId: number;
+            rotulo: string;
+            /** @enum {string} */
+            entidade: "veiculo" | "caso";
+            secao: string;
+            valor: string;
             /** Format: date-time */
-            ultimaVez: string;
+            atualizadoEm: string;
+        };
+        ValorDeCampoDoCaso: {
+            casoId: string;
+            campoId: number;
+            rotulo: string;
+            valor: string;
         };
         Integracao: {
             id: string;

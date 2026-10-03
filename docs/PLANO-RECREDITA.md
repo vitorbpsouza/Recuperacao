@@ -532,6 +532,7 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
     - **Link de campo:** o recuperador terceiro recebe (pelo WhatsApp da Evolution, se quiser) um link de um caso só, com validade de 12 h a 7 dias e token só em hash. Sem login, ele vê placa, modelo, cor e região — nunca devedor nem dívida — e envia foto e localização. Tudo entra com o link como autor; o link pode ser revogado.
     - Fontes de avistamento novas: `camera` (câmera de condomínio, comércio, LPR de parceiro) e `foto`.
     - Testes: domínio 57, banco 62, API 105 e E2E 15.
+  - **Campos dinâmicos (2026-10-03, migração 0011):** rótulo novo de veículo, pessoa ou caso vira campo oficial na hora, sem deploy: entra no catálogo `campo_dinamico` e aparece na ficha técnica, nos relatórios e no CSV (o valor continua em `dado_extra`). A tela Gestão › Campos dos relatórios renomeia, junta sinônimos de fornecedores diferentes e oculta. Coluna de verdade só quando um campo pesar em filtro (a tela copia o SQL). A API nunca altera a estrutura do banco: um texto malformado não muda tabela. A migração também devolveu ao veículo as seções "IMPORTAÇÃO" e "OUTROS", que o leitor antigo dava à pessoa; o leitor agora dá a uma seção desconhecida o dono das seções vizinhas e lê "Emplacamento: CIDADE/UF" como município e UF.
   - **Pendente (próximas etapas do Plano A):**
     - Importação de carteira e arquivo de recall.
     - Enriquecimento com `dado_enriquecido`.

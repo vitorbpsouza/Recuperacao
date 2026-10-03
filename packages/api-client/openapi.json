@@ -2917,9 +2917,14 @@
           "pessoas"
         ]
       },
-      "CampoNovoInput": {
+      "CampoDinamicoInput": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "entidade": {
             "type": "string",
             "enum": [
@@ -2928,15 +2933,33 @@
               "caso"
             ]
           },
+          "chave": {
+            "type": "string"
+          },
           "secao": {
             "type": "string"
           },
-          "chave": {
+          "rotuloOriginal": {
             "type": "string"
           },
           "rotulo": {
             "type": "string"
           },
+          "oculto": {
+            "type": "boolean"
+          },
+          "juntoDe": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ordem": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "criadoEm": {},
           "ocorrencias": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -2951,19 +2974,85 @@
             "nullable": true,
             "type": "string"
           },
-          "primeiraVez": {},
-          "ultimaVez": {}
+          "ultimaVez": {
+            "nullable": true
+          }
         },
         "required": [
+          "id",
           "entidade",
-          "secao",
           "chave",
+          "secao",
+          "rotuloOriginal",
           "rotulo",
+          "oculto",
+          "juntoDe",
+          "ordem",
+          "criadoEm",
           "ocorrencias",
           "casos",
           "exemplo",
-          "primeiraVez",
           "ultimaVez"
+        ]
+      },
+      "ValorDeCampoInput": {
+        "type": "object",
+        "properties": {
+          "campoId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "veiculo",
+              "caso"
+            ]
+          },
+          "secao": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "string"
+          },
+          "atualizadoEm": {}
+        },
+        "required": [
+          "campoId",
+          "rotulo",
+          "entidade",
+          "secao",
+          "valor",
+          "atualizadoEm"
+        ]
+      },
+      "ValorDeCampoDoCasoInput": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "campoId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "casoId",
+          "campoId",
+          "rotulo",
+          "valor"
         ]
       },
       "IntegracaoInput": {
@@ -7114,9 +7203,14 @@
         ],
         "additionalProperties": false
       },
-      "CampoNovo": {
+      "CampoDinamico": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "entidade": {
             "type": "string",
             "enum": [
@@ -7125,14 +7219,35 @@
               "caso"
             ]
           },
+          "chave": {
+            "type": "string"
+          },
           "secao": {
             "type": "string"
           },
-          "chave": {
+          "rotuloOriginal": {
             "type": "string"
           },
           "rotulo": {
             "type": "string"
+          },
+          "oculto": {
+            "type": "boolean"
+          },
+          "juntoDe": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ordem": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
           },
           "ocorrencias": {
             "type": "integer",
@@ -7148,25 +7263,92 @@
             "nullable": true,
             "type": "string"
           },
-          "primeiraVez": {
-            "type": "string",
-            "format": "date-time"
-          },
           "ultimaVez": {
+            "nullable": true,
             "type": "string",
             "format": "date-time"
           }
         },
         "required": [
+          "id",
           "entidade",
-          "secao",
           "chave",
+          "secao",
+          "rotuloOriginal",
           "rotulo",
+          "oculto",
+          "juntoDe",
+          "ordem",
+          "criadoEm",
           "ocorrencias",
           "casos",
           "exemplo",
-          "primeiraVez",
           "ultimaVez"
+        ],
+        "additionalProperties": false
+      },
+      "ValorDeCampo": {
+        "type": "object",
+        "properties": {
+          "campoId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "veiculo",
+              "caso"
+            ]
+          },
+          "secao": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "string"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "campoId",
+          "rotulo",
+          "entidade",
+          "secao",
+          "valor",
+          "atualizadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "ValorDeCampoDoCaso": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "campoId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "casoId",
+          "campoId",
+          "rotulo",
+          "valor"
         ],
         "additionalProperties": false
       },
@@ -11522,7 +11704,7 @@
         }
       }
     },
-    "/api/campos-novos": {
+    "/api/campos-dinamicos": {
       "get": {
         "tags": [
           "relatorios"
@@ -11535,7 +11717,159 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CampoNovo"
+                    "$ref": "#/components/schemas/CampoDinamico"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campos-dinamicos/{campoId}": {
+      "put": {
+        "tags": [
+          "relatorios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rotulo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "oculto": {
+                    "type": "boolean"
+                  },
+                  "juntoDe": {
+                    "nullable": true,
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 9007199254740991
+                  },
+                  "ordem": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "campoId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/campos": {
+      "get": {
+        "tags": [
+          "relatorios"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValorDeCampo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campos-dinamicos/valores": {
+      "get": {
+        "tags": [
+          "relatorios"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "veiculo",
+                "caso"
+              ]
+            },
+            "in": "query",
+            "name": "entidade",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValorDeCampoDoCaso"
                   }
                 }
               }

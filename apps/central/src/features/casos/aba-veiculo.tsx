@@ -28,6 +28,7 @@ import { cn } from '@workspace/ui/lib/utils';
 import { ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
 import {
   api,
+  camposDoCasoQuery,
   dadosExtrasQuery,
   exigir,
   integracoesQuery,
@@ -53,11 +54,14 @@ function Linha({ rotulo, children }: { rotulo: string; children: React.ReactNode
   );
 }
 
-export function Dado({ rotulo, valor, mono }: { rotulo: string; valor: React.ReactNode; mono?: boolean }) {
+export function Dado({ rotulo, valor, mono, dinamico }: { rotulo: string; valor: React.ReactNode; mono?: boolean; dinamico?: string }) {
   const vazio = valor === null || valor === undefined || valor === '';
   return (
-    <div className="min-w-0 rounded-lg bg-white/[0.03] px-3 py-2.5 ring-1 ring-white/[0.05]">
-      <Rotulo className="text-[10px]">{rotulo}</Rotulo>
+    <div className="min-w-0 rounded-lg bg-white/[0.03] px-3 py-2.5 ring-1 ring-white/[0.05]" title={dinamico}>
+      <Rotulo className="flex items-center gap-1 text-[10px]">
+        {rotulo}
+        {dinamico ? <SparklesIcon className="size-2.5 text-amber-300" aria-label="campo trazido pelo relatório" /> : null}
+      </Rotulo>
       <p
         className={cn('mt-0.5 line-clamp-2 text-sm break-words', vazio ? 'text-slate-600' : 'text-white', mono && 'font-mono text-xs')}
         title={typeof valor === 'string' ? valor : undefined}
@@ -111,6 +115,7 @@ export function ListaDeExtras({ extras }: { extras: DadoExtra[] }) {
 export function AbaVeiculo({ caso, sessao }: { caso: CasoDetalhe; sessao: UsuarioSessao }) {
   const verificacoes = useQuery(verificacoesVeiculoQuery(caso.id));
   const extras = useQuery(dadosExtrasQuery(caso.id));
+  const campos = useQuery(camposDoCasoQuery(caso.id));
   const [fipe, setFipe] = useState(false);
   const [apiBrasil, setApiBrasil] = useState(false);
   const escreve = pode.escrever(sessao);
@@ -154,7 +159,16 @@ export function AbaVeiculo({ caso, sessao }: { caso: CasoDetalhe; sessao: Usuari
             <Dado rotulo="Renavam" valor={a.renavam} mono />
             <Dado rotulo="Situação" valor={a.situacao} />
             <Dado rotulo="Emplacamento" valor={[a.municipioEmplacamento, a.ufEmplacamento].filter(Boolean).join(' / ') || null} />
+            {(campos.data ?? []).map((c) => (
+              <Dado key={c.campoId} rotulo={c.rotulo} valor={c.valor} dinamico={`${c.secao} · ${formatarDataHora(c.atualizadoEm)}`} />
+            ))}
           </div>
+          {campos.data?.length ? (
+            <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+              <SparklesIcon className="size-3 text-amber-300" aria-hidden />
+              Campos que os relatórios trouxeram e entraram sozinhos. Renomeie, junte ou oculte em Gestão › Campos dos relatórios.
+            </p>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -242,7 +256,7 @@ export function AbaVeiculo({ caso, sessao }: { caso: CasoDetalhe; sessao: Usuari
         <CardHeader>
           <CardTitle className="text-white">Outros dados do relatório</CardTitle>
           <CardDescription>
-            O que veio sem campo próprio. Os marcados como novos aparecem em Gestão › Campos novos, para virar campo no próximo deploy.
+            O que veio sem campo na ficha (rótulos já conhecidos, guardados como vieram). Campo novo entra sozinho na ficha técnica, acima.
           </CardDescription>
         </CardHeader>
         <CardContent>

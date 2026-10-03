@@ -354,8 +354,8 @@ export function PreviaLeitura({ leitura, devedorDoc, papelEscolhido, aoEscolherP
       {novos.length ? (
         <Bloco icone={SparklesIcon} titulo="Campos novos" contagem={novos.length} tom="ambar">
           <p className="mb-2 text-xs text-amber-200">
-            O sistema ainda não tem campo próprio para estes dados. Eles ficam guardados e aparecem em Gestão › Campos novos, para virarem
-            campo num próximo deploy.
+            Rótulos que o sistema ainda não conhecia. Viram campo na hora: aparecem na ficha, nos relatórios e no CSV. Dá para renomear,
+            juntar ou ocultar em Gestão › Campos dos relatórios.
           </p>
           <ul className="grid gap-1 text-xs md:grid-cols-2">
             {novos.map((n) => (

@@ -74,8 +74,10 @@ describe('colar o relatório do veículo', () => {
     const avistamentos = (await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/avistamentos')).json();
     expect(avistamentos.find((a: { fonte: string }) => a.fonte === 'radar')).toMatchObject({ latitude: -19.9, longitude: -43.9 });
 
-    const extras = (await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/dados-extras')).json();
-    expect(extras).toEqual([expect.objectContaining({ rotulo: 'Capacidade de Carga', valor: '0,45', novo: true })]);
+    // O rótulo novo virou campo oficial na hora: aparece nos campos, não em "outros dados".
+    const campos = (await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/campos')).json();
+    expect(campos).toEqual([expect.objectContaining({ rotulo: 'Capacidade de Carga', valor: '0,45', entidade: 'veiculo' })]);
+    expect((await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/dados-extras')).json()).toEqual([]);
 
     const eventos = (await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/eventos')).json();
     expect(eventos.filter((e: { tipo: string }) => e.tipo === 'relatorio_colado')).toHaveLength(1);
@@ -87,14 +89,32 @@ describe('colar o relatório do veículo', () => {
     await amb.chamar(opA, 'POST', '/api/casos/caso-a-001/relatorios', { texto: veiculo('SEED001') });
     const radares = (await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/avistamentos')).json().filter((a: { fonte: string }) => a.fonte === 'radar');
     expect(radares).toHaveLength(1);
-    expect((await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/dados-extras')).json()).toHaveLength(1);
+    expect((await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/campos')).json()).toHaveLength(1);
     expect((await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/relatorios')).json()).toHaveLength(2);
   });
 
-  it('campos novos aparecem para quem cuida do próximo deploy', async () => {
-    expect((await amb.chamar(opA, 'GET', '/api/campos-novos')).statusCode).toBe(403);
-    const novos = (await amb.chamar(admin, 'GET', '/api/campos-novos')).json();
-    expect(novos).toEqual([expect.objectContaining({ rotulo: 'Capacidade de Carga', ocorrencias: 1, casos: 1, exemplo: '0,45' })]);
+  it('campo novo vira campo oficial na hora: renomeia, junta sinônimo e oculta, sem deploy', async () => {
+    expect((await amb.chamar(opA, 'GET', '/api/campos-dinamicos')).statusCode).toBe(403);
+    const [campo] = (await amb.chamar(admin, 'GET', '/api/campos-dinamicos')).json();
+    expect(campo).toMatchObject({ rotulo: 'Capacidade de Carga', entidade: 'veiculo', ocorrencias: 1, casos: 1, exemplo: '0,45', oculto: false });
+
+    expect((await amb.chamar(gestor, 'PUT', `/api/campos-dinamicos/${campo.id}`, { rotulo: 'Carga (t)' })).statusCode).toBe(200);
+    expect((await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/campos')).json()[0]).toMatchObject({ rotulo: 'Carga (t)' });
+
+    // Outro fornecedor chama o mesmo dado de outro jeito: junta no principal.
+    await amb.chamar(opA, 'POST', '/api/casos/caso-a-001/relatorios', { texto: '🚗 DADOS DO VEÍCULO 🚗\nPlaca: SEED001\nCapacidade Carga: 0,50' });
+    const sinonimo = (await amb.chamar(admin, 'GET', '/api/campos-dinamicos')).json().find((c: { rotulo: string }) => c.rotulo === 'Capacidade Carga');
+    await amb.chamar(gestor, 'PUT', `/api/campos-dinamicos/${sinonimo.id}`, { juntoDe: campo.id });
+    const campos = (await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/campos')).json();
+    expect(campos).toEqual([expect.objectContaining({ campoId: campo.id, rotulo: 'Carga (t)', valor: '0,50' })]);
+
+    const valores = (await amb.chamar(opA, 'GET', '/api/campos-dinamicos/valores?entidade=veiculo')).json();
+    expect(valores).toContainEqual({ casoId: 'caso-a-001', campoId: campo.id, rotulo: 'Carga (t)', valor: '0,50' });
+
+    await amb.chamar(gestor, 'PUT', `/api/campos-dinamicos/${campo.id}`, { oculto: true });
+    expect((await amb.chamar(opA, 'GET', '/api/casos/caso-a-001/campos')).json()).toEqual([]);
+    expect((await amb.chamar(opA, 'PUT', `/api/campos-dinamicos/${campo.id}`, { oculto: false })).statusCode).toBe(403);
+    await amb.chamar(gestor, 'PUT', `/api/campos-dinamicos/${campo.id}`, { oculto: false });
   });
 
   it('no Plano B atualiza RENAJUD e gravame e guarda o radar sem virar avistamento', async () => {

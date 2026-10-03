@@ -54,7 +54,7 @@ export const NAVEGACAO_GESTAO: ItemNavegacao[] = [
   { titulo: 'Fontes e credores', icone: InboxIcon, para: '/gestao/fontes' },
   { titulo: 'Relatórios', icone: FileSpreadsheetIcon, para: '/gestao/relatorios' },
   { titulo: 'Integrações', icone: CableIcon, para: '/gestao/integracoes', visivel: pode.gerir },
-  { titulo: 'Campos novos', icone: SparklesIcon, para: '/gestao/campos-novos', visivel: pode.auditar },
+  { titulo: 'Campos dos relatórios', icone: SparklesIcon, para: '/gestao/campos', visivel: pode.auditar },
   { titulo: 'Colisões', icone: GitMergeIcon, para: '/gestao/colisoes', visivel: pode.auditar },
   { titulo: 'Usuários', icone: UserCogIcon, para: '/gestao/usuarios', visivel: pode.administrar },
 ];

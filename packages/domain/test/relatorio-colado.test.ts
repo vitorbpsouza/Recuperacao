@@ -282,3 +282,50 @@ describe('peças do leitor', () => {
     expect(r.radares).toHaveLength(2);
   });
 });
+
+describe('seções do veículo que o leitor não conhecia', () => {
+  // Estrutura do relatório real (rótulos de 2026-10-02), com valores fictícios.
+  const texto = `🚗 DADOS DO VEÍCULO 🚗
+Placa: TST1A23
+Emplacamento: PARA DE MINAS/MG
+Lotação: 5
+
+⛔ RESTRIÇÕES & INDICADORES ⛔
+Alarme: Não
+Comunicação Venda: Não
+
+📦 IMPORTAÇÃO 📦
+Importador: INEXISTENTE
+Doc Importador:
+  País Transferência: INEXISTENTE
+  Processo: 0
+
+ℹ OUTROS ℹ
+Financeira: BANCO FICTICIO
+Restrição RFB: INEXISTENTE
+
+--- DADOS BÁSICOS ---
+Nome: PESSOA FICTICIA
+CPF: 012.345.678-90
+Signo: CAPRICORNIO`;
+  const r = lerRelatorio(texto);
+
+  it('emplacamento preenche município e UF', () => {
+    expect(r.veiculo).toMatchObject({ municipio: 'PARA DE MINAS', uf: 'MG' });
+  });
+
+  it('importação e "outros" logo depois do veículo são do veículo, com o grupo no rótulo', () => {
+    const doVeiculo = r.veiculo!.extras.map((e) => `${e.secao} :: ${e.rotulo}`);
+    expect(doVeiculo).toEqual(
+      expect.arrayContaining([
+        'IMPORTAÇÃO :: Importador',
+        'IMPORTAÇÃO :: Doc Importador › País Transferência',
+        'IMPORTAÇÃO :: Doc Importador › Processo',
+        'OUTROS :: Financeira',
+        'OUTROS :: Restrição RFB',
+        'DADOS DO VEÍCULO :: Lotação',
+      ]),
+    );
+    expect(r.pessoas[0]!.extras.map((e) => e.rotulo)).toEqual(['Signo']);
+  });
+});

@@ -68,7 +68,7 @@ const TELAS = [
   '/gestao/fontes',
   '/gestao/relatorios',
   '/gestao/integracoes',
-  '/gestao/campos-novos',
+  '/gestao/campos',
   '/gestao/colisoes',
   '/gestao/usuarios',
 ];

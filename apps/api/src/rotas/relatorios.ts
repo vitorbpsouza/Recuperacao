@@ -11,7 +11,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import type { Tx } from '@workspace/db';
-import { colarRelatorioEntrada, finalidadeEntrada, type PapelPessoa } from '@workspace/domain';
+import { atualizarCampoEntrada, colarRelatorioEntrada, finalidadeEntrada, type PapelPessoa } from '@workspace/domain';
 
 import { exigirPapel } from '../auth/plugin.ts';
 import type { Papel } from '../auth/sessao.ts';
@@ -177,6 +177,7 @@ export const rotasRelatorios: FastifyPluginAsyncZod = async (app) => {
                      d.promovido_em as "promovidoEm", d.criado_em as "criadoEm"
                 from dado_extra d
                where d.caso_id = ${req.params.id} and not d.sensivel and d.entidade <> 'pessoa'
+                 and not exists (select 1 from campo_dinamico c where c.chave = d.chave and c.entidade = d.entidade)
                order by d.secao, d.id`,
         ),
       ),
@@ -252,10 +253,14 @@ export const rotasRelatorios: FastifyPluginAsyncZod = async (app) => {
         );
         const extras = await consultar<z.infer<typeof c.dadoExtra>>(
           tx,
-          sql`select d.id::int as id, d.entidade, d.pessoa_id as "pessoaId", d.secao, d.chave, d.rotulo, d.valor, d.sensivel, d.novo,
+          sql`select d.id::int as id, d.entidade, d.pessoa_id as "pessoaId", d.secao, d.chave,
+                     coalesce(alvo.rotulo, c.rotulo, d.rotulo) as rotulo, d.valor, d.sensivel, d.novo,
                      d.promovido_em as "promovidoEm", d.criado_em as "criadoEm"
                 from dado_extra d
+                left join campo_dinamico c on c.chave = d.chave and c.entidade = d.entidade
+                left join campo_dinamico alvo on alvo.id = c.junto_de
                where d.caso_id = ${req.params.id} and d.entidade = 'pessoa' and (${sensivel} or not d.sensivel)
+                 and not coalesce(alvo.oculto, c.oculto, false)
                order by d.secao, d.id`,
         );
 
@@ -284,28 +289,106 @@ export const rotasRelatorios: FastifyPluginAsyncZod = async (app) => {
   );
 
   /**
-   * Campos que os relatórios trouxeram e o sistema ainda não tem: o que
-   * precisa virar coluna no próximo deploy. O valor de exemplo nunca é de
-   * dado sensível.
+   * Campos dinâmicos: todo rótulo novo que os relatórios trouxeram vira campo
+   * oficial na hora. Aqui se renomeia, oculta e junta sinônimos — sem deploy.
    */
   app.get(
-    '/campos-novos',
+    '/campos-dinamicos',
     {
       preHandler: exigirPapel('admin', 'gestor', 'auditor'),
-      schema: { tags: ['relatorios'], response: { 200: z.array(c.campoNovo) } },
+      schema: { tags: ['relatorios'], response: { 200: z.array(c.campoDinamico) } },
     },
     async (req) =>
       req.banco((tx) =>
-        consultar<z.infer<typeof c.campoNovo>>(
+        consultar<z.infer<typeof c.campoDinamico>>(
           tx,
-          sql`select d.entidade, d.secao, d.chave, min(d.rotulo) as rotulo, count(*)::int as ocorrencias,
-                     count(distinct d.caso_id)::int as casos,
+          sql`select c.id::int as id, c.entidade, c.chave, c.secao, c.rotulo_original as "rotuloOriginal", c.rotulo, c.oculto,
+                     c.junto_de::int as "juntoDe", c.ordem, c.criado_em as "criadoEm",
+                     count(d.id)::int as ocorrencias, count(distinct d.caso_id)::int as casos,
                      (array_agg(d.valor order by d.id desc) filter (where not d.sensivel))[1] as exemplo,
-                     min(d.criado_em) as "primeiraVez", max(d.criado_em) as "ultimaVez"
-                from dado_extra d
-               where d.novo and d.promovido_em is null
-               group by d.entidade, d.secao, d.chave
-               order by count(*) desc, min(d.criado_em)`,
+                     max(d.criado_em) as "ultimaVez"
+                from campo_dinamico c
+                left join dado_extra d on d.chave = c.chave and d.entidade = c.entidade
+               group by c.id
+               order by count(d.id) desc, c.rotulo`,
+        ),
+      ),
+  );
+
+  app.put(
+    '/campos-dinamicos/:campoId',
+    {
+      preHandler: exigirPapel('admin', 'gestor'),
+      schema: {
+        tags: ['relatorios'],
+        params: z.object({ campoId: z.coerce.number().int() }),
+        body: atualizarCampoEntrada,
+        response: { 200: c.criado, 404: c.erro, 409: c.erro },
+      },
+    },
+    async (req, reply) =>
+      req.banco(async (tx) => {
+        const [campo] = await consultar<{ entidade: string }>(tx, sql`select entidade from campo_dinamico where id = ${req.params.campoId}`);
+        if (!campo) return reply.code(404).send({ erro: 'campo não encontrado' });
+        const v = req.body;
+        if (v.juntoDe) {
+          const [alvo] = await consultar<{ entidade: string; juntoDe: number | null }>(
+            tx,
+            sql`select entidade, junto_de::int as "juntoDe" from campo_dinamico where id = ${v.juntoDe}`,
+          );
+          if (!alvo || alvo.entidade !== campo.entidade) return reply.code(409).send({ erro: 'só se junta com campo da mesma entidade (veículo com veículo)' });
+          if (alvo.juntoDe) return reply.code(409).send({ erro: 'o campo escolhido já está junto de outro: escolha o principal' });
+        }
+        const sets: SQL[] = [];
+        if (v.rotulo !== undefined) sets.push(sql`rotulo = ${v.rotulo}`);
+        if (v.oculto !== undefined) sets.push(sql`oculto = ${v.oculto}`);
+        if (v.juntoDe !== undefined) sets.push(sql`junto_de = ${v.juntoDe}`);
+        if (v.ordem !== undefined) sets.push(sql`ordem = ${v.ordem}`);
+        if (sets.length) await tx.execute(sql`update campo_dinamico set ${sql.join(sets, sql`, `)} where id = ${req.params.campoId}`);
+        return { id: String(req.params.campoId) };
+      }),
+  );
+
+  /** Valores dos campos dinâmicos do veículo e do caso: o mais recente de cada campo, já com sinônimos juntados. */
+  app.get(
+    '/casos/:id/campos',
+    { schema: { tags: ['relatorios'], params, response: { 200: z.array(c.valorDeCampo) } } },
+    async (req) =>
+      req.banco(async (tx) => {
+        const linhas = await consultar<z.infer<typeof c.valorDeCampo> & { ordem: number }>(
+          tx,
+          sql`with campos as (
+                select c.chave, c.entidade, coalesce(alvo.id, c.id) as campo_id, coalesce(alvo.rotulo, c.rotulo) as rotulo,
+                       coalesce(alvo.ordem, c.ordem) as ordem, coalesce(alvo.oculto, c.oculto) as oculto
+                  from campo_dinamico c left join campo_dinamico alvo on alvo.id = c.junto_de
+              )
+              select distinct on (campos.campo_id) campos.campo_id::int as "campoId", campos.rotulo, campos.entidade, d.secao, d.valor,
+                     d.criado_em as "atualizadoEm", campos.ordem
+                from dado_extra d join campos on campos.chave = d.chave and campos.entidade = d.entidade
+               where d.caso_id = ${req.params.id} and d.entidade in ('veiculo', 'caso') and not campos.oculto
+               order by campos.campo_id, d.id desc`,
+        );
+        return linhas.sort((a, b) => a.ordem - b.ordem || a.rotulo.localeCompare(b.rotulo)).map(({ ordem: _, ...l }) => l);
+      }),
+  );
+
+  /** Valores de todos os casos, para os relatórios e o CSV. */
+  app.get(
+    '/campos-dinamicos/valores',
+    { schema: { tags: ['relatorios'], querystring: z.object({ entidade: z.enum(['veiculo', 'caso']) }), response: { 200: z.array(c.valorDeCampoDoCaso) } } },
+    async (req) =>
+      req.banco((tx) =>
+        consultar<z.infer<typeof c.valorDeCampoDoCaso>>(
+          tx,
+          sql`with campos as (
+                select c.chave, c.entidade, coalesce(alvo.id, c.id) as campo_id, coalesce(alvo.rotulo, c.rotulo) as rotulo,
+                       coalesce(alvo.oculto, c.oculto) as oculto
+                  from campo_dinamico c left join campo_dinamico alvo on alvo.id = c.junto_de
+              )
+              select distinct on (d.caso_id, campos.campo_id) d.caso_id as "casoId", campos.campo_id::int as "campoId", campos.rotulo, d.valor
+                from dado_extra d join campos on campos.chave = d.chave and campos.entidade = d.entidade
+               where d.entidade = ${req.query.entidade} and not campos.oculto
+               order by d.caso_id, campos.campo_id, d.id desc`,
         ),
       ),
   );

@@ -47,7 +47,7 @@ export const useAtualizarDepoisDeColar = () => {
     void queryClient.invalidateQueries({ queryKey: ['caso', casoId] });
     void queryClient.invalidateQueries({ queryKey: ['casos'] });
     void queryClient.invalidateQueries({ queryKey: ['painel'] });
-    void queryClient.invalidateQueries({ queryKey: ['campos-novos'] });
+    void queryClient.invalidateQueries({ queryKey: ['campos-dinamicos'] });
   };
 };
 

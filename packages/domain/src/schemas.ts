@@ -581,3 +581,14 @@ export const avistamentoCampoEntrada = z
     message: 'informe latitude e longitude juntas',
     path: ['longitude'],
   });
+
+/** Ajuste de um campo dinâmico: nome na tela, ocultar, juntar com sinônimo, ordem. */
+export const atualizarCampoEntrada = z
+  .object({
+    rotulo: z.string().trim().min(1, 'dê um nome ao campo').max(80).optional(),
+    oculto: z.boolean().optional(),
+    /** Junta este campo com outro (sinônimo); nulo desfaz. */
+    juntoDe: z.number().int().positive().nullable().optional(),
+    ordem: z.number().int().min(0).max(1000).optional(),
+  })
+  .strict();
