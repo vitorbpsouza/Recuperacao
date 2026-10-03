@@ -15,6 +15,7 @@ import { sql, type SQL } from 'drizzle-orm';
 import exifr from 'exifr';
 
 import type { Tx } from '@workspace/db';
+import { formasDaPlaca, placasEquivalentes } from '@workspace/domain';
 
 import { lerPlacaNaFoto, type LeituraDePlaca } from '../integracoes/ocr-placa.ts';
 
@@ -133,7 +134,7 @@ export const gravarFoto = async (
       ? { latitude: o.aparelho.latitude, longitude: o.aparelho.longitude, precisao: o.aparelho.precisao ?? null, origem: 'aparelho' as const }
       : null;
   const placaLida = f.ocr?.placa ?? null;
-  const placaConfere = placaLida ? placaLida === caso.placa : null;
+  const placaConfere = placaLida ? placasEquivalentes(placaLida, caso.placa) : null;
 
   const [foto] = await consultar<{ id: number }>(
     tx,
@@ -150,7 +151,8 @@ export const gravarFoto = async (
   if (placaLida && !placaConfere) {
     const [outro] = await consultar<{ id: string; placa: string }>(
       tx,
-      sql`select k.id, a.placa from caso k join ativo a on a.id = k.ativo_id where a.placa = ${placaLida} and k.id <> ${o.casoId} limit 1`,
+      sql`select k.id, a.placa from caso k join ativo a on a.id = k.ativo_id
+           where a.placa in (${sql.join(formasDaPlaca(placaLida).map((p) => sql`${p}`), sql`, `)}) and k.id <> ${o.casoId} limit 1`,
     );
     outroCaso = outro ?? null;
   }

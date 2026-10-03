@@ -7,11 +7,11 @@
  * Com texto colado, ele é guardado e lido na mesma transação: ou o caso nasce
  * com tudo o que veio no texto, ou não nasce.
  */
-import { and, eq, notInArray } from 'drizzle-orm';
+import { and, eq, inArray, notInArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 
 import { schema } from '@workspace/db';
-import { cadastroCasoEntrada, finalidadeDe, normalizarDocumento, normalizarPlaca } from '@workspace/domain';
+import { cadastroCasoEntrada, finalidadeDe, formasDaPlaca, normalizarDocumento, normalizarPlaca } from '@workspace/domain';
 
 import * as c from '../contratos.ts';
 import { ErroDeRelatorio, importarRelatorio } from '../servicos/relatorio.ts';
@@ -48,7 +48,7 @@ export const rotasCadastroCaso: FastifyPluginAsyncZod = async (app) => {
           .select({ id: caso.id, status: caso.status })
           .from(caso)
           .innerJoin(ativo, eq(ativo.id, caso.ativoId))
-          .where(and(eq(ativo.placa, placa), eq(caso.origem, corpo.origem), notInArray(caso.status, FINAIS)));
+          .where(and(inArray(ativo.placa, formasDaPlaca(placa)), eq(caso.origem, corpo.origem), notInArray(caso.status, FINAIS)));
         if (aberto) {
           return { erro: 409 as const, mensagem: `a placa ${placa} já tem caso aberto neste plano (${aberto.status})` };
         }

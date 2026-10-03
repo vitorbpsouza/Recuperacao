@@ -195,6 +195,31 @@ describe('colar o dossiê da pessoa', () => {
   });
 });
 
+describe('placa antiga e Mercosul', () => {
+  it('relatório com a placa Mercosul grava no caso da placa antiga, e o cadastro não duplica', async () => {
+    const r = await amb.chamar(opA, 'POST', '/api/casos/cadastro', {
+      origem: 'plataforma_credor',
+      fonteId: 'fonte-plataforma',
+      credorId: 'cred-alfa',
+      bem: { placa: 'QUW-5278', modelo: 'YAMAHA/FZ25 FAZER' },
+    });
+    expect(r.statusCode).toBe(201);
+    const { id } = r.json();
+    const colado = await amb.chamar(opA, 'POST', `/api/casos/${id}/relatorios`, { texto: veiculo('QUW5C78') });
+    expect(colado.statusCode).toBe(201);
+    expect(colado.json().avisos).toContain('a placa QUW5C78 do relatório é a mesma QUW5278 do caso (padrão antigo e Mercosul)');
+    expect(colado.json().radares).toBe(1);
+
+    const repetido = await amb.chamar(opA, 'POST', '/api/casos/cadastro', {
+      origem: 'plataforma_credor',
+      fonteId: 'fonte-plataforma',
+      credorId: 'cred-alfa',
+      bem: { placa: 'QUW5C78', modelo: 'YAMAHA/FZ25 FAZER' },
+    });
+    expect(repetido.statusCode).toBe(409);
+  });
+});
+
 describe('cadastro com texto colado', () => {
   it('cria o caso e grava o texto na mesma transação; o devedor vem do dossiê', async () => {
     const r = await amb.chamar(opA, 'POST', '/api/casos/cadastro', {

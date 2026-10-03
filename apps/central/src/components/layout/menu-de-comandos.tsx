@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { CarFrontIcon, HandshakeIcon, LayoutDashboardIcon } from 'lucide-react';
 import { useEffect } from 'react';
 
+import { formasDaPlaca } from '@workspace/domain';
 import { PlacaMercosul } from '@workspace/ui/brand/placa-mercosul';
 import {
   Command,
@@ -89,7 +90,7 @@ export function MenuDeComandos({ sessao, aberto, aoMudar }: Props) {
                   {casos.map((caso) => (
                     <CommandItem
                       key={caso.id}
-                      value={`${caso.placa} ${caso.modelo ?? ''} ${caso.cidade ?? ''} ${caso.status}`}
+                      value={`${formasDaPlaca(caso.placa).join(' ')} ${caso.modelo ?? ''} ${caso.cidade ?? ''} ${caso.status}`}
                       onSelect={() =>
                         ir(() =>
                           navigate({

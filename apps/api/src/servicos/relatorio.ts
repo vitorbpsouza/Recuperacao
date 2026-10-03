@@ -18,6 +18,7 @@ import {
   lerRelatorio,
   normalizarDocumentoLido,
   papeisDaPessoa,
+  placasEquivalentes,
   type DadoExtra,
   type LeituraDeRelatorio,
   type PapelDoDossie,
@@ -195,11 +196,15 @@ export const importarRelatorio = async (tx: Tx, operadorId: string, pedido: Pedi
 
   const leitura: LeituraDeRelatorio = lerRelatorio(pedido.texto);
   const v = leitura.veiculo;
-  if (v?.placa && v.placa !== caso.placa) {
+  // Placa antiga e Mercosul são a mesma (QUW5278 = QUW5C78).
+  if (v?.placa && !placasEquivalentes(v.placa, caso.placa)) {
     throw new ErroDeRelatorio(`o relatório é da placa ${v.placa}, e o caso é da ${caso.placa}`, 409);
   }
+  if (v?.placa && v.placa !== caso.placa) {
+    leitura.avisos.push(`a placa ${v.placa} do relatório é a mesma ${caso.placa} do caso (padrão antigo e Mercosul)`);
+  }
   // Radar de outra placa no mesmo texto: não é deste caso.
-  const radares = leitura.radares.filter((r) => !r.placa || r.placa === caso.placa);
+  const radares = leitura.radares.filter((r) => !r.placa || placasEquivalentes(r.placa, caso.placa));
 
   const papeis = leitura.pessoas.map((p) => papeisDaPessoa(p, caso.devedorDoc));
   if (papeis.some((x) => x.pergunta) && !pedido.papelPessoa) {

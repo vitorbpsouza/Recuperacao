@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardPasteIcon, SaveIcon } from 'lucide-react';
 import { useDeferredValue, useMemo, useState } from 'react';
 
-import { colarRelatorioEntrada, lerRelatorio, type PapelDoDossie } from '@workspace/domain';
+import { colarRelatorioEntrada, lerRelatorio, placasEquivalentes, type PapelDoDossie } from '@workspace/domain';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
 import { Button } from '@workspace/ui/components/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog';
@@ -113,7 +113,7 @@ export function DialogoColar({
     gravar.mutate(r.data);
   };
 
-  const outraPlaca = !!leitura?.veiculo?.placa && leitura.veiculo.placa !== placa;
+  const outraPlaca = !!leitura?.veiculo?.placa && !placasEquivalentes(leitura.veiculo.placa, placa);
   const bloqueado = !leitura || outraPlaca || faltaPapel(leitura, devedorDoc, papel) || gravar.isPending;
 
   return (

@@ -9,6 +9,7 @@ import {
   normalizarDocumentoLido,
   novoCredorEntrada,
   papeisDaPessoa,
+  placasEquivalentes,
   type PapelDoDossie,
 } from '@workspace/domain';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
@@ -179,7 +180,7 @@ export function PaginaNovoCaso({ canal, sessao }: { canal: Canal; sessao: Usuari
   );
 
   const semCredores = credores.isSuccess && credores.data.length === 0;
-  const outraPlaca = !!leitura?.veiculo?.placa && !!v.placa && leitura.veiculo.placa !== v.placa.toUpperCase().replace(/[\s-]/g, '');
+  const outraPlaca = !!leitura?.veiculo?.placa && !!v.placa && !placasEquivalentes(leitura.veiculo.placa, v.placa);
   const voltar = canal === 'a' ? '/a/casos' : '/b/casos';
 
   return (

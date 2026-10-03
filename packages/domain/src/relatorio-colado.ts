@@ -775,7 +775,8 @@ export const lerRelatorio = (textoOriginal: string): LeituraDeRelatorio => {
         for (const [rotulo, valor] of pares) {
           const k = semAcento(rotulo);
           // "DOCUMENTOS" existe nos dois relatórios: PIS e RG são da pessoa; licenciamento, do veículo.
-          if (tipo === 'documentos' && !CAMPOS_VEICULO[k]) campoDaPessoa(dossie, rotulo, valor, false);
+          // No dossiê, PIS e RG são da pessoa; no relatório do veículo, tudo é do veículo.
+          if (tipo === 'documentos' && contexto !== 'veiculo' && !CAMPOS_VEICULO[k]) campoDaPessoa(dossie, rotulo, valor, false);
           else campoDoVeiculo(rotulo, valor);
         }
         break;
@@ -897,8 +898,13 @@ export const lerRelatorio = (textoOriginal: string): LeituraDeRelatorio => {
   }
 
   // Contatos e endereços são do dossiê; sem dossiê, do proprietário do veículo.
-  const temDossie =
-    !!dossie.documento || !!dossie.nome || dossie.extras.length > 0 || dossie.parentes.length > 0 || contatos.size + enderecos.size > 0;
+  const temDossie = !!dossie.documento || !!dossie.nome || dossie.parentes.length > 0 || contatos.size + enderecos.size > 0;
+  if (!temDossie && dossie.extras.length) {
+    // Dado de pessoa sem pessoa: fica com o proprietário do veículo, ou no caso. Não vira "pessoa sem nome".
+    if (proprietario.documento || proprietario.nome) proprietario.extras.push(...dossie.extras);
+    else outros.push(...dossie.extras.map((e) => ({ ...e, entidade: 'caso' as const })));
+    dossie.extras = [];
+  }
   const donoDosContatos = temDossie ? dossie : proprietario;
   donoDosContatos.contatos = [...contatos.values()].sort(
     (a, b) => Number(b.valido) - Number(a.valido) || b.fontes.length - a.fontes.length,

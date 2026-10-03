@@ -16,6 +16,7 @@ import {
   camposNovos,
   PAPEIS_DO_DOSSIE,
   papeisDaPessoa,
+  placasEquivalentes,
   type LeituraDeRelatorio,
   type PapelDoDossie,
   type PessoaLida,
@@ -240,8 +241,9 @@ export function PreviaLeitura({ leitura, devedorDoc, papelEscolhido, aoEscolherP
   const papeis = usePapeis(leitura, devedorDoc);
   const novos = camposNovos(leitura);
   const v = leitura.veiculo;
-  const outraPlaca = !!placaDoCaso && !!v?.placa && v.placa !== placaDoCaso;
-  const radares = leitura.radares.filter((r) => !placaDoCaso || !r.placa || r.placa === placaDoCaso);
+  const outraPlaca = !!placaDoCaso && !!v?.placa && !placasEquivalentes(v.placa, placaDoCaso);
+  const outraGrafia = !!placaDoCaso && !!v?.placa && !outraPlaca && v.placa !== placaDoCaso;
+  const radares = leitura.radares.filter((r) => !placaDoCaso || !r.placa || placasEquivalentes(r.placa, placaDoCaso));
   const pontos = useMemo(
     () =>
       radares
@@ -284,6 +286,16 @@ export function PreviaLeitura({ leitura, devedorDoc, papelEscolhido, aoEscolherP
           <AlertTitle>Texto de outra placa</AlertTitle>
           <AlertDescription>
             O relatório é da placa {v?.placa}, e o caso é da {placaDoCaso}. Ele não será gravado neste caso.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {outraGrafia ? (
+        <Alert>
+          <CarFrontIcon />
+          <AlertTitle>Mesma placa, outro padrão</AlertTitle>
+          <AlertDescription>
+            {v?.placa} e {placaDoCaso} são a mesma placa (antiga e Mercosul: o segundo número vira letra). O texto será gravado neste caso.
           </AlertDescription>
         </Alert>
       ) : null}

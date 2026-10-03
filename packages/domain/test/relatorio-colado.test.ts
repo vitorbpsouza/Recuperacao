@@ -283,6 +283,25 @@ describe('peças do leitor', () => {
   });
 });
 
+describe('relatório só do veículo', () => {
+  it('não inventa uma "pessoa sem nome" com rótulos de DOCUMENTOS', () => {
+    const r = lerRelatorio(`🚗 DADOS DO VEÍCULO 🚗
+Placa: QUW5C78
+⛔ RESTRIÇÕES & INDICADORES ⛔
+Renajud: Sim
+👤 PROPRIETÁRIO 👤
+Documento: 012.345.678-90
+Nome: PESSOA FICTICIA
+📄 DOCUMENTOS 📄
+Ano Licenciamento: 2026
+CRV: 123456789
+Exercício: 2026`);
+    expect(r.pessoas).toHaveLength(1);
+    expect(r.pessoas[0]).toMatchObject({ origem: 'proprietario_do_veiculo', nome: 'PESSOA FICTICIA' });
+    expect(r.veiculo!.extras.map((e) => e.rotulo)).toEqual(expect.arrayContaining(['CRV', 'Exercício']));
+  });
+});
+
 describe('seções do veículo que o leitor não conhecia', () => {
   // Estrutura do relatório real (rótulos de 2026-10-02), com valores fictícios.
   const texto = `🚗 DADOS DO VEÍCULO 🚗

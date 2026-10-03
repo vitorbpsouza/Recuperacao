@@ -80,3 +80,27 @@ export const placaValida = (valor: string): boolean => /^[A-Z]{3}\d[A-Z0-9]\d{2}
 
 /** Chassi (VIN): 17 posições, letras e dígitos, sem I, O nem Q (ISO 3779). */
 export const chassiValido = (valor: string): boolean => /^[A-HJ-NPR-Z0-9]{17}$/.test(valor.toUpperCase().replace(/\s/g, ''));
+
+const LETRA_MERCOSUL = 'ABCDEFGHIJ';
+const semMascara = (placa: string) => placa.toUpperCase().replace(/[\s-]/g, '');
+
+/**
+ * Placa antiga no padrão Mercosul: o segundo número vira letra (0=A, 1=B …
+ * 9=J). ABC-1234 → ABC1C34. Placa já Mercosul (ou inválida) volta como está.
+ */
+export const placaMercosul = (placa: string): string => {
+  const p = semMascara(placa);
+  return /^[A-Z]{3}\d{4}$/.test(p) ? `${p.slice(0, 4)}${LETRA_MERCOSUL[Number(p[4])]}${p.slice(5)}` : p;
+};
+
+/** O caminho de volta: ABC1C34 → ABC1234. Só existe quando a letra é de A a J. */
+export const placaAntiga = (placa: string): string => {
+  const m = /^([A-Z]{3}\d)([A-J])(\d{2})$/.exec(semMascara(placa));
+  return m ? `${m[1]}${LETRA_MERCOSUL.indexOf(m[2]!)}${m[3]}` : semMascara(placa);
+};
+
+/** As grafias da mesma placa (antiga e Mercosul), para busca e comparação no banco. */
+export const formasDaPlaca = (placa: string): string[] => [...new Set([semMascara(placa), placaMercosul(placa), placaAntiga(placa)])];
+
+/** Mesma placa, antes e depois da troca para o padrão Mercosul. */
+export const placasEquivalentes = (a: string, b: string): boolean => placaMercosul(a) === placaMercosul(b);

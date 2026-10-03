@@ -12,6 +12,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowUpDownIcon, ChevronLeftIcon, ChevronRightIcon, FilterIcon, SearchIcon, XIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
+import { formasDaPlaca } from '@workspace/domain';
 import { PlacaMercosul } from '@workspace/ui/brand/placa-mercosul';
 import { PrazoBadge } from '@workspace/ui/brand/prazo-badge';
 import { StatusBadge } from '@workspace/ui/brand/status-badge';
@@ -174,7 +175,8 @@ export function TabelaCasos({ canal, casos, carregando, atualizando, vocabulario
     onSortingChange: setOrdenacao,
     globalFilterFn: (linha, _coluna, filtro: string) => {
       const c = linha.original;
-      const alvo = `${c.placa} ${c.modelo ?? ''} ${c.cidade ?? ''} ${c.status} ${c.recuperadorNome ?? ''}`.toLowerCase();
+      // Placa nas duas grafias: quem busca QUW5C78 acha o caso da QUW5278.
+      const alvo = `${formasDaPlaca(c.placa).join(' ')} ${c.modelo ?? ''} ${c.cidade ?? ''} ${c.status} ${c.recuperadorNome ?? ''}`.toLowerCase();
       return filtro
         .toLowerCase()
         .split(/\s+/)

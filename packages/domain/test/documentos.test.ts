@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
-import { cnpjValido, cpfValido, digitoCnj, formatarCnj, numeroCnjValido, tipoDePessoa } from '../src/documentos.ts';
+import {
+  cnpjValido,
+  cpfValido,
+  digitoCnj,
+  formasDaPlaca,
+  formatarCnj,
+  numeroCnjValido,
+  placaAntiga,
+  placaMercosul,
+  placasEquivalentes,
+  tipoDePessoa,
+} from '../src/documentos.ts';
 
 describe('CPF', () => {
   it('aceita com e sem máscara', () => {
@@ -63,5 +74,24 @@ describe('número CNJ', () => {
 
   it('formata 20 dígitos com a máscara', () => {
     expect(formatarCnj('00012343620268130024')).toBe('0001234-36.2026.8.13.0024');
+  });
+});
+
+describe('placa antiga × Mercosul', () => {
+  it('converte o segundo número em letra e volta', () => {
+    expect(placaMercosul('QUW-5278')).toBe('QUW5C78');
+    expect(placaMercosul('ABC1034')).toBe('ABC1A34');
+    expect(placaMercosul('ABC1934')).toBe('ABC1J34');
+    expect(placaMercosul('QUW5C78')).toBe('QUW5C78');
+    expect(placaAntiga('QUW5C78')).toBe('QUW5278');
+    // Letra depois do J não tem placa antiga correspondente.
+    expect(placaAntiga('ABC1K34')).toBe('ABC1K34');
+  });
+
+  it('reconhece a mesma placa nas duas grafias', () => {
+    expect(placasEquivalentes('QUW5278', 'QUW5C78')).toBe(true);
+    expect(placasEquivalentes('quw-5c78', 'QUW5278')).toBe(true);
+    expect(placasEquivalentes('QUW5278', 'QUW5D78')).toBe(false);
+    expect(formasDaPlaca('QUW5278').sort()).toEqual(['QUW5278', 'QUW5C78']);
   });
 });
