@@ -1,4 +1,4 @@
-import { CarIcon, CircleDotIcon, FilePlus2Icon, GavelIcon, MapPinIcon, ScaleIcon, SendIcon } from 'lucide-react';
+import { CarIcon, CircleDotIcon, ClipboardPasteIcon, FilePlus2Icon, GavelIcon, MapPinIcon, ScaleIcon, SendIcon } from 'lucide-react';
 
 import { StatusBadge } from '@workspace/ui/brand/status-badge';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@workspace/ui/components/empty';
@@ -16,6 +16,7 @@ const ICONE = {
   registro_juridico: GavelIcon,
   verificacao_veicular: CarIcon,
   avistamento: MapPinIcon,
+  relatorio_colado: ClipboardPasteIcon,
 } as const;
 
 const REGISTRO: Record<string, string> = {
@@ -50,6 +51,17 @@ const textoDe = (e: EventoCaso) => {
     case 'avistamento': {
       const { descricao } = e.dados as { descricao?: string };
       return `Veículo avistado${descricao ? `: ${descricao}` : ''}`;
+    }
+    case 'relatorio_colado': {
+      const d = e.dados as { via?: string; pessoas?: number; contatos?: number; enderecos?: number; radares?: number; camposNovos?: number };
+      const partes = [
+        d.pessoas ? `${d.pessoas} pessoa(s)` : null,
+        d.contatos ? `${d.contatos} contato(s)` : null,
+        d.enderecos ? `${d.enderecos} endereço(s)` : null,
+        d.radares ? `${d.radares} passagem(ns) de radar` : null,
+        d.camposNovos ? `${d.camposNovos} campo(s) novo(s)` : null,
+      ].filter(Boolean);
+      return `${d.via === 'integracao' ? 'Consulta por integração' : 'Relatório colado'}${partes.length ? ` · ${partes.join(', ')}` : ''}`;
     }
     default:
       return 'Status alterado';

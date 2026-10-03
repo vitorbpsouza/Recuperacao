@@ -3,6 +3,9 @@
  *
  * A fronteira continua no banco: RLS recusa cadastrar em canal que a sessão
  * não enxerga, e os triggers de fronteira tratam a colisão entre planos.
+ *
+ * Com texto colado, ele é guardado e lido na mesma transação: ou o caso nasce
+ * com tudo o que veio no texto, ou não nasce.
  */
 import { and, eq, notInArray } from 'drizzle-orm';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
@@ -11,6 +14,7 @@ import { schema } from '@workspace/db';
 import { cadastroCasoEntrada, finalidadeDe, normalizarDocumento, normalizarPlaca } from '@workspace/domain';
 
 import * as c from '../contratos.ts';
+import { ErroDeRelatorio, importarRelatorio } from '../servicos/relatorio.ts';
 
 const { ativo, caso, credor } = schema;
 
@@ -24,7 +28,7 @@ export const rotasCadastroCaso: FastifyPluginAsyncZod = async (app) => {
       schema: {
         tags: ['casos'],
         body: cadastroCasoEntrada,
-        response: { 201: c.criado, 404: c.erro, 409: c.erro },
+        response: { 201: c.criado, 404: c.erro, 409: c.erro, 422: c.erro },
       },
     },
     async (req, reply) => {
@@ -93,7 +97,13 @@ export const rotasCadastroCaso: FastifyPluginAsyncZod = async (app) => {
                 },
           )
           .returning({ id: caso.id });
+        if (corpo.relatorio) {
+          await importarRelatorio(tx, req.usuario!.id, { casoId: novoCaso!.id, ...corpo.relatorio });
+        }
         return { id: novoCaso!.id, erro: undefined, mensagem: undefined };
+      }).catch((e: unknown) => {
+        if (e instanceof ErroDeRelatorio) return { erro: e.statusCode, mensagem: e.message, id: undefined };
+        throw e;
       });
 
       if ('erro' in resultado && resultado.erro) return reply.code(resultado.erro).send({ erro: resultado.mensagem });

@@ -8,7 +8,7 @@ export interface NovoUsuario {
   email: string;
   nome: string;
   senha: string;
-  papel: 'admin' | 'operador' | 'auditor';
+  papel: 'admin' | 'gestor' | 'operador' | 'auditor';
   canais: OrigemCaso[];
 }
 

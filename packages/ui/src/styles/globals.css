@@ -162,3 +162,25 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Balão do mapa (MapLibre) na identidade escura. */
+.mapa-balao .maplibregl-popup-content {
+  background: oklch(0.208 0.042 265.755); /* slate-900 */
+  color: oklch(0.929 0.013 255.508);
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px oklch(1 0 0 / 10%), 0 10px 30px oklch(0 0 0 / 50%);
+  padding: 0.75rem 0.875rem;
+}
+.mapa-balao.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.mapa-balao.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.mapa-balao.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: oklch(0.208 0.042 265.755);
+}
+.mapa-balao.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.mapa-balao.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.mapa-balao.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: oklch(0.208 0.042 265.755);
+}
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}

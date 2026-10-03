@@ -17,7 +17,7 @@ import type { OrigemCaso } from '@workspace/domain';
 
 import { conferirSenha, gerarHash } from './senha.ts';
 
-export type Papel = 'admin' | 'operador' | 'auditor';
+export type Papel = 'admin' | 'gestor' | 'operador' | 'auditor';
 
 export interface UsuarioSessao {
   id: string;
@@ -119,9 +119,9 @@ export const revogarSessao = async (db: Db, token: string): Promise<void> => {
   await consultar(db, sql`select auth_revogar_sessao(${hashToken(token)})`);
 };
 
-/** Canais que o usuário pode ver. admin e auditor veem os dois. */
+/** Canais que o usuário pode ver. admin, gestor e auditor veem os dois. */
 export const canaisVisiveis = (u: Pick<UsuarioSessao, 'papel' | 'canais'>): OrigemCaso[] =>
-  u.papel === 'admin' || u.papel === 'auditor' ? ['plataforma_credor', 'lead_proprio'] : u.canais;
+  u.papel === 'admin' || u.papel === 'gestor' || u.papel === 'auditor' ? ['plataforma_credor', 'lead_proprio'] : u.canais;
 
 /**
  * Token CSRF derivado da sessão.

@@ -4,4 +4,4 @@ export * from './fluxos.ts';
 export * from './kpis.ts';
 export * from './prazos.ts';
 export * from './schemas.ts';
-export * from './relatorio-veicular.ts';
+export * from './relatorio-colado.ts';

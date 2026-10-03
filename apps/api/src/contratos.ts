@@ -272,6 +272,20 @@ export const casoDetalhe = caso.extend({
     valorFipe: z.number().nullable(),
     fipeCodigo: z.string().nullable(),
     fipeReferencia: z.string().nullable(),
+    marca: z.string().nullable(),
+    situacao: z.string().nullable(),
+    tipo: z.string().nullable(),
+    especie: z.string().nullable(),
+    categoria: z.string().nullable(),
+    carroceria: z.string().nullable(),
+    combustivel: z.string().nullable(),
+    potencia: z.string().nullable(),
+    cilindradas: z.string().nullable(),
+    motor: z.string().nullable(),
+    procedencia: z.string().nullable(),
+    municipioEmplacamento: z.string().nullable(),
+    ufEmplacamento: z.string().nullable(),
+    anoFabricacao: z.number().int().nullable(),
   }),
   fonte: z.object({
     nome: z.string(),
@@ -282,7 +296,16 @@ export const casoDetalhe = caso.extend({
 
 export const eventoCaso = z.object({
   id: z.number().int(),
-  tipo: z.enum(['criado', 'status_alterado', 'distribuido', 'rito_definido', 'registro_juridico', 'verificacao_veicular', 'avistamento']),
+  tipo: z.enum([
+    'criado',
+    'status_alterado',
+    'distribuido',
+    'rito_definido',
+    'registro_juridico',
+    'verificacao_veicular',
+    'avistamento',
+    'relatorio_colado',
+  ]),
   statusDe: z.string().nullable(),
   statusPara: z.string().nullable(),
   usuarioNome: z.string().nullable(),
@@ -447,9 +470,10 @@ export const valorFipe = z.object({
 
 export const verificacaoVeicular = z.object({
   id: z.number(),
-  fornecedor: z.string(),
-  baseLegal: z.string(),
-  justificativa: z.string(),
+  /** Sem fornecedor: veio de texto colado sem consulta registrada. */
+  fornecedor: z.string().nullable(),
+  baseLegal: z.string().nullable(),
+  justificativa: z.string().nullable(),
   situacao: z.string().nullable(),
   restricoes: z.array(z.string()),
   renajud: z.boolean().nullable(),
@@ -468,8 +492,317 @@ export const avistamento = z.object({
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
   descricao: z.string(),
-  fonte: z.enum(['equipe_campo', 'credor', 'devedor', 'outro']),
+  fonte: z.enum(['equipe_campo', 'credor', 'devedor', 'outro', 'radar']),
   usuarioNome: z.string().nullable(),
 });
 
 registrar({ ValorFipe: valorFipe, VerificacaoVeicular: verificacaoVeicular, Avistamento: avistamento });
+
+// ---------------------------------------------------------------------------
+// Texto colado, pessoas e campos novos
+// ---------------------------------------------------------------------------
+
+const papelPessoa = z.enum(['devedor', 'proprietario', 'terceiro_possuidor', 'parente', 'avalista', 'outro']);
+
+export const resumoImportacao = z.object({
+  relatorioId: z.number().int(),
+  veiculo: z.object({ campos: z.array(z.string()), restricoes: z.number().int() }).nullable(),
+  pessoas: z.array(z.object({ id: z.string(), nome: z.string().nullable(), papeis: z.array(papelPessoa) })),
+  contatos: z.number().int(),
+  enderecos: z.number().int(),
+  parentes: z.number().int(),
+  radares: z.number().int(),
+  extras: z.number().int(),
+  novos: z.array(z.object({ secao: z.string(), rotulo: z.string() })),
+  avisos: z.array(z.string()),
+});
+
+export const relatorioColado = z.object({
+  id: z.number().int(),
+  via: z.enum(['colado', 'integracao']),
+  secoes: z.array(z.string()),
+  resumo: z.record(z.string(), z.unknown()),
+  fornecedor: z.string().nullable(),
+  usuarioNome: z.string().nullable(),
+  coladoEm: z.coerce.date(),
+  tamanho: z.number().int(),
+});
+
+export const dadoExtra = z.object({
+  id: z.number().int(),
+  entidade: z.enum(['veiculo', 'pessoa', 'caso']),
+  pessoaId: z.string().nullable(),
+  secao: z.string(),
+  chave: z.string(),
+  rotulo: z.string(),
+  valor: z.string(),
+  sensivel: z.boolean(),
+  novo: z.boolean(),
+  promovidoEm: z.coerce.date().nullable(),
+  criadoEm: z.coerce.date(),
+});
+
+export const pessoasDoCaso = z.object({
+  /** O que muda a diligência: proprietário ≠ devedor, óbito. */
+  alertas: z.array(z.string()),
+  pessoas: z.array(
+    z.object({
+      id: z.string(),
+      papel: papelPessoa,
+      vinculo: z.string().nullable(),
+      iniciais: z.string().nullable(),
+      documentoMascarado: z.string().nullable(),
+      tipoPessoa: z.enum(['PF', 'PJ']).nullable(),
+      obito: z.boolean().nullable(),
+      contatos: z.number().int(),
+      enderecos: z.number().int(),
+    }),
+  ),
+});
+
+export const fonteContato = z.object({
+  fonte: z.string(),
+  data: z.string().optional(),
+  ranking: z.number().optional(),
+  titular: z.string().optional(),
+});
+
+export const contatoPessoa = z.object({
+  id: z.number().int(),
+  tipo: z.enum(['celular', 'fixo', 'email', 'invalido']),
+  valor: z.string(),
+  original: z.string().nullable(),
+  valido: z.boolean(),
+  whatsapp: z.boolean().nullable(),
+  whatsappConferidoEm: z.coerce.date().nullable(),
+  fontes: z.array(fonteContato),
+});
+
+export const enderecoPessoa = z.object({
+  id: z.number().int(),
+  logradouro: z.string(),
+  numero: z.string().nullable(),
+  complemento: z.string().nullable(),
+  bairro: z.string().nullable(),
+  cidade: z.string().nullable(),
+  uf: z.string().nullable(),
+  cep: z.string().nullable(),
+  variantes: z.array(z.string()),
+  fontes: z.array(z.string()),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+});
+
+export const pessoaRevelada = z.object({
+  id: z.string(),
+  papel: papelPessoa,
+  vinculo: z.string().nullable(),
+  parenteDe: z.string().nullable(),
+  documento: z.string().nullable(),
+  tipoPessoa: z.enum(['PF', 'PJ']).nullable(),
+  nome: z.string().nullable(),
+  nomeCivil: z.string().nullable(),
+  nomeMae: z.string().nullable(),
+  nomePai: z.string().nullable(),
+  nascimento: z.string().nullable(),
+  sexo: z.string().nullable(),
+  estadoCivil: z.string().nullable(),
+  rg: z.string().nullable(),
+  rgOrgao: z.string().nullable(),
+  rgUf: z.string().nullable(),
+  tituloEleitor: z.string().nullable(),
+  profissao: z.string().nullable(),
+  nacionalidade: z.string().nullable(),
+  situacaoCadastral: z.string().nullable(),
+  obito: z.boolean().nullable(),
+  atualizadoEm: z.coerce.date(),
+  contatos: z.array(contatoPessoa),
+  enderecos: z.array(enderecoPessoa),
+  extras: z.array(dadoExtra),
+});
+
+export const pessoasReveladas = z.object({
+  alertas: z.array(z.string()),
+  /** Perfil, crédito e parentes vieram junto (admin e gestor). */
+  sensivelLiberado: z.boolean(),
+  pessoas: z.array(pessoaRevelada),
+});
+
+export const campoNovo = z.object({
+  entidade: z.enum(['veiculo', 'pessoa', 'caso']),
+  secao: z.string(),
+  chave: z.string(),
+  rotulo: z.string(),
+  ocorrencias: z.number().int(),
+  casos: z.number().int(),
+  /** Último valor visto; nulo quando o campo é sensível. */
+  exemplo: z.string().nullable(),
+  primeiraVez: z.coerce.date(),
+  ultimaVez: z.coerce.date(),
+});
+
+registrar({
+  ResumoImportacao: resumoImportacao,
+  RelatorioColado: relatorioColado,
+  DadoExtra: dadoExtra,
+  PessoasDoCaso: pessoasDoCaso,
+  FonteContato: fonteContato,
+  ContatoPessoa: contatoPessoa,
+  EnderecoPessoa: enderecoPessoa,
+  PessoaRevelada: pessoaRevelada,
+  PessoasReveladas: pessoasReveladas,
+  CampoNovo: campoNovo,
+});
+
+// ---------------------------------------------------------------------------
+// Integrações e conversas
+// ---------------------------------------------------------------------------
+
+/** Conexão sem credencial: só o final dela, para reconhecer qual está em uso. */
+export const integracao = z.object({
+  id: z.string(),
+  tipo: z.enum(['apibrasil', 'evolution']),
+  nome: z.string(),
+  baseUrl: z.string(),
+  config: z.object({ instancia: z.string().optional(), servico: z.enum(['dados', 'consulta']).optional() }),
+  bureauId: z.string().nullable(),
+  bureauNome: z.string().nullable(),
+  custoConsulta: z.number().nullable(),
+  contrato: z.string().nullable(),
+  ativo: z.boolean(),
+  credenciaisFinal: z.string(),
+  webhookConfigurado: z.boolean(),
+  ultimoTesteEm: z.coerce.date().nullable(),
+  ultimoTesteOk: z.boolean().nullable(),
+  ultimoTesteDetalhe: z.string().nullable(),
+  criadoEm: z.coerce.date(),
+});
+
+export const integracaoCriada = z.object({
+  id: z.string(),
+  /** Evolution: aparece uma vez só (o banco guarda o hash do token). */
+  webhookUrl: z.string().nullable(),
+});
+
+export const testeIntegracao = z.object({ ok: z.boolean(), detalhe: z.string() });
+
+export const webhookConfigurado = z.object({ url: z.string(), configuradoNaEvolution: z.boolean(), detalhe: z.string() });
+
+export const conversa = z.object({
+  numero: z.string(),
+  nome: z.string().nullable(),
+  recuperadorId: z.string().nullable(),
+  recuperadorNome: z.string().nullable(),
+  ultimaMensagem: z.string(),
+  ultimaDirecao: z.enum(['enviada', 'recebida']),
+  ultimaEm: z.coerce.date(),
+  total: z.number().int(),
+});
+
+export const mensagem = z.object({
+  id: z.number().int(),
+  direcao: z.enum(['enviada', 'recebida']),
+  texto: z.string(),
+  casoId: z.string().nullable(),
+  placa: z.string().nullable(),
+  usuarioNome: z.string().nullable(),
+  criadoEm: z.coerce.date(),
+});
+
+registrar({
+  Integracao: integracao,
+  IntegracaoCriada: integracaoCriada,
+  TesteIntegracao: testeIntegracao,
+  WebhookConfigurado: webhookConfigurado,
+  Conversa: conversa,
+  Mensagem: mensagem,
+});
+
+// ---------------------------------------------------------------------------
+// Painel executivo (Plano A)
+// ---------------------------------------------------------------------------
+
+export const pontoMapa = z.object({
+  casoId: z.string(),
+  placa: z.string(),
+  modelo: z.string().nullable(),
+  status: z.string(),
+  latitude: z.number(),
+  longitude: z.number(),
+  observadoEm: z.coerce.date(),
+  fonte: z.string(),
+  descricao: z.string(),
+});
+
+export const ativoMaisVisto = z.object({
+  casoId: z.string(),
+  placa: z.string(),
+  modelo: z.string().nullable(),
+  status: z.string(),
+  avistamentos: z.number().int(),
+  locais: z.number().int(),
+  ultimoEm: z.coerce.date(),
+});
+
+export const contagemCidade = z.object({
+  cidade: z.string(),
+  uf: z.string().nullable(),
+  total: z.number().int(),
+  retomados: z.number().int(),
+  emCampo: z.number().int(),
+});
+
+export const contagemCredor = z.object({
+  credor: z.string(),
+  total: z.number().int(),
+  retomados: z.number().int(),
+  valorDivida: z.number().nullable(),
+});
+
+export const desempenhoRecuperador = z.object({
+  id: z.string(),
+  nome: z.string(),
+  status: z.string(),
+  cidades: z.array(z.string()),
+  casos: z.number().int(),
+  retomados: z.number().int(),
+  emCampo: z.number().int(),
+  semExito: z.number().int(),
+});
+
+export const alertaCaso = z.object({
+  casoId: z.string(),
+  placa: z.string(),
+  modelo: z.string().nullable(),
+  status: z.string(),
+  tipo: z.enum(['prazo_vencido', 'prazo_48h', 'aceite_vencido', 'parado', 'proprietario_diferente']),
+  motivo: z.string(),
+  desde: z.coerce.date().nullable(),
+});
+
+export const pontoEvolucao = z.object({ mes: z.string(), recebidos: z.number().int(), retomados: z.number().int() });
+
+export const painelRecuperacao = z.object({
+  valorDivida: z.number().nullable(),
+  fipeCarteira: z.number().nullable(),
+  fipeRetomados: z.number().nullable(),
+  status: z.array(z.object({ status: z.string(), quantidade: z.number().int() })),
+  mapa: z.array(pontoMapa),
+  maisVistos: z.array(ativoMaisVisto),
+  porCidade: z.array(contagemCidade),
+  porCredor: z.array(contagemCredor),
+  recuperadores: z.array(desempenhoRecuperador),
+  alertas: z.array(alertaCaso),
+  evolucao: z.array(pontoEvolucao),
+});
+
+registrar({
+  PontoMapa: pontoMapa,
+  AtivoMaisVisto: ativoMaisVisto,
+  ContagemCidade: contagemCidade,
+  ContagemCredor: contagemCredor,
+  DesempenhoRecuperador: desempenhoRecuperador,
+  AlertaCaso: alertaCaso,
+  PontoEvolucao: pontoEvolucao,
+  PainelRecuperacao: painelRecuperacao,
+});

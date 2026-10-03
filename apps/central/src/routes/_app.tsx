@@ -37,8 +37,9 @@ function LayoutAutenticado() {
       <AppSidebar sessao={sessao} canal={canal} />
       <SidebarInset className="min-w-0">
         <AppHeader sessao={sessao} canal={canal} aoBuscar={() => setBuscaAberta(true)} />
-        <div className="custom-scrollbar flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="mx-auto w-full max-w-7xl">
+        {/* Tela cheia: a operação trabalha com mapa, tabela e ficha lado a lado. */}
+        <div className="custom-scrollbar flex-1 overflow-y-auto p-4 md:p-6 2xl:p-8">
+          <div className="mx-auto w-full max-w-[2200px]">
             <Outlet />
           </div>
         </div>

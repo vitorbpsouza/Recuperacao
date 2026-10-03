@@ -58,6 +58,19 @@ export type AcaoCaso = Esquemas['AcaoCaso'];
 export type Credor = Esquemas['Credor'];
 export type VerificacaoVeicular = Esquemas['VerificacaoVeicular'];
 export type Avistamento = Esquemas['Avistamento'];
+export type ResumoImportacao = Esquemas['ResumoImportacao'];
+export type RelatorioColado = Esquemas['RelatorioColado'];
+export type DadoExtra = Esquemas['DadoExtra'];
+export type PessoasDoCaso = Esquemas['PessoasDoCaso'];
+export type PessoaRevelada = Esquemas['PessoaRevelada'];
+export type ContatoPessoa = Esquemas['ContatoPessoa'];
+export type EnderecoPessoa = Esquemas['EnderecoPessoa'];
+export type CampoNovo = Esquemas['CampoNovo'];
+export type Integracao = Esquemas['Integracao'];
+export type Conversa = Esquemas['Conversa'];
+export type Mensagem = Esquemas['Mensagem'];
+export type PainelRecuperacao = Esquemas['PainelRecuperacao'];
+export type AlertaCaso = Esquemas['AlertaCaso'];
 
 export const casoQuery = (id: string) =>
   queryOptions({
@@ -109,6 +122,52 @@ export const avistamentosQuery = (id: string) =>
     queryFn: () => exigir(api.GET('/api/casos/{id}/avistamentos', { params: { path: { id } } })),
   });
 
+export const relatoriosColadosQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'relatorios'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/relatorios', { params: { path: { id } } })),
+  });
+
+export const dadosExtrasQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'dados-extras'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/dados-extras', { params: { path: { id } } })),
+  });
+
+export const pessoasQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['caso', id, 'pessoas'],
+    queryFn: () => exigir(api.GET('/api/casos/{id}/pessoas', { params: { path: { id } } })),
+  });
+
+export const camposNovosQuery = queryOptions({
+  queryKey: ['campos-novos'],
+  queryFn: () => exigir(api.GET('/api/campos-novos')),
+});
+
+export const integracoesQuery = queryOptions({
+  queryKey: ['integracoes'],
+  queryFn: () => exigir(api.GET('/api/integracoes')),
+});
+
+export const conversasQuery = queryOptions({
+  queryKey: ['conversas'],
+  queryFn: () => exigir(api.GET('/api/conversas')),
+  refetchInterval: 15_000,
+});
+
+export const mensagensQuery = (numero: string) =>
+  queryOptions({
+    queryKey: ['conversas', numero],
+    queryFn: () => exigir(api.GET('/api/conversas/{numero}', { params: { path: { numero } } })),
+    refetchInterval: 10_000,
+  });
+
+export const painelRecuperacaoQuery = queryOptions({
+  queryKey: ['painel', 'recuperacao'],
+  queryFn: () => exigir(api.GET('/api/painel/recuperacao')),
+});
+
 export const credoresQuery = queryOptions({
   queryKey: ['credores'],
   queryFn: () => exigir(api.GET('/api/credores')),
@@ -157,7 +216,10 @@ export const usuariosQuery = queryOptions({
 /** Quem enxerga o quê, na tela, com a mesma regra da API (que de todo modo recusaria). */
 export const pode = {
   administrar: (s: UsuarioSessao) => s.papel === 'admin',
-  auditar: (s: UsuarioSessao) => s.papel === 'admin' || s.papel === 'auditor',
+  /** Perfil, crédito, parentes e o texto original colado. */
+  verSensivel: (s: UsuarioSessao) => s.papel === 'admin' || s.papel === 'gestor',
+  gerir: (s: UsuarioSessao) => s.papel === 'admin' || s.papel === 'gestor',
+  auditar: (s: UsuarioSessao) => s.papel === 'admin' || s.papel === 'gestor' || s.papel === 'auditor',
   escrever: (s: UsuarioSessao) => s.papel !== 'auditor',
   verPlanoA: (s: UsuarioSessao) => s.canaisVisiveis.includes('plataforma_credor'),
 };

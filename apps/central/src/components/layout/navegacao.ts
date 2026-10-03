@@ -1,5 +1,8 @@
 import {
+  CableIcon,
   CarFrontIcon,
+  MessagesSquareIcon,
+  SparklesIcon,
   DatabaseIcon,
   FileSpreadsheetIcon,
   GitMergeIcon,
@@ -35,6 +38,7 @@ export const NAVEGACAO_DO_CANAL: Record<Canal, ItemNavegacao[]> = {
     { titulo: 'Painel', icone: LayoutDashboardIcon, para: '/a', exato: true },
     { titulo: 'Casos', icone: CarFrontIcon, para: '/a/casos' },
     { titulo: 'Distribuição', icone: SendIcon, para: '/a/distribuicao' },
+    { titulo: 'Operação', icone: MessagesSquareIcon, para: '/a/operacao' },
     { titulo: 'Rede de campo', icone: UsersIcon, para: '/a/rede' },
     { titulo: 'Repasses', icone: WalletIcon, para: '/a/repasses' },
   ],
@@ -49,6 +53,8 @@ export const NAVEGACAO_GESTAO: ItemNavegacao[] = [
   { titulo: 'Dados & Bureaus', icone: DatabaseIcon, para: '/gestao/dados' },
   { titulo: 'Fontes e credores', icone: InboxIcon, para: '/gestao/fontes' },
   { titulo: 'Relatórios', icone: FileSpreadsheetIcon, para: '/gestao/relatorios' },
+  { titulo: 'Integrações', icone: CableIcon, para: '/gestao/integracoes', visivel: pode.gerir },
+  { titulo: 'Campos novos', icone: SparklesIcon, para: '/gestao/campos-novos', visivel: pode.auditar },
   { titulo: 'Colisões', icone: GitMergeIcon, para: '/gestao/colisoes', visivel: pode.auditar },
   { titulo: 'Usuários', icone: UserCogIcon, para: '/gestao/usuarios', visivel: pode.administrar },
 ];

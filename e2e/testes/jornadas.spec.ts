@@ -23,9 +23,9 @@ test.describe('sem sessão', () => {
 test('admin entra no painel do Plano A com dado real', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/a$/);
-  await expect(page.getByRole('heading', { name: 'Painel · Recuperação' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Painel executivo · Recuperação' })).toBeVisible();
   // Seed: quatro casos no Plano A.
-  await expect(page.getByText('Na carteira').locator('xpath=ancestor::*[@data-slot="card"]')).toContainText('4');
+  await expect(page.getByText('Na carteira', { exact: true }).locator('xpath=ancestor::*[@data-slot="card"]')).toContainText('4');
 });
 
 test('ficha do caso: dado pessoal só com finalidade, e o acesso fica registrado', async ({ page }) => {
@@ -34,7 +34,7 @@ test('ficha do caso: dado pessoal só com finalidade, e o acesso fica registrado
   await expect(page.getByRole('heading', { name: 'FIAT/ARGO DRIVE' })).toBeVisible();
   await expect(page.getByText('Devedor Sintético Um')).toHaveCount(0);
 
-  await page.getByRole('tab', { name: 'Devedor' }).click();
+  await page.getByRole('tab', { name: 'Pessoas' }).click();
   await page.getByRole('button', { name: 'Revelar dados' }).click();
   await page.getByLabel('Finalidade').fill('curto');
   await page.getByRole('button', { name: 'Revelar e registrar' }).click();
@@ -71,7 +71,7 @@ test('Plano B mostra as pendências jurídicas da transferência', async ({ page
 test('busca global abre a ficha pela placa', async ({ page }) => {
   await page.goto('/a');
   // O atalho é registrado quando o layout monta: esperar a tela, não só a URL.
-  await expect(page.getByRole('heading', { name: 'Painel · Recuperação' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Painel executivo · Recuperação' })).toBeVisible();
   await page.keyboard.press('Control+k');
   await page.getByPlaceholder('Placa, modelo, cidade ou tela…').fill('corolla');
   await page.getByRole('option', { name: /COROLLA/ }).click();
@@ -93,70 +93,80 @@ test('Plano A: retomada pelo painel de próximos passos, e a entrega espera a pu
   await expect(page.getByText(/o devedor ainda pode purgar a mora até/)).toBeVisible();
 });
 
-test('cadastra um bem colando os dados do veículo e criando o credor na hora', async ({ page }) => {
+test('cadastra um caso em tela cheia colando o relatório: tudo vai junto', async ({ page }) => {
   await page.goto('/a/casos');
-  await page.getByRole('button', { name: 'Novo caso' }).click();
-  const dialogo = page.getByRole('dialog');
+  await page.getByRole('link', { name: 'Novo caso' }).click();
+  await expect(page.getByRole('heading', { name: 'Novo caso de recuperação' })).toBeVisible();
 
   // Sem nada preenchido: mensagens em português, nos campos certos.
-  await dialogo.getByRole('button', { name: 'Cadastrar' }).click();
-  await expect(dialogo.getByText('informe a placa')).toBeVisible();
-  await expect(dialogo.getByText('informe o modelo')).toBeVisible();
+  await page.getByRole('button', { name: 'Cadastrar caso' }).click();
+  await expect(page.getByText('informe a placa')).toBeVisible();
+  await expect(page.getByText('informe o modelo')).toBeVisible();
 
-  // A fonte do plano já vem escolhida; os dados do veículo vêm do relatório colado.
-  await expect(dialogo.getByText('Carteira do credor')).toBeVisible();
-  await dialogo.getByLabel('Colar dados do veículo').fill(
+  // A fonte do plano já vem escolhida; o relatório preenche o veículo e a prévia mostra o resto.
+  await expect(page.getByText('Carteira do credor', { exact: true })).toBeVisible();
+  await page.getByLabel('Texto do relatório').fill(
     [
+      '🚗 DADOS DO VEÍCULO 🚗',
       'Placa: RCE4F56',
       'Chassi: 9BWZZZ377VT004251',
       'Renavam: 01234567890',
       'Modelo: CHEVROLET/ONIX LT',
+      'Tipo: AUTOMOVEL',
       'Cor: PRATA',
       'Ano Fab/Mod: 2020 / 2021',
+      'Capacidade de Carga: 0,45',
+      '👤 PROPRIETÁRIO 👤',
+      'Documento: 529.982.247-25',
       'Nome: PESSOA FICTICIA',
     ].join('\n'),
   );
-  await expect(dialogo.getByLabel('Placa')).toHaveValue('RCE4F56');
-  await expect(dialogo.getByLabel('Renavam')).toHaveValue('01234567890');
-  await expect(dialogo.getByText(/Descartado: dados do proprietário/)).toBeVisible();
+  await expect(page.getByLabel('Placa')).toHaveValue('RCE4F56');
+  await expect(page.getByLabel('Renavam')).toHaveValue('01234567890');
+  await expect(page.getByText('PESSOA FICTICIA', { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Campos novos' })).toBeVisible();
 
-  await dialogo.getByRole('combobox').first().click();
+  await page.getByRole('combobox').nth(0).click();
   await page.getByRole('option', { name: '+ Cadastrar novo credor' }).click();
-  await dialogo.getByLabel('Nome do credor').fill('Banco Teste E2E S.A.');
-  await dialogo.getByLabel('CPF ou CNPJ').fill('529.982.247-25');
-  await dialogo.getByRole('button', { name: 'Cadastrar' }).click();
+  await page.getByLabel('Nome do credor').fill('Banco Teste E2E S.A.');
+  await page.getByRole('button', { name: 'Cadastrar caso' }).click();
 
   await expect(page.getByRole('heading', { name: 'CHEVROLET/ONIX LT' })).toBeVisible();
   await expect(page).toHaveURL(/\/a\/casos\/.+/);
+  await page.getByRole('tab', { name: 'Veículo' }).click();
+  await expect(page.getByText('AUTOMOVEL')).toBeVisible();
+  await expect(page.getByText('Capacidade de Carga')).toBeVisible();
 });
 
-test('relatório do fornecedor: guarda o veículo e descarta dono e radar', async ({ page }) => {
+test('colar na ficha: guarda proprietário e radar, que vira ponto no mapa', async ({ page }) => {
   await page.goto('/a/casos/caso-a-002');
-  await page.getByRole('tab', { name: 'Veículo' }).click();
-  await page.getByRole('button', { name: 'Colar relatório' }).click();
+  await page.getByRole('button', { name: 'Colar dados' }).click();
   const dialogo = page.getByRole('dialog');
-  await dialogo.getByLabel('Relatório').fill(
+  await dialogo.getByLabel('Texto do relatório').fill(
     [
-      'DATA - HORA: 01/10/2026:10:00, PLACA: SEED002, LOCAL: RUA FICTICIA, LATITUDE: -23.5, LONGITUDE: -46.6',
+      '--- RADAR (SEED002): ---',
+      'DATA - HORA: 01/10/2026:10:00, PLACA: SEED002, LOCAL: SP - SAO PAULO - RUA FICTICIA 100, LATITUDE: -23.5, LONGITUDE: -46.6',
+      '----------------------------------',
+      '🚗 DADOS DO VEÍCULO 🚗',
       'Placa: SEED002',
-      'Renavam: 01234567890',
       'Situação: EM_CIRCULACAO',
-      'Documento: 00000000000',
-      'Nome: PESSOA FICTICIA',
+      '⛔ RESTRIÇÕES & INDICADORES ⛔',
       'Restrição 1: RENAJUD',
       'Renajud: Sim',
-      'Roubo/Furto: Não',
+      '👤 PROPRIETÁRIO 👤',
+      'Documento: 529.982.247-25',
+      'Nome: PESSOA FICTICIA',
     ].join('\n'),
   );
-  await expect(dialogo.getByText(/Descartado: .*dados do proprietário/)).toBeVisible();
-  await expect(dialogo.getByText('PESSOA FICTICIA', { exact: true })).toHaveCount(0);
+  await expect(dialogo.getByText('Passagens por radar')).toBeVisible();
+  await expect(dialogo.getByText('PESSOA FICTICIA', { exact: true }).first()).toBeVisible();
+  await dialogo.getByRole('button', { name: 'Gravar no caso' }).click();
+  await expect(page.getByText('Tudo guardado no caso.')).toBeVisible();
 
-  await dialogo.getByRole('combobox').first().click();
-  await page.getByRole('option', { name: 'B3 / SNG (Gravames)' }).click();
-  await dialogo.getByLabel('Por que esta consulta').fill('conferir restrições antes da abordagem em campo');
-  await dialogo.getByRole('button', { name: 'Registrar verificação' }).click();
-  await expect(page.getByText('Verificação registrada na trilha de auditoria.')).toBeVisible();
-  await expect(page.getByText('01234567890')).toBeVisible();
+  await page.getByRole('tab', { name: 'Avistamentos' }).click();
+  await expect(page.getByText('SP - SAO PAULO - RUA FICTICIA 100')).toBeVisible();
+  await page.getByRole('tab', { name: 'Pessoas' }).click();
+  await expect(page.getByText('Proprietário atual')).toBeVisible();
 });
 
 test('avistamento fica registrado com autor e hora', async ({ page }) => {

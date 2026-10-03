@@ -18,19 +18,24 @@ import { Route as AppGestaoRouteImport } from './routes/_app/gestao'
 import { Route as AppAIndexRouteImport } from './routes/_app/a/index'
 import { Route as AppACasosRouteImport } from './routes/_app/a/casos'
 import { Route as AppADistribuicaoRouteImport } from './routes/_app/a/distribuicao'
+import { Route as AppAOperacaoRouteImport } from './routes/_app/a/operacao'
 import { Route as AppARedeRouteImport } from './routes/_app/a/rede'
 import { Route as AppARepassesRouteImport } from './routes/_app/a/repasses'
 import { Route as AppBIndexRouteImport } from './routes/_app/b/index'
 import { Route as AppBCasosRouteImport } from './routes/_app/b/casos'
+import { Route as AppGestaoCamposNovosRouteImport } from './routes/_app/gestao/campos-novos'
 import { Route as AppGestaoColisoesRouteImport } from './routes/_app/gestao/colisoes'
 import { Route as AppGestaoDadosRouteImport } from './routes/_app/gestao/dados'
 import { Route as AppGestaoFontesRouteImport } from './routes/_app/gestao/fontes'
+import { Route as AppGestaoIntegracoesRouteImport } from './routes/_app/gestao/integracoes'
 import { Route as AppGestaoRelatoriosRouteImport } from './routes/_app/gestao/relatorios'
 import { Route as AppGestaoUsuariosRouteImport } from './routes/_app/gestao/usuarios'
 import { Route as AppACasosIndexRouteImport } from './routes/_app/a/casos/index'
 import { Route as AppACasosCasoIdRouteImport } from './routes/_app/a/casos/$casoId'
+import { Route as AppACasosNovoRouteImport } from './routes/_app/a/casos/novo'
 import { Route as AppBCasosIndexRouteImport } from './routes/_app/b/casos/index'
 import { Route as AppBCasosCasoIdRouteImport } from './routes/_app/b/casos/$casoId'
+import { Route as AppBCasosNovoRouteImport } from './routes/_app/b/casos/novo'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -76,6 +81,11 @@ const AppADistribuicaoRoute = AppADistribuicaoRouteImport.update({
   path: '/distribuicao',
   getParentRoute: () => AppARoute,
 } as any)
+const AppAOperacaoRoute = AppAOperacaoRouteImport.update({
+  id: '/operacao',
+  path: '/operacao',
+  getParentRoute: () => AppARoute,
+} as any)
 const AppARedeRoute = AppARedeRouteImport.update({
   id: '/rede',
   path: '/rede',
@@ -96,6 +106,11 @@ const AppBCasosRoute = AppBCasosRouteImport.update({
   path: '/casos',
   getParentRoute: () => AppBRoute,
 } as any)
+const AppGestaoCamposNovosRoute = AppGestaoCamposNovosRouteImport.update({
+  id: '/campos-novos',
+  path: '/campos-novos',
+  getParentRoute: () => AppGestaoRoute,
+} as any)
 const AppGestaoColisoesRoute = AppGestaoColisoesRouteImport.update({
   id: '/colisoes',
   path: '/colisoes',
@@ -109,6 +124,11 @@ const AppGestaoDadosRoute = AppGestaoDadosRouteImport.update({
 const AppGestaoFontesRoute = AppGestaoFontesRouteImport.update({
   id: '/fontes',
   path: '/fontes',
+  getParentRoute: () => AppGestaoRoute,
+} as any)
+const AppGestaoIntegracoesRoute = AppGestaoIntegracoesRouteImport.update({
+  id: '/integracoes',
+  path: '/integracoes',
   getParentRoute: () => AppGestaoRoute,
 } as any)
 const AppGestaoRelatoriosRoute = AppGestaoRelatoriosRouteImport.update({
@@ -131,6 +151,11 @@ const AppACasosCasoIdRoute = AppACasosCasoIdRouteImport.update({
   path: '/$casoId',
   getParentRoute: () => AppACasosRoute,
 } as any)
+const AppACasosNovoRoute = AppACasosNovoRouteImport.update({
+  id: '/novo',
+  path: '/novo',
+  getParentRoute: () => AppACasosRoute,
+} as any)
 const AppBCasosIndexRoute = AppBCasosIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -139,6 +164,11 @@ const AppBCasosIndexRoute = AppBCasosIndexRouteImport.update({
 const AppBCasosCasoIdRoute = AppBCasosCasoIdRouteImport.update({
   id: '/$casoId',
   path: '/$casoId',
+  getParentRoute: () => AppBCasosRoute,
+} as any)
+const AppBCasosNovoRoute = AppBCasosNovoRouteImport.update({
+  id: '/novo',
+  path: '/novo',
   getParentRoute: () => AppBCasosRoute,
 } as any)
 
@@ -150,18 +180,23 @@ export interface FileRoutesByFullPath {
   '/gestao': typeof AppGestaoRouteWithChildren
   '/a/casos': typeof AppACasosRouteWithChildren
   '/a/distribuicao': typeof AppADistribuicaoRoute
+  '/a/operacao': typeof AppAOperacaoRoute
   '/a/rede': typeof AppARedeRoute
   '/a/repasses': typeof AppARepassesRoute
   '/b/casos': typeof AppBCasosRouteWithChildren
+  '/gestao/campos-novos': typeof AppGestaoCamposNovosRoute
   '/gestao/colisoes': typeof AppGestaoColisoesRoute
   '/gestao/dados': typeof AppGestaoDadosRoute
   '/gestao/fontes': typeof AppGestaoFontesRoute
+  '/gestao/integracoes': typeof AppGestaoIntegracoesRoute
   '/gestao/relatorios': typeof AppGestaoRelatoriosRoute
   '/gestao/usuarios': typeof AppGestaoUsuariosRoute
   '/a/': typeof AppAIndexRoute
   '/b/': typeof AppBIndexRoute
   '/a/casos/$casoId': typeof AppACasosCasoIdRoute
+  '/a/casos/novo': typeof AppACasosNovoRoute
   '/b/casos/$casoId': typeof AppBCasosCasoIdRoute
+  '/b/casos/novo': typeof AppBCasosNovoRoute
   '/a/casos/': typeof AppACasosIndexRoute
   '/b/casos/': typeof AppBCasosIndexRoute
 }
@@ -170,17 +205,22 @@ export interface FileRoutesByTo {
   '/gestao': typeof AppGestaoRouteWithChildren
   '/': typeof AppIndexRoute
   '/a/distribuicao': typeof AppADistribuicaoRoute
+  '/a/operacao': typeof AppAOperacaoRoute
   '/a/rede': typeof AppARedeRoute
   '/a/repasses': typeof AppARepassesRoute
+  '/gestao/campos-novos': typeof AppGestaoCamposNovosRoute
   '/gestao/colisoes': typeof AppGestaoColisoesRoute
   '/gestao/dados': typeof AppGestaoDadosRoute
   '/gestao/fontes': typeof AppGestaoFontesRoute
+  '/gestao/integracoes': typeof AppGestaoIntegracoesRoute
   '/gestao/relatorios': typeof AppGestaoRelatoriosRoute
   '/gestao/usuarios': typeof AppGestaoUsuariosRoute
   '/a': typeof AppAIndexRoute
   '/b': typeof AppBIndexRoute
   '/a/casos/$casoId': typeof AppACasosCasoIdRoute
+  '/a/casos/novo': typeof AppACasosNovoRoute
   '/b/casos/$casoId': typeof AppBCasosCasoIdRoute
+  '/b/casos/novo': typeof AppBCasosNovoRoute
   '/a/casos': typeof AppACasosIndexRoute
   '/b/casos': typeof AppBCasosIndexRoute
 }
@@ -194,18 +234,23 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/a/casos': typeof AppACasosRouteWithChildren
   '/_app/a/distribuicao': typeof AppADistribuicaoRoute
+  '/_app/a/operacao': typeof AppAOperacaoRoute
   '/_app/a/rede': typeof AppARedeRoute
   '/_app/a/repasses': typeof AppARepassesRoute
   '/_app/b/casos': typeof AppBCasosRouteWithChildren
+  '/_app/gestao/campos-novos': typeof AppGestaoCamposNovosRoute
   '/_app/gestao/colisoes': typeof AppGestaoColisoesRoute
   '/_app/gestao/dados': typeof AppGestaoDadosRoute
   '/_app/gestao/fontes': typeof AppGestaoFontesRoute
+  '/_app/gestao/integracoes': typeof AppGestaoIntegracoesRoute
   '/_app/gestao/relatorios': typeof AppGestaoRelatoriosRoute
   '/_app/gestao/usuarios': typeof AppGestaoUsuariosRoute
   '/_app/a/': typeof AppAIndexRoute
   '/_app/b/': typeof AppBIndexRoute
   '/_app/a/casos/$casoId': typeof AppACasosCasoIdRoute
+  '/_app/a/casos/novo': typeof AppACasosNovoRoute
   '/_app/b/casos/$casoId': typeof AppBCasosCasoIdRoute
+  '/_app/b/casos/novo': typeof AppBCasosNovoRoute
   '/_app/a/casos/': typeof AppACasosIndexRoute
   '/_app/b/casos/': typeof AppBCasosIndexRoute
 }
@@ -219,18 +264,23 @@ export interface FileRouteTypes {
     | '/gestao'
     | '/a/casos'
     | '/a/distribuicao'
+    | '/a/operacao'
     | '/a/rede'
     | '/a/repasses'
     | '/b/casos'
+    | '/gestao/campos-novos'
     | '/gestao/colisoes'
     | '/gestao/dados'
     | '/gestao/fontes'
+    | '/gestao/integracoes'
     | '/gestao/relatorios'
     | '/gestao/usuarios'
     | '/a/'
     | '/b/'
     | '/a/casos/$casoId'
+    | '/a/casos/novo'
     | '/b/casos/$casoId'
+    | '/b/casos/novo'
     | '/a/casos/'
     | '/b/casos/'
   fileRoutesByTo: FileRoutesByTo
@@ -239,17 +289,22 @@ export interface FileRouteTypes {
     | '/gestao'
     | '/'
     | '/a/distribuicao'
+    | '/a/operacao'
     | '/a/rede'
     | '/a/repasses'
+    | '/gestao/campos-novos'
     | '/gestao/colisoes'
     | '/gestao/dados'
     | '/gestao/fontes'
+    | '/gestao/integracoes'
     | '/gestao/relatorios'
     | '/gestao/usuarios'
     | '/a'
     | '/b'
     | '/a/casos/$casoId'
+    | '/a/casos/novo'
     | '/b/casos/$casoId'
+    | '/b/casos/novo'
     | '/a/casos'
     | '/b/casos'
   id:
@@ -262,18 +317,23 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/a/casos'
     | '/_app/a/distribuicao'
+    | '/_app/a/operacao'
     | '/_app/a/rede'
     | '/_app/a/repasses'
     | '/_app/b/casos'
+    | '/_app/gestao/campos-novos'
     | '/_app/gestao/colisoes'
     | '/_app/gestao/dados'
     | '/_app/gestao/fontes'
+    | '/_app/gestao/integracoes'
     | '/_app/gestao/relatorios'
     | '/_app/gestao/usuarios'
     | '/_app/a/'
     | '/_app/b/'
     | '/_app/a/casos/$casoId'
+    | '/_app/a/casos/novo'
     | '/_app/b/casos/$casoId'
+    | '/_app/b/casos/novo'
     | '/_app/a/casos/'
     | '/_app/b/casos/'
   fileRoutesById: FileRoutesById
@@ -348,6 +408,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppADistribuicaoRouteImport
       parentRoute: typeof AppARoute
     }
+    '/_app/a/operacao': {
+      id: '/_app/a/operacao'
+      path: '/operacao'
+      fullPath: '/a/operacao'
+      preLoaderRoute: typeof AppAOperacaoRouteImport
+      parentRoute: typeof AppARoute
+    }
     '/_app/a/rede': {
       id: '/_app/a/rede'
       path: '/rede'
@@ -376,6 +443,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBCasosRouteImport
       parentRoute: typeof AppBRoute
     }
+    '/_app/gestao/campos-novos': {
+      id: '/_app/gestao/campos-novos'
+      path: '/campos-novos'
+      fullPath: '/gestao/campos-novos'
+      preLoaderRoute: typeof AppGestaoCamposNovosRouteImport
+      parentRoute: typeof AppGestaoRoute
+    }
     '/_app/gestao/colisoes': {
       id: '/_app/gestao/colisoes'
       path: '/colisoes'
@@ -395,6 +469,13 @@ declare module '@tanstack/react-router' {
       path: '/fontes'
       fullPath: '/gestao/fontes'
       preLoaderRoute: typeof AppGestaoFontesRouteImport
+      parentRoute: typeof AppGestaoRoute
+    }
+    '/_app/gestao/integracoes': {
+      id: '/_app/gestao/integracoes'
+      path: '/integracoes'
+      fullPath: '/gestao/integracoes'
+      preLoaderRoute: typeof AppGestaoIntegracoesRouteImport
       parentRoute: typeof AppGestaoRoute
     }
     '/_app/gestao/relatorios': {
@@ -425,6 +506,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppACasosCasoIdRouteImport
       parentRoute: typeof AppACasosRoute
     }
+    '/_app/a/casos/novo': {
+      id: '/_app/a/casos/novo'
+      path: '/novo'
+      fullPath: '/a/casos/novo'
+      preLoaderRoute: typeof AppACasosNovoRouteImport
+      parentRoute: typeof AppACasosRoute
+    }
     '/_app/b/casos/': {
       id: '/_app/b/casos/'
       path: '/'
@@ -439,16 +527,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBCasosCasoIdRouteImport
       parentRoute: typeof AppBCasosRoute
     }
+    '/_app/b/casos/novo': {
+      id: '/_app/b/casos/novo'
+      path: '/novo'
+      fullPath: '/b/casos/novo'
+      preLoaderRoute: typeof AppBCasosNovoRouteImport
+      parentRoute: typeof AppBCasosRoute
+    }
   }
 }
 
 interface AppACasosRouteChildren {
   AppACasosCasoIdRoute: typeof AppACasosCasoIdRoute
+  AppACasosNovoRoute: typeof AppACasosNovoRoute
   AppACasosIndexRoute: typeof AppACasosIndexRoute
 }
 
 const AppACasosRouteChildren: AppACasosRouteChildren = {
   AppACasosCasoIdRoute: AppACasosCasoIdRoute,
+  AppACasosNovoRoute: AppACasosNovoRoute,
   AppACasosIndexRoute: AppACasosIndexRoute,
 }
 
@@ -459,6 +556,7 @@ const AppACasosRouteWithChildren = AppACasosRoute._addFileChildren(
 interface AppARouteChildren {
   AppACasosRoute: typeof AppACasosRouteWithChildren
   AppADistribuicaoRoute: typeof AppADistribuicaoRoute
+  AppAOperacaoRoute: typeof AppAOperacaoRoute
   AppARedeRoute: typeof AppARedeRoute
   AppARepassesRoute: typeof AppARepassesRoute
   AppAIndexRoute: typeof AppAIndexRoute
@@ -467,6 +565,7 @@ interface AppARouteChildren {
 const AppARouteChildren: AppARouteChildren = {
   AppACasosRoute: AppACasosRouteWithChildren,
   AppADistribuicaoRoute: AppADistribuicaoRoute,
+  AppAOperacaoRoute: AppAOperacaoRoute,
   AppARedeRoute: AppARedeRoute,
   AppARepassesRoute: AppARepassesRoute,
   AppAIndexRoute: AppAIndexRoute,
@@ -476,11 +575,13 @@ const AppARouteWithChildren = AppARoute._addFileChildren(AppARouteChildren)
 
 interface AppBCasosRouteChildren {
   AppBCasosCasoIdRoute: typeof AppBCasosCasoIdRoute
+  AppBCasosNovoRoute: typeof AppBCasosNovoRoute
   AppBCasosIndexRoute: typeof AppBCasosIndexRoute
 }
 
 const AppBCasosRouteChildren: AppBCasosRouteChildren = {
   AppBCasosCasoIdRoute: AppBCasosCasoIdRoute,
+  AppBCasosNovoRoute: AppBCasosNovoRoute,
   AppBCasosIndexRoute: AppBCasosIndexRoute,
 }
 
@@ -501,17 +602,21 @@ const AppBRouteChildren: AppBRouteChildren = {
 const AppBRouteWithChildren = AppBRoute._addFileChildren(AppBRouteChildren)
 
 interface AppGestaoRouteChildren {
+  AppGestaoCamposNovosRoute: typeof AppGestaoCamposNovosRoute
   AppGestaoColisoesRoute: typeof AppGestaoColisoesRoute
   AppGestaoDadosRoute: typeof AppGestaoDadosRoute
   AppGestaoFontesRoute: typeof AppGestaoFontesRoute
+  AppGestaoIntegracoesRoute: typeof AppGestaoIntegracoesRoute
   AppGestaoRelatoriosRoute: typeof AppGestaoRelatoriosRoute
   AppGestaoUsuariosRoute: typeof AppGestaoUsuariosRoute
 }
 
 const AppGestaoRouteChildren: AppGestaoRouteChildren = {
+  AppGestaoCamposNovosRoute: AppGestaoCamposNovosRoute,
   AppGestaoColisoesRoute: AppGestaoColisoesRoute,
   AppGestaoDadosRoute: AppGestaoDadosRoute,
   AppGestaoFontesRoute: AppGestaoFontesRoute,
+  AppGestaoIntegracoesRoute: AppGestaoIntegracoesRoute,
   AppGestaoRelatoriosRoute: AppGestaoRelatoriosRoute,
   AppGestaoUsuariosRoute: AppGestaoUsuariosRoute,
 }

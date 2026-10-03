@@ -1,14 +1,12 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { PlusIcon, RefreshCwIcon } from 'lucide-react';
-import { useState } from 'react';
 
 import { STATUS_AQUISICAO, STATUS_RECUPERACAO } from '@workspace/domain';
 import { Button } from '@workspace/ui/components/button';
 
 import { CabecalhoDePagina, ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
 import { casosQuery, ORIGEM_DO_CANAL, pode, sessaoQuery, type Canal } from '@/lib/api.ts';
-
-import { DialogoNovoCaso } from './dialogo-novo-caso.tsx';
 
 import { TabelaCasos } from './tabela-casos.tsx';
 
@@ -32,7 +30,6 @@ interface Props {
 export function PaginaCasos({ canal, busca, aoBuscar }: Props) {
   const consulta = useQuery({ ...casosQuery(ORIGEM_DO_CANAL[canal]), placeholderData: keepPreviousData });
   const sessao = useQuery(sessaoQuery).data;
-  const [cadastrando, setCadastrando] = useState(false);
 
   return (
     <>
@@ -42,9 +39,11 @@ export function PaginaCasos({ canal, busca, aoBuscar }: Props) {
         acoes={
           <>
           {sessao && pode.escrever(sessao) ? (
-            <Button size="sm" onClick={() => setCadastrando(true)}>
-              <PlusIcon />
-              {canal === 'a' ? 'Novo caso' : 'Novo lead'}
+            <Button size="sm" asChild>
+              <Link to={canal === 'a' ? '/a/casos/novo' : '/b/casos/novo'}>
+                <PlusIcon />
+                {canal === 'a' ? 'Novo caso' : 'Novo lead'}
+              </Link>
             </Button>
           ) : null}
           <Button variant="outline" size="sm" onClick={() => void consulta.refetch()} disabled={consulta.isFetching}>
@@ -67,7 +66,6 @@ export function PaginaCasos({ canal, busca, aoBuscar }: Props) {
           aoBuscar={aoBuscar}
         />
       )}
-      {cadastrando ? <DialogoNovoCaso canal={canal} aoFechar={() => setCadastrando(false)} /> : null}
     </>
   );
 }

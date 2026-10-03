@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ExternalLinkIcon, LocateFixedIcon, MapPinIcon, PlusIcon } from 'lucide-react';
-import { useState } from 'react';
+import { ClipboardPasteIcon, ExternalLinkIcon, LocateFixedIcon, MapPinIcon, PlusIcon, RadarIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { avistamentoEntrada, FONTES_AVISTAMENTO } from '@workspace/domain';
 import { Alert, AlertDescription } from '@workspace/ui/components/alert';
@@ -16,15 +16,26 @@ import { formatarDataHora } from '@workspace/ui/lib/formato';
 import { toast } from '@workspace/ui/lib/toast';
 
 import { ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
-import { api, avistamentosQuery, exigir, pode, type UsuarioSessao } from '@/lib/api.ts';
+import { Mapa } from '@/components/mapa.tsx';
+import { api, avistamentosQuery, exigir, pode, type Avistamento, type UsuarioSessao } from '@/lib/api.ts';
 
 import { useAtualizarCaso } from './painel-acoes.tsx';
 
-const ROTULO_FONTE: Record<(typeof FONTES_AVISTAMENTO)[number], string> = {
+const ROTULO_FONTE: Record<Avistamento['fonte'], string> = {
   equipe_campo: 'Equipe de campo',
   credor: 'Credor',
   devedor: 'Devedor',
   outro: 'Outro',
+  radar: 'Radar',
+};
+
+/** Cor no mapa e na lista: radar violeta, campo azul, o resto âmbar. */
+export const COR_FONTE: Record<Avistamento['fonte'], string> = {
+  radar: '#a78bfa',
+  equipe_campo: '#3b82f6',
+  credor: '#f59e0b',
+  devedor: '#f59e0b',
+  outro: '#94a3b8',
 };
 
 const agoraLocal = () => {
@@ -37,59 +48,138 @@ const agoraLocal = () => {
  * Onde o veículo foi visto, por quem e quando. É a fonte legítima de
  * localização do Plano A: registrada por quem viu, com a hora do servidor.
  */
-export function AbaAvistamentos({ casoId, sessao }: { casoId: string; sessao: UsuarioSessao }) {
+export function AbaAvistamentos({ casoId, sessao, aoColar }: { casoId: string; sessao: UsuarioSessao; aoColar: () => void }) {
   const consulta = useQuery(avistamentosQuery(casoId));
   const [registrando, setRegistrando] = useState(false);
+  const [filtro, setFiltro] = useState<'todos' | 'radar' | 'campo'>('todos');
+  const lista = useMemo(
+    () => (consulta.data ?? []).filter((a) => filtro === 'todos' || (filtro === 'radar' ? a.fonte === 'radar' : a.fonte !== 'radar')),
+    [consulta.data, filtro],
+  );
+  const pontos = useMemo(
+    () =>
+      [...lista]
+        .filter((a) => a.latitude != null && a.longitude != null)
+        .sort((x, y) => +new Date(x.observadoEm) - +new Date(y.observadoEm))
+        .map((a) => ({
+          id: a.id,
+          latitude: a.latitude!,
+          longitude: a.longitude!,
+          cor: COR_FONTE[a.fonte],
+          titulo: formatarDataHora(a.observadoEm),
+          linhas: [a.descricao, ROTULO_FONTE[a.fonte]],
+        })),
+    [lista],
+  );
+  const total = consulta.data?.length ?? 0;
+  const radares = (consulta.data ?? []).filter((a) => a.fonte === 'radar').length;
+  const filtros = [
+    ['todos', `Todos (${total})`],
+    ['radar', `Radar (${radares})`],
+    ['campo', `Campo e outros (${total - radares})`],
+  ] as const;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-white">Avistamentos</CardTitle>
-        <CardDescription>Localização do bem — não da pessoa — com autor e hora do servidor. Não se edita nem se apaga.</CardDescription>
-        {pode.escrever(sessao) && !registrando ? (
-          <CardAction>
-            <Button variant="ghost" size="sm" onClick={() => setRegistrando(true)}>
-              <PlusIcon />
-              Registrar
-            </Button>
-          </CardAction>
-        ) : null}
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {registrando ? <FormAvistamento casoId={casoId} aoFechar={() => setRegistrando(false)} /> : null}
-        {consulta.isPending ? (
-          <Skeleton className="h-24" />
-        ) : consulta.isError ? (
-          <ErroDeConsulta erro={consulta.error} aoTentar={() => void consulta.refetch()} />
-        ) : consulta.data.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum avistamento registrado.</p>
-        ) : (
-          <ol className="space-y-3">
-            {consulta.data.map((a) => (
-              <li key={a.id} className="flex gap-3 rounded-lg bg-white/3 p-3 ring-1 ring-white/5">
-                <MapPinIcon className="mt-0.5 size-4 shrink-0 text-blue-300" aria-hidden />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-white">{a.descricao}</p>
-                  <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-                    visto em {formatarDataHora(a.observadoEm)} · {ROTULO_FONTE[a.fonte]} · registrado por {a.usuarioNome ?? '—'}
-                  </p>
-                  {a.latitude != null && a.longitude != null ? (
-                    <a
-                      className="mt-1 inline-flex items-center gap-1 text-xs text-blue-300 hover:underline"
-                      href={`https://www.openstreetmap.org/?mlat=${a.latitude}&mlon=${a.longitude}#map=17/${a.latitude}/${a.longitude}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {a.latitude.toFixed(5)}, {a.longitude.toFixed(5)} · ver no mapa
-                      <ExternalLinkIcon className="size-3" aria-hidden />
-                    </a>
-                  ) : null}
-                </div>
-              </li>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-white">Onde o veículo foi visto</CardTitle>
+          <CardDescription>
+            Passagens de radar dos relatórios colados e avistamentos da equipe de campo, com hora. O tracejado liga os pontos na ordem.
+          </CardDescription>
+          {pode.escrever(sessao) ? (
+            <CardAction className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={aoColar}>
+                <ClipboardPasteIcon />
+                Colar radar
+              </Button>
+              {!registrando ? (
+                <Button variant="outline" size="sm" onClick={() => setRegistrando(true)}>
+                  <PlusIcon />
+                  Registrar
+                </Button>
+              ) : null}
+            </CardAction>
+          ) : null}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            {filtros.map(([k, rotulo]) => (
+              <Button key={k} size="sm" variant={filtro === k ? 'secondary' : 'ghost'} className="h-7" onClick={() => setFiltro(k)}>
+                {rotulo}
+              </Button>
             ))}
-          </ol>
-        )}
-      </CardContent>
-    </Card>
+            <span className="ml-auto flex items-center gap-3 text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <span className="size-2.5 rounded-full" style={{ background: COR_FONTE.radar }} /> radar
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="size-2.5 rounded-full" style={{ background: COR_FONTE.equipe_campo }} /> campo
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="size-2.5 rounded-full" style={{ background: COR_FONTE.credor }} /> credor e outros
+              </span>
+            </span>
+          </div>
+          {pontos.length ? (
+            <Mapa pontos={pontos} ligarPontos className="h-[420px]" />
+          ) : (
+            <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 text-center">
+              <RadarIcon className="size-6 text-slate-600" aria-hidden />
+              <p className="text-sm text-muted-foreground">
+                Sem coordenadas ainda. Cole as passagens de radar ou registre com a localização do aparelho.
+              </p>
+            </div>
+          )}
+          {registrando ? <FormAvistamento casoId={casoId} aoFechar={() => setRegistrando(false)} /> : null}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-white">Histórico</CardTitle>
+          <CardDescription>Não se edita nem se apaga. O mais recente primeiro.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {consulta.isPending ? (
+            <Skeleton className="h-24" />
+          ) : consulta.isError ? (
+            <ErroDeConsulta erro={consulta.error} aoTentar={() => void consulta.refetch()} />
+          ) : lista.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum avistamento registrado.</p>
+          ) : (
+            <ol className="grid gap-2 xl:grid-cols-2">
+              {lista.map((a) => (
+                <li key={a.id} className="flex gap-3 rounded-lg bg-white/3 p-3 ring-1 ring-white/5">
+                  {a.fonte === 'radar' ? (
+                    <RadarIcon className="mt-0.5 size-4 shrink-0 text-violet-300" aria-hidden />
+                  ) : (
+                    <MapPinIcon className="mt-0.5 size-4 shrink-0 text-blue-300" aria-hidden />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white">{a.descricao}</p>
+                    <p className="mt-1 text-xs text-muted-foreground tabular-nums">
+                      visto em {formatarDataHora(a.observadoEm)} · {ROTULO_FONTE[a.fonte]} · registrado por {a.usuarioNome ?? '—'}
+                    </p>
+                    {a.latitude != null && a.longitude != null ? (
+                      <a
+                        className="mt-1 inline-flex items-center gap-1 text-xs text-blue-300 hover:underline"
+                        href={`https://www.google.com/maps/search/?api=1&query=${a.latitude},${a.longitude}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {a.latitude.toFixed(5)}, {a.longitude.toFixed(5)} · abrir no mapa
+                        <ExternalLinkIcon className="size-3" aria-hidden />
+                      </a>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

@@ -5,6 +5,7 @@ import {
   CheckCircle2Icon,
   ChevronDownIcon,
   CircleAlertIcon,
+  ClipboardPasteIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -48,13 +49,15 @@ import {
 } from '@/lib/api.ts';
 import { tomDoStatus } from '@/lib/status.ts';
 
+import { DialogoColar } from '../relatorio/dialogo-colar.tsx';
 import { AbaAvistamentos } from './aba-avistamentos.tsx';
 import { AbaJuridico } from './aba-juridico.tsx';
+import { AbaPessoas } from './aba-pessoas.tsx';
+import { AbaTextos } from './aba-textos.tsx';
 import { AbaVeiculo } from './aba-veiculo.tsx';
 import { DialogoDistribuir } from './dialogo-distribuir.tsx';
 import { LinhaDoTempo } from './linha-do-tempo.tsx';
 import { PainelAcoes } from './painel-acoes.tsx';
-import { PainelDevedor } from './painel-devedor.tsx';
 
 interface Props {
   canal: Canal;
@@ -68,6 +71,8 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
   const planoA = canal === 'a';
   const juridico = useQuery({ ...juridicoQuery(casoId), enabled: planoA });
   const [distribuindo, setDistribuindo] = useState(false);
+  const [colando, setColando] = useState<string | null>(null);
+  const [aba, setAba] = useState('resumo');
   const voltar = canal === 'a' ? '/a/casos' : '/b/casos';
 
   if (consulta.isError) {
@@ -94,11 +99,18 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
         </Link>
       </Button>
 
-      {caso ? <Cabecalho caso={caso} canal={canal} sessao={sessao} /> : <Skeleton className="h-24 rounded-xl" />}
+      {caso ? (
+        <Cabecalho caso={caso} canal={canal} sessao={sessao} aoColar={() => setColando('Colar dados do relatório')} />
+      ) : (
+        <Skeleton className="h-24 rounded-xl" />
+      )}
+      {caso && colando ? (
+        <DialogoColar casoId={caso.id} placa={caso.placa} planoA={planoA} sessao={sessao} titulo={colando} aoFechar={() => setColando(null)} />
+      ) : null}
       {caso && planoA ? <DialogoDistribuir caso={caso} aberto={distribuindo} aoMudar={setDistribuindo} /> : null}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Tabs defaultValue="resumo" className="min-w-0 lg:col-span-2">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <Tabs value={aba} onValueChange={setAba} className="min-w-0">
           {/* No celular a barra rola de lado em vez de alargar a página. */}
           <div className="-mx-1 overflow-x-auto px-1 pb-1">
             <TabsList>
@@ -106,8 +118,9 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
               {planoA ? <TabsTrigger value="juridico">Jurídico</TabsTrigger> : null}
               <TabsTrigger value="veiculo">Veículo</TabsTrigger>
               {planoA ? <TabsTrigger value="avistamentos">Avistamentos</TabsTrigger> : null}
+              <TabsTrigger value="pessoas">Pessoas</TabsTrigger>
               <TabsTrigger value="linha-do-tempo">Linha do tempo</TabsTrigger>
-              <TabsTrigger value="pessoa">{canal === 'a' ? 'Devedor' : 'Vendedor'}</TabsTrigger>
+              <TabsTrigger value="textos">Textos colados</TabsTrigger>
               {pode.auditar(sessao) ? <TabsTrigger value="acessos">Acessos</TabsTrigger> : null}
             </TabsList>
           </div>
@@ -126,7 +139,7 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
           </TabsContent>
           {planoA ? (
             <TabsContent value="avistamentos">
-              <AbaAvistamentos casoId={casoId} sessao={sessao} />
+              <AbaAvistamentos casoId={casoId} sessao={sessao} aoColar={() => setColando('Colar passagens de radar')} />
             </TabsContent>
           ) : null}
           <TabsContent value="linha-do-tempo">
@@ -136,12 +149,16 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="pessoa">
-            <Card>
-              <CardContent className="pt-1">
-                <PainelDevedor casoId={casoId} rotulo={canal === 'a' ? 'Devedor' : 'Vendedor'} />
-              </CardContent>
-            </Card>
+          <TabsContent value="pessoas">
+            <AbaPessoas
+              casoId={casoId}
+              sessao={sessao}
+              rotuloDevedor={canal === 'a' ? 'Devedor' : 'Vendedor'}
+              aoColar={() => setColando('Colar dossiê da pessoa')}
+            />
+          </TabsContent>
+          <TabsContent value="textos">
+            <AbaTextos casoId={casoId} sessao={sessao} />
           </TabsContent>
           {pode.auditar(sessao) ? (
             <TabsContent value="acessos">
@@ -162,7 +179,7 @@ export function FichaCaso({ canal, casoId, sessao }: Props) {
   );
 }
 
-function Cabecalho({ caso, canal, sessao }: { caso: CasoDetalhe; canal: Canal; sessao: UsuarioSessao }) {
+function Cabecalho({ caso, canal, sessao, aoColar }: { caso: CasoDetalhe; canal: Canal; sessao: UsuarioSessao; aoColar: () => void }) {
   const queryClient = useQueryClient();
   const outrosStatus = statusValidos(caso.finalidade).filter((s) => s !== caso.status);
 
@@ -192,8 +209,15 @@ function Cabecalho({ caso, canal, sessao }: { caso: CasoDetalhe; canal: Canal; s
         </div>
       </div>
       {/* Plano A: as mudanças passam pelo painel de próximos passos, com as guardas do banco. */}
+      <div className="flex flex-wrap gap-2">
+        {pode.escrever(sessao) ? (
+          <Button onClick={aoColar}>
+            <ClipboardPasteIcon />
+            Colar dados
+          </Button>
+        ) : null}
       {pode.escrever(sessao) && canal === 'b' ? (
-        <div className="flex flex-wrap gap-2">
+        <>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" disabled={mudarStatus.isPending}>
@@ -212,8 +236,9 @@ function Cabecalho({ caso, canal, sessao }: { caso: CasoDetalhe; canal: Canal; s
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </>
       ) : null}
+      </div>
     </Card>
   );
 }

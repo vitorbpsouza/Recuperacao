@@ -19,12 +19,26 @@ export const FIPE_FALSA: ClienteFipe = {
   valor: async () => ({ valor: 48900, codigoFipe: '015032-0', mesReferencia: 'outubro de 2026', marca: 'Hyundai', modelo: 'Modelo Teste', anoModelo: 2016 }),
 };
 
-const USUARIOS: Array<{ email: string; papel: 'admin' | 'operador' | 'auditor'; canais: OrigemCaso[] }> = [
+const USUARIOS: Array<{ email: string; papel: 'admin' | 'gestor' | 'operador' | 'auditor'; canais: OrigemCaso[] }> = [
   { email: 'admin@teste.local', papel: 'admin', canais: [] },
+  { email: 'gestor@teste.local', papel: 'gestor', canais: [] },
   { email: 'opa@teste.local', papel: 'operador', canais: ['plataforma_credor'] },
   { email: 'opb@teste.local', papel: 'operador', canais: ['lead_proprio'] },
   { email: 'auditor@teste.local', papel: 'auditor', canais: [] },
 ];
+
+/** Chamadas que a API faria para fora (API Brasil, Evolution), com a resposta combinada no teste. */
+export const externo = {
+  chamadas: [] as { url: string; corpo: unknown; headers: Record<string, string> }[],
+  responder: (_url: string, _corpo: unknown): unknown => ({}),
+};
+
+const FETCH_FALSO: typeof fetch = async (entrada, init) => {
+  const url = String(entrada);
+  const corpo = init?.body ? JSON.parse(String(init.body)) : undefined;
+  externo.chamadas.push({ url, corpo, headers: (init?.headers ?? {}) as Record<string, string> });
+  return new Response(JSON.stringify(externo.responder(url, corpo)), { status: 200, headers: { 'content-type': 'application/json' } });
+};
 
 export interface Sessao {
   cookie: string;
@@ -58,7 +72,7 @@ export const ambienteDeTeste = async (): Promise<Ambiente> => {
     }
   });
 
-  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false, fipe: FIPE_FALSA });
+  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false, fipe: FIPE_FALSA, executar: FETCH_FALSO });
 
   const entrar = async (email: string, senha = SENHA): Promise<Sessao> => {
     const r = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email, senha } });

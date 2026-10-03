@@ -24,7 +24,7 @@ export function GraficoStatus({ dados, cor }: Props) {
       <BarChart data={dados} layout="vertical" margin={{ left: 0, right: 32, top: 4, bottom: 4 }}>
         <CartesianGrid horizontal={false} strokeDasharray="3 3" />
         <XAxis type="number" allowDecimals={false} hide domain={[0, (maximo: number) => Math.max(maximo, 1)]} />
-        <YAxis type="category" dataKey="status" tickLine={false} axisLine={false} width={150} fontSize={12} />
+        <YAxis type="category" dataKey="status" tickLine={false} axisLine={false} width={150} fontSize={12} interval={0} />
         <ChartTooltip cursor={{ fill: 'var(--accent)' }} content={<ChartTooltipContent hideLabel={false} />} />
         <Bar
           dataKey="quantidade"

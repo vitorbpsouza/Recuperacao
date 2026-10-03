@@ -13,6 +13,7 @@ import { z } from 'zod';
 
 import { chassiValido, cnpjValido, cpfValido, numeroCnjValido, placaValida } from './documentos.ts';
 import { MODALIDADES_RETOMADA, RITOS } from './fluxos.ts';
+import { PAPEIS_DO_DOSSIE } from './relatorio-colado.ts';
 
 // Mensagens de validação em português em todo lugar que usa o zod (API e telas).
 // Os campos de cadastro ainda trazem mensagens próprias, mais diretas que as do locale.
@@ -20,7 +21,7 @@ z.config(z.locales.pt());
 
 export const origemCaso = z.enum(['plataforma_credor', 'lead_proprio']);
 export const finalidadePermitida = z.enum(['recuperacao_para_credor', 'aquisicao_com_quitacao']);
-export const papelUsuario = z.enum(['admin', 'operador', 'auditor']);
+export const papelUsuario = z.enum(['admin', 'gestor', 'operador', 'auditor']);
 
 const texto = z.string().trim().min(1, 'campo obrigatório');
 
@@ -308,6 +309,37 @@ export const resistenciaEntrada = z
   .strict();
 
 // ---------------------------------------------------------------------------
+// Texto colado
+// ---------------------------------------------------------------------------
+
+/**
+ * Relatório colado na ficha ou no cadastro. O fornecedor é opcional: com ele,
+ * a consulta entra na trilha de auditoria (base legal e justificativa); sem
+ * ele, o texto fica guardado como colado pelo usuário.
+ */
+export const colarRelatorioEntrada = z
+  .object({
+    texto: z.string().trim().min(10, 'cole o texto do relatório').max(500_000, 'texto grande demais (máximo de 500 mil caracteres)'),
+    /** Papel da pessoa do dossiê quando o documento não é o do devedor do caso. */
+    papelPessoa: z.enum(PAPEIS_DO_DOSSIE).optional(),
+    bureauId: texto.optional(),
+    baseLegal: baseLegal.optional(),
+    justificativa: z.string().trim().min(10, 'diga por que esta consulta, neste caso (ao menos 10 caracteres)').optional(),
+  })
+  .strict()
+  .refine((r) => !r.bureauId || (r.baseLegal && r.justificativa), {
+    message: 'com fornecedor, informe a base legal e a justificativa da consulta',
+    path: ['justificativa'],
+  });
+
+/** Ver o dado sensível ou o texto original: a finalidade fica na trilha de acesso. */
+export const finalidadeEntrada = z
+  .object({
+    finalidade: z.string().trim().min(10, 'descreva a finalidade em ao menos 10 caracteres'),
+  })
+  .strict();
+
+// ---------------------------------------------------------------------------
 // Cadastro de caso com o bem
 // ---------------------------------------------------------------------------
 
@@ -343,6 +375,8 @@ export const cadastroCasoEntrada = z.discriminatedUnion('origem', [
       fonteId: z.string().min(1, 'escolha a fonte'),
       credorId: z.string().min(1, 'escolha o credor (ou cadastre um novo)'),
       bem: bemEntrada,
+      /** Texto colado no cadastro: guardado inteiro e lido no mesmo passo. */
+      relatorio: colarRelatorioEntrada.optional(),
     })
     .strict(),
   z
@@ -355,6 +389,7 @@ export const cadastroCasoEntrada = z.discriminatedUnion('origem', [
       /** Como se prova que o lead não veio do dado de uma plataforma de credor. */
       evidenciaLead: z.string().trim().min(10, 'descreva a evidência de origem em ao menos 10 caracteres'),
       saldoDevedor: z.number().nonnegative().optional(),
+      relatorio: colarRelatorioEntrada.optional(),
     })
     .strict(),
 ]);
@@ -427,5 +462,73 @@ export const novoBureauEntrada = z
     /** Número ou referência do contrato com o fornecedor. Sem contrato não há consulta. */
     contratoFornecedorId: z.string().trim().min(3, 'informe o número ou a referência do contrato'),
     custoConsulta: z.number().min(0, 'custo não pode ser negativo').default(0),
+  })
+  .strict();
+
+// ---------------------------------------------------------------------------
+// Integrações (API Brasil, Evolution) e conversa com a rede de campo
+// ---------------------------------------------------------------------------
+
+const url = z.string().trim().url('endereço inválido: comece com https://');
+
+export const novaIntegracaoEntrada = z.discriminatedUnion('tipo', [
+  z
+    .object({
+      tipo: z.literal('apibrasil'),
+      nome: z.string().trim().min(2, 'dê um nome à conexão'),
+      baseUrl: url.default('https://gateway.apibrasil.io/api/v2'),
+      bearerToken: z.string().trim().min(10, 'cole o Bearer Token da API Brasil'),
+      deviceToken: z.string().trim().min(4).optional(),
+      /** dados: /vehicles/dados (com DeviceToken); consulta: /consulta/veiculos/credits (créditos da conta). */
+      servico: z.enum(['dados', 'consulta']).default('dados'),
+      /** Contrato e custo: a API Brasil vira um fornecedor, e cada consulta entra na trilha. */
+      contratoFornecedorId: z.string().trim().min(3, 'informe o número ou a referência do contrato'),
+      custoConsulta: z.number().min(0).default(0),
+    })
+    .strict()
+    .refine((v) => v.servico === 'consulta' || !!v.deviceToken, {
+      message: 'o serviço de dados por placa exige o DeviceToken',
+      path: ['deviceToken'],
+    }),
+  z
+    .object({
+      tipo: z.literal('evolution'),
+      nome: z.string().trim().min(2, 'dê um nome à conexão'),
+      baseUrl: url,
+      apikey: z.string().trim().min(8, 'cole a apikey da instância'),
+      instancia: z.string().trim().min(1, 'informe o nome da instância'),
+    })
+    .strict(),
+]);
+
+export const atualizarIntegracaoEntrada = z
+  .object({
+    nome: z.string().trim().min(2).optional(),
+    baseUrl: url.optional(),
+    ativo: z.boolean().optional(),
+    /** Só quando trocar: credencial em branco mantém a atual. */
+    bearerToken: z.string().trim().min(10).optional(),
+    deviceToken: z.string().trim().min(4).optional(),
+    apikey: z.string().trim().min(8).optional(),
+    instancia: z.string().trim().min(1).optional(),
+    servico: z.enum(['dados', 'consulta']).optional(),
+  })
+  .strict();
+
+/** Consulta paga: precisa de base legal e justificativa, como qualquer consulta a fornecedor. */
+export const consultaIntegracaoEntrada = z
+  .object({
+    integracaoId: texto.optional(),
+    baseLegal,
+    justificativa: z.string().trim().min(10, 'diga por que esta consulta, neste caso (ao menos 10 caracteres)'),
+    papelPessoa: z.enum(PAPEIS_DO_DOSSIE).optional(),
+  })
+  .strict();
+
+export const enviarMensagemEntrada = z
+  .object({
+    texto: z.string().trim().min(1, 'escreva a mensagem').max(4000),
+    casoId: texto.optional(),
+    integracaoId: texto.optional(),
   })
   .strict();

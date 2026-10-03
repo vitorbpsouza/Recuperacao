@@ -35,6 +35,7 @@ import { NAVEGACAO_DO_CANAL, NAVEGACAO_GESTAO, type ItemNavegacao } from './nave
 
 const PAPEL: Record<UsuarioSessao['papel'], string> = {
   admin: 'Administrador',
+  gestor: 'Gestor',
   operador: 'Operador',
   auditor: 'Auditor (somente leitura)',
 };

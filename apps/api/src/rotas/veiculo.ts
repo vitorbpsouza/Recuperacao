@@ -1,17 +1,16 @@
 /**
- * Dados do veículo com procedência: valor FIPE, verificação de fornecedor
- * contratado (auditada como consulta) e avistamentos.
+ * Dados do veículo com procedência: valor FIPE, verificações (do texto colado
+ * ou de fornecedor, ver rotas/relatorios.ts) e avistamentos.
  */
 import { sql, type SQL } from 'drizzle-orm';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import type { Tx } from '@workspace/db';
-import { avistamentoEntrada, consultaFipeEntrada, normalizarPlaca, TIPOS_FIPE, verificacaoVeicularEntrada } from '@workspace/domain';
+import { avistamentoEntrada, consultaFipeEntrada, TIPOS_FIPE } from '@workspace/domain';
 
 import * as c from '../contratos.ts';
 import type { ClienteFipe } from '../integracoes/fipe.ts';
-import { registrarConsulta } from '../servicos/auditoria.ts';
 
 const params = z.object({ id: z.string() });
 const consultar = async <T>(tx: Tx, q: SQL): Promise<T[]> => ((await tx.execute(q)) as unknown as { rows: T[] }).rows;
@@ -70,80 +69,6 @@ export const rotasVeiculo: FastifyPluginAsyncZod<{ fipe: ClienteFipe }> = async 
   // Verificação veicular (fornecedor contratado)
   // -------------------------------------------------------------------------
 
-  app.post(
-    '/casos/:id/verificacao-veicular',
-    {
-      schema: {
-        tags: ['veiculo'],
-        params,
-        body: verificacaoVeicularEntrada,
-        response: { 201: c.criado, 404: c.erro, 409: c.erro },
-      },
-    },
-    async (req, reply) => {
-      const v = req.body;
-      const resultado = await req.banco(async (tx) => {
-        const [k] = await consultar<{ placa: string; ativoId: string; origem: string }>(
-          tx,
-          sql`select a.placa, k.ativo_id as "ativoId", k.origem from caso k join ativo a on a.id = k.ativo_id where k.id = ${req.params.id}`,
-        );
-        if (!k) return { codigo: 404 as const, erro: 'caso não encontrado' };
-        if (normalizarPlaca(v.veiculo.placa) !== k.placa) {
-          return { codigo: 409 as const, erro: `o relatório é da placa ${normalizarPlaca(v.veiculo.placa)}, e o caso é da ${k.placa}` };
-        }
-
-        // A consulta fica na trilha com fornecedor, contrato, base legal e
-        // justificativa; os campos, não os valores.
-        const campos = [
-          ...Object.entries(v.veiculo)
-            .filter(([, x]) => x !== undefined)
-            .map(([chave]) => chave),
-          ...(['renajud', 'rouboFurto', 'leilao', 'alienacaoFiduciaria', 'anoLicenciamento'] as const).filter((x) => v[x] !== undefined),
-          ...(v.restricoes.length ? ['restricoes'] : []),
-        ];
-        const consulta = await registrarConsulta(tx, req.usuario!.id, {
-          casoId: req.params.id,
-          bureauId: v.bureauId,
-          baseLegal: v.baseLegal,
-          justificativa: v.justificativa,
-          camposRetornados: campos,
-        });
-
-        const [linha] = await consultar<{ id: string }>(
-          tx,
-          sql`insert into verificacao_veicular
-                (caso_id, consulta_id, situacao, restricoes, renajud, roubo_furto, leilao, alienacao_fiduciaria, ano_licenciamento)
-              values (${req.params.id}, ${consulta.id}, ${v.veiculo.situacao ?? null}, array(select jsonb_array_elements_text(${JSON.stringify(v.restricoes)}::jsonb)),
-                      ${v.renajud ?? null}, ${v.rouboFurto ?? null}, ${v.leilao ?? null}, ${v.alienacaoFiduciaria ?? null},
-                      ${v.anoLicenciamento ?? null})
-              returning id::text as id`,
-        );
-
-        // Completa o veículo com o que o fornecedor trouxe (só o que veio).
-        await tx.execute(sql`
-          update ativo set
-            chassi  = coalesce(${v.veiculo.chassi ?? null}, chassi),
-            renavam = coalesce(${v.veiculo.renavam ?? null}, renavam),
-            modelo  = coalesce(${v.veiculo.modelo ?? null}, modelo),
-            cor     = coalesce(${v.veiculo.cor ?? null}, cor),
-            ano     = coalesce(${v.veiculo.anoModelo ?? null}::int, ano)
-          where id = ${k.ativoId}`);
-
-        // Plano B: RENAJUD e gravame verificados destravam (ou travam) a transferência.
-        if (k.origem === 'lead_proprio') {
-          await tx.execute(sql`
-            update caso set
-              renajud_ativo   = coalesce(${v.renajud ?? null}::boolean, renajud_ativo),
-              gravame_baixado = coalesce(not ${v.alienacaoFiduciaria ?? null}::boolean, gravame_baixado)
-            where id = ${req.params.id}`);
-        }
-        return { id: linha!.id, codigo: 201 as const, erro: null };
-      });
-      if (resultado.codigo !== 201) return reply.code(resultado.codigo).send({ erro: resultado.erro });
-      return reply.code(201).send({ id: resultado.id! });
-    },
-  );
-
   app.get(
     '/casos/:id/verificacoes-veiculares',
     { schema: { tags: ['veiculo'], params, response: { 200: z.array(c.verificacaoVeicular) } } },
@@ -156,8 +81,8 @@ export const rotasVeiculo: FastifyPluginAsyncZod<{ fipe: ClienteFipe }> = async 
                      v.alienacao_fiduciaria as "alienacaoFiduciaria", v.ano_licenciamento as "anoLicenciamento",
                      u.nome as "usuarioNome", v.verificado_em as "verificadoEm"
                 from verificacao_veicular v
-                join consulta_auditoria q on q.id = v.consulta_id
-                join bureau b on b.id = q.bureau_id
+                left join consulta_auditoria q on q.id = v.consulta_id
+                left join bureau b on b.id = q.bureau_id
                 left join usuario u on u.id = v.usuario_id
                where v.caso_id = ${req.params.id}
                order by v.verificado_em desc, v.id desc`,

@@ -58,6 +58,7 @@
             "type": "string",
             "enum": [
               "admin",
+              "gestor",
               "operador",
               "auditor"
             ]
@@ -129,6 +130,7 @@
             "type": "string",
             "enum": [
               "admin",
+              "gestor",
               "operador",
               "auditor"
             ]
@@ -944,6 +946,7 @@
             "type": "string",
             "enum": [
               "admin",
+              "gestor",
               "operador",
               "auditor"
             ]
@@ -1435,6 +1438,64 @@
               "fipeReferencia": {
                 "nullable": true,
                 "type": "string"
+              },
+              "marca": {
+                "nullable": true,
+                "type": "string"
+              },
+              "situacao": {
+                "nullable": true,
+                "type": "string"
+              },
+              "tipo": {
+                "nullable": true,
+                "type": "string"
+              },
+              "especie": {
+                "nullable": true,
+                "type": "string"
+              },
+              "categoria": {
+                "nullable": true,
+                "type": "string"
+              },
+              "carroceria": {
+                "nullable": true,
+                "type": "string"
+              },
+              "combustivel": {
+                "nullable": true,
+                "type": "string"
+              },
+              "potencia": {
+                "nullable": true,
+                "type": "string"
+              },
+              "cilindradas": {
+                "nullable": true,
+                "type": "string"
+              },
+              "motor": {
+                "nullable": true,
+                "type": "string"
+              },
+              "procedencia": {
+                "nullable": true,
+                "type": "string"
+              },
+              "municipioEmplacamento": {
+                "nullable": true,
+                "type": "string"
+              },
+              "ufEmplacamento": {
+                "nullable": true,
+                "type": "string"
+              },
+              "anoFabricacao": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
               }
             },
             "required": [
@@ -1447,7 +1508,21 @@
               "renavam",
               "valorFipe",
               "fipeCodigo",
-              "fipeReferencia"
+              "fipeReferencia",
+              "marca",
+              "situacao",
+              "tipo",
+              "especie",
+              "categoria",
+              "carroceria",
+              "combustivel",
+              "potencia",
+              "cilindradas",
+              "motor",
+              "procedencia",
+              "municipioEmplacamento",
+              "ufEmplacamento",
+              "anoFabricacao"
             ]
           },
           "fonte": {
@@ -1522,7 +1597,8 @@
               "rito_definido",
               "registro_juridico",
               "verificacao_veicular",
-              "avistamento"
+              "avistamento",
+              "relatorio_colado"
             ]
           },
           "statusDe": {
@@ -2084,12 +2160,15 @@
             "type": "number"
           },
           "fornecedor": {
+            "nullable": true,
             "type": "string"
           },
           "baseLegal": {
+            "nullable": true,
             "type": "string"
           },
           "justificativa": {
+            "nullable": true,
             "type": "string"
           },
           "situacao": {
@@ -2169,7 +2248,8 @@
               "equipe_campo",
               "credor",
               "devedor",
-              "outro"
+              "outro",
+              "radar"
             ]
           },
           "usuarioNome": {
@@ -2186,6 +2266,1263 @@
           "descricao",
           "fonte",
           "usuarioNome"
+        ]
+      },
+      "ResumoImportacaoInput": {
+        "type": "object",
+        "properties": {
+          "relatorioId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "veiculo": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "campos": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "restricoes": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "campos",
+              "restricoes"
+            ]
+          },
+          "pessoas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "nome": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "papeis": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "devedor",
+                      "proprietario",
+                      "terceiro_possuidor",
+                      "parente",
+                      "avalista",
+                      "outro"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "nome",
+                "papeis"
+              ]
+            }
+          },
+          "contatos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "enderecos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "parentes": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "radares": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "extras": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "novos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "secao": {
+                  "type": "string"
+                },
+                "rotulo": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "secao",
+                "rotulo"
+              ]
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "relatorioId",
+          "veiculo",
+          "pessoas",
+          "contatos",
+          "enderecos",
+          "parentes",
+          "radares",
+          "extras",
+          "novos",
+          "avisos"
+        ]
+      },
+      "RelatorioColadoInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "via": {
+            "type": "string",
+            "enum": [
+              "colado",
+              "integracao"
+            ]
+          },
+          "secoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resumo": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "fornecedor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "coladoEm": {},
+          "tamanho": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "via",
+          "secoes",
+          "resumo",
+          "fornecedor",
+          "usuarioNome",
+          "coladoEm",
+          "tamanho"
+        ]
+      },
+      "DadoExtraInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "veiculo",
+              "pessoa",
+              "caso"
+            ]
+          },
+          "pessoaId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "secao": {
+            "type": "string"
+          },
+          "chave": {
+            "type": "string"
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "string"
+          },
+          "sensivel": {
+            "type": "boolean"
+          },
+          "novo": {
+            "type": "boolean"
+          },
+          "promovidoEm": {
+            "nullable": true
+          },
+          "criadoEm": {}
+        },
+        "required": [
+          "id",
+          "entidade",
+          "pessoaId",
+          "secao",
+          "chave",
+          "rotulo",
+          "valor",
+          "sensivel",
+          "novo",
+          "promovidoEm",
+          "criadoEm"
+        ]
+      },
+      "PessoasDoCasoInput": {
+        "type": "object",
+        "properties": {
+          "alertas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pessoas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "papel": {
+                  "type": "string",
+                  "enum": [
+                    "devedor",
+                    "proprietario",
+                    "terceiro_possuidor",
+                    "parente",
+                    "avalista",
+                    "outro"
+                  ]
+                },
+                "vinculo": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "iniciais": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "documentoMascarado": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "tipoPessoa": {
+                  "nullable": true,
+                  "type": "string",
+                  "enum": [
+                    "PF",
+                    "PJ"
+                  ]
+                },
+                "obito": {
+                  "nullable": true,
+                  "type": "boolean"
+                },
+                "contatos": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "enderecos": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "papel",
+                "vinculo",
+                "iniciais",
+                "documentoMascarado",
+                "tipoPessoa",
+                "obito",
+                "contatos",
+                "enderecos"
+              ]
+            }
+          }
+        },
+        "required": [
+          "alertas",
+          "pessoas"
+        ]
+      },
+      "FonteContatoInput": {
+        "type": "object",
+        "properties": {
+          "fonte": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "ranking": {
+            "type": "number"
+          },
+          "titular": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fonte"
+        ]
+      },
+      "ContatoPessoaInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "celular",
+              "fixo",
+              "email",
+              "invalido"
+            ]
+          },
+          "valor": {
+            "type": "string"
+          },
+          "original": {
+            "nullable": true,
+            "type": "string"
+          },
+          "valido": {
+            "type": "boolean"
+          },
+          "whatsapp": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "whatsappConferidoEm": {
+            "nullable": true
+          },
+          "fontes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FonteContatoInput"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "valor",
+          "original",
+          "valido",
+          "whatsapp",
+          "whatsappConferidoEm",
+          "fontes"
+        ]
+      },
+      "EnderecoPessoaInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "logradouro": {
+            "type": "string"
+          },
+          "numero": {
+            "nullable": true,
+            "type": "string"
+          },
+          "complemento": {
+            "nullable": true,
+            "type": "string"
+          },
+          "bairro": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cidade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cep": {
+            "nullable": true,
+            "type": "string"
+          },
+          "variantes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fontes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "logradouro",
+          "numero",
+          "complemento",
+          "bairro",
+          "cidade",
+          "uf",
+          "cep",
+          "variantes",
+          "fontes",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "PessoaReveladaInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "devedor",
+              "proprietario",
+              "terceiro_possuidor",
+              "parente",
+              "avalista",
+              "outro"
+            ]
+          },
+          "vinculo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "parenteDe": {
+            "nullable": true,
+            "type": "string"
+          },
+          "documento": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tipoPessoa": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "PF",
+              "PJ"
+            ]
+          },
+          "nome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomeCivil": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomeMae": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomePai": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nascimento": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sexo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "estadoCivil": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rg": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rgOrgao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rgUf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tituloEleitor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "profissao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nacionalidade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "situacaoCadastral": {
+            "nullable": true,
+            "type": "string"
+          },
+          "obito": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "atualizadoEm": {},
+          "contatos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContatoPessoaInput"
+            }
+          },
+          "enderecos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnderecoPessoaInput"
+            }
+          },
+          "extras": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DadoExtraInput"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "papel",
+          "vinculo",
+          "parenteDe",
+          "documento",
+          "tipoPessoa",
+          "nome",
+          "nomeCivil",
+          "nomeMae",
+          "nomePai",
+          "nascimento",
+          "sexo",
+          "estadoCivil",
+          "rg",
+          "rgOrgao",
+          "rgUf",
+          "tituloEleitor",
+          "profissao",
+          "nacionalidade",
+          "situacaoCadastral",
+          "obito",
+          "atualizadoEm",
+          "contatos",
+          "enderecos",
+          "extras"
+        ]
+      },
+      "PessoasReveladasInput": {
+        "type": "object",
+        "properties": {
+          "alertas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sensivelLiberado": {
+            "type": "boolean"
+          },
+          "pessoas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PessoaReveladaInput"
+            }
+          }
+        },
+        "required": [
+          "alertas",
+          "sensivelLiberado",
+          "pessoas"
+        ]
+      },
+      "CampoNovoInput": {
+        "type": "object",
+        "properties": {
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "veiculo",
+              "pessoa",
+              "caso"
+            ]
+          },
+          "secao": {
+            "type": "string"
+          },
+          "chave": {
+            "type": "string"
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "ocorrencias": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "casos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "exemplo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "primeiraVez": {},
+          "ultimaVez": {}
+        },
+        "required": [
+          "entidade",
+          "secao",
+          "chave",
+          "rotulo",
+          "ocorrencias",
+          "casos",
+          "exemplo",
+          "primeiraVez",
+          "ultimaVez"
+        ]
+      },
+      "IntegracaoInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "apibrasil",
+              "evolution"
+            ]
+          },
+          "nome": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "instancia": {
+                "type": "string"
+              },
+              "servico": {
+                "type": "string",
+                "enum": [
+                  "dados",
+                  "consulta"
+                ]
+              }
+            }
+          },
+          "bureauId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "bureauNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "custoConsulta": {
+            "nullable": true,
+            "type": "number"
+          },
+          "contrato": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "credenciaisFinal": {
+            "type": "string"
+          },
+          "webhookConfigurado": {
+            "type": "boolean"
+          },
+          "ultimoTesteEm": {
+            "nullable": true
+          },
+          "ultimoTesteOk": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "ultimoTesteDetalhe": {
+            "nullable": true,
+            "type": "string"
+          },
+          "criadoEm": {}
+        },
+        "required": [
+          "id",
+          "tipo",
+          "nome",
+          "baseUrl",
+          "config",
+          "bureauId",
+          "bureauNome",
+          "custoConsulta",
+          "contrato",
+          "ativo",
+          "credenciaisFinal",
+          "webhookConfigurado",
+          "ultimoTesteEm",
+          "ultimoTesteOk",
+          "ultimoTesteDetalhe",
+          "criadoEm"
+        ]
+      },
+      "IntegracaoCriadaInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "webhookUrl": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "webhookUrl"
+        ]
+      },
+      "TesteIntegracaoInput": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "detalhe": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "detalhe"
+        ]
+      },
+      "WebhookConfiguradoInput": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "configuradoNaEvolution": {
+            "type": "boolean"
+          },
+          "detalhe": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "configuradoNaEvolution",
+          "detalhe"
+        ]
+      },
+      "ConversaInput": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "nome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recuperadorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recuperadorNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ultimaMensagem": {
+            "type": "string"
+          },
+          "ultimaDirecao": {
+            "type": "string",
+            "enum": [
+              "enviada",
+              "recebida"
+            ]
+          },
+          "ultimaEm": {},
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "numero",
+          "nome",
+          "recuperadorId",
+          "recuperadorNome",
+          "ultimaMensagem",
+          "ultimaDirecao",
+          "ultimaEm",
+          "total"
+        ]
+      },
+      "MensagemInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "direcao": {
+            "type": "string",
+            "enum": [
+              "enviada",
+              "recebida"
+            ]
+          },
+          "texto": {
+            "type": "string"
+          },
+          "casoId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placa": {
+            "nullable": true,
+            "type": "string"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "criadoEm": {}
+        },
+        "required": [
+          "id",
+          "direcao",
+          "texto",
+          "casoId",
+          "placa",
+          "usuarioNome",
+          "criadoEm"
+        ]
+      },
+      "PontoMapaInput": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "observadoEm": {},
+          "fonte": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "casoId",
+          "placa",
+          "modelo",
+          "status",
+          "latitude",
+          "longitude",
+          "observadoEm",
+          "fonte",
+          "descricao"
+        ]
+      },
+      "AtivoMaisVistoInput": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "avistamentos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "locais": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ultimoEm": {}
+        },
+        "required": [
+          "casoId",
+          "placa",
+          "modelo",
+          "status",
+          "avistamentos",
+          "locais",
+          "ultimoEm"
+        ]
+      },
+      "ContagemCidadeInput": {
+        "type": "object",
+        "properties": {
+          "cidade": {
+            "type": "string"
+          },
+          "uf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "emCampo": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "cidade",
+          "uf",
+          "total",
+          "retomados",
+          "emCampo"
+        ]
+      },
+      "ContagemCredorInput": {
+        "type": "object",
+        "properties": {
+          "credor": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "valorDivida": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "credor",
+          "total",
+          "retomados",
+          "valorDivida"
+        ]
+      },
+      "DesempenhoRecuperadorInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "cidades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "casos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "emCampo": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "semExito": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "status",
+          "cidades",
+          "casos",
+          "retomados",
+          "emCampo",
+          "semExito"
+        ]
+      },
+      "AlertaCasoInput": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "prazo_vencido",
+              "prazo_48h",
+              "aceite_vencido",
+              "parado",
+              "proprietario_diferente"
+            ]
+          },
+          "motivo": {
+            "type": "string"
+          },
+          "desde": {
+            "nullable": true
+          }
+        },
+        "required": [
+          "casoId",
+          "placa",
+          "modelo",
+          "status",
+          "tipo",
+          "motivo",
+          "desde"
+        ]
+      },
+      "PontoEvolucaoInput": {
+        "type": "object",
+        "properties": {
+          "mes": {
+            "type": "string"
+          },
+          "recebidos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "mes",
+          "recebidos",
+          "retomados"
+        ]
+      },
+      "PainelRecuperacaoInput": {
+        "type": "object",
+        "properties": {
+          "valorDivida": {
+            "nullable": true,
+            "type": "number"
+          },
+          "fipeCarteira": {
+            "nullable": true,
+            "type": "number"
+          },
+          "fipeRetomados": {
+            "nullable": true,
+            "type": "number"
+          },
+          "status": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "status",
+                "quantidade"
+              ]
+            }
+          },
+          "mapa": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PontoMapaInput"
+            }
+          },
+          "maisVistos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AtivoMaisVistoInput"
+            }
+          },
+          "porCidade": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContagemCidadeInput"
+            }
+          },
+          "porCredor": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContagemCredorInput"
+            }
+          },
+          "recuperadores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DesempenhoRecuperadorInput"
+            }
+          },
+          "alertas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlertaCasoInput"
+            }
+          },
+          "evolucao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PontoEvolucaoInput"
+            }
+          }
+        },
+        "required": [
+          "valorDivida",
+          "fipeCarteira",
+          "fipeRetomados",
+          "status",
+          "mapa",
+          "maisVistos",
+          "porCidade",
+          "porCredor",
+          "recuperadores",
+          "alertas",
+          "evolucao"
         ]
       },
       "Erro": {
@@ -2241,6 +3578,7 @@
             "type": "string",
             "enum": [
               "admin",
+              "gestor",
               "operador",
               "auditor"
             ]
@@ -2317,6 +3655,7 @@
             "type": "string",
             "enum": [
               "admin",
+              "gestor",
               "operador",
               "auditor"
             ]
@@ -3187,6 +4526,7 @@
             "type": "string",
             "enum": [
               "admin",
+              "gestor",
               "operador",
               "auditor"
             ]
@@ -3707,6 +5047,64 @@
               "fipeReferencia": {
                 "nullable": true,
                 "type": "string"
+              },
+              "marca": {
+                "nullable": true,
+                "type": "string"
+              },
+              "situacao": {
+                "nullable": true,
+                "type": "string"
+              },
+              "tipo": {
+                "nullable": true,
+                "type": "string"
+              },
+              "especie": {
+                "nullable": true,
+                "type": "string"
+              },
+              "categoria": {
+                "nullable": true,
+                "type": "string"
+              },
+              "carroceria": {
+                "nullable": true,
+                "type": "string"
+              },
+              "combustivel": {
+                "nullable": true,
+                "type": "string"
+              },
+              "potencia": {
+                "nullable": true,
+                "type": "string"
+              },
+              "cilindradas": {
+                "nullable": true,
+                "type": "string"
+              },
+              "motor": {
+                "nullable": true,
+                "type": "string"
+              },
+              "procedencia": {
+                "nullable": true,
+                "type": "string"
+              },
+              "municipioEmplacamento": {
+                "nullable": true,
+                "type": "string"
+              },
+              "ufEmplacamento": {
+                "nullable": true,
+                "type": "string"
+              },
+              "anoFabricacao": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
               }
             },
             "required": [
@@ -3719,7 +5117,21 @@
               "renavam",
               "valorFipe",
               "fipeCodigo",
-              "fipeReferencia"
+              "fipeReferencia",
+              "marca",
+              "situacao",
+              "tipo",
+              "especie",
+              "categoria",
+              "carroceria",
+              "combustivel",
+              "potencia",
+              "cilindradas",
+              "motor",
+              "procedencia",
+              "municipioEmplacamento",
+              "ufEmplacamento",
+              "anoFabricacao"
             ],
             "additionalProperties": false
           },
@@ -3797,7 +5209,8 @@
               "rito_definido",
               "registro_juridico",
               "verificacao_veicular",
-              "avistamento"
+              "avistamento",
+              "relatorio_colado"
             ]
           },
           "statusDe": {
@@ -4407,12 +5820,15 @@
             "type": "number"
           },
           "fornecedor": {
+            "nullable": true,
             "type": "string"
           },
           "baseLegal": {
+            "nullable": true,
             "type": "string"
           },
           "justificativa": {
+            "nullable": true,
             "type": "string"
           },
           "situacao": {
@@ -4502,7 +5918,8 @@
               "equipe_campo",
               "credor",
               "devedor",
-              "outro"
+              "outro",
+              "radar"
             ]
           },
           "usuarioNome": {
@@ -4519,6 +5936,1331 @@
           "descricao",
           "fonte",
           "usuarioNome"
+        ],
+        "additionalProperties": false
+      },
+      "ResumoImportacao": {
+        "type": "object",
+        "properties": {
+          "relatorioId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "veiculo": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "campos": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "restricoes": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "campos",
+              "restricoes"
+            ],
+            "additionalProperties": false
+          },
+          "pessoas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "nome": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "papeis": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "devedor",
+                      "proprietario",
+                      "terceiro_possuidor",
+                      "parente",
+                      "avalista",
+                      "outro"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "nome",
+                "papeis"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "contatos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "enderecos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "parentes": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "radares": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "extras": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "novos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "secao": {
+                  "type": "string"
+                },
+                "rotulo": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "secao",
+                "rotulo"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "relatorioId",
+          "veiculo",
+          "pessoas",
+          "contatos",
+          "enderecos",
+          "parentes",
+          "radares",
+          "extras",
+          "novos",
+          "avisos"
+        ],
+        "additionalProperties": false
+      },
+      "RelatorioColado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "via": {
+            "type": "string",
+            "enum": [
+              "colado",
+              "integracao"
+            ]
+          },
+          "secoes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resumo": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "fornecedor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "coladoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tamanho": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "via",
+          "secoes",
+          "resumo",
+          "fornecedor",
+          "usuarioNome",
+          "coladoEm",
+          "tamanho"
+        ],
+        "additionalProperties": false
+      },
+      "DadoExtra": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "veiculo",
+              "pessoa",
+              "caso"
+            ]
+          },
+          "pessoaId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "secao": {
+            "type": "string"
+          },
+          "chave": {
+            "type": "string"
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "string"
+          },
+          "sensivel": {
+            "type": "boolean"
+          },
+          "novo": {
+            "type": "boolean"
+          },
+          "promovidoEm": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "entidade",
+          "pessoaId",
+          "secao",
+          "chave",
+          "rotulo",
+          "valor",
+          "sensivel",
+          "novo",
+          "promovidoEm",
+          "criadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "PessoasDoCaso": {
+        "type": "object",
+        "properties": {
+          "alertas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pessoas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "papel": {
+                  "type": "string",
+                  "enum": [
+                    "devedor",
+                    "proprietario",
+                    "terceiro_possuidor",
+                    "parente",
+                    "avalista",
+                    "outro"
+                  ]
+                },
+                "vinculo": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "iniciais": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "documentoMascarado": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "tipoPessoa": {
+                  "nullable": true,
+                  "type": "string",
+                  "enum": [
+                    "PF",
+                    "PJ"
+                  ]
+                },
+                "obito": {
+                  "nullable": true,
+                  "type": "boolean"
+                },
+                "contatos": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "enderecos": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "id",
+                "papel",
+                "vinculo",
+                "iniciais",
+                "documentoMascarado",
+                "tipoPessoa",
+                "obito",
+                "contatos",
+                "enderecos"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "alertas",
+          "pessoas"
+        ],
+        "additionalProperties": false
+      },
+      "FonteContato": {
+        "type": "object",
+        "properties": {
+          "fonte": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "ranking": {
+            "type": "number"
+          },
+          "titular": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fonte"
+        ],
+        "additionalProperties": false
+      },
+      "ContatoPessoa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "celular",
+              "fixo",
+              "email",
+              "invalido"
+            ]
+          },
+          "valor": {
+            "type": "string"
+          },
+          "original": {
+            "nullable": true,
+            "type": "string"
+          },
+          "valido": {
+            "type": "boolean"
+          },
+          "whatsapp": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "whatsappConferidoEm": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "fontes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FonteContato"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "valor",
+          "original",
+          "valido",
+          "whatsapp",
+          "whatsappConferidoEm",
+          "fontes"
+        ],
+        "additionalProperties": false
+      },
+      "EnderecoPessoa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "logradouro": {
+            "type": "string"
+          },
+          "numero": {
+            "nullable": true,
+            "type": "string"
+          },
+          "complemento": {
+            "nullable": true,
+            "type": "string"
+          },
+          "bairro": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cidade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "cep": {
+            "nullable": true,
+            "type": "string"
+          },
+          "variantes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fontes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "logradouro",
+          "numero",
+          "complemento",
+          "bairro",
+          "cidade",
+          "uf",
+          "cep",
+          "variantes",
+          "fontes",
+          "latitude",
+          "longitude"
+        ],
+        "additionalProperties": false
+      },
+      "PessoaRevelada": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "devedor",
+              "proprietario",
+              "terceiro_possuidor",
+              "parente",
+              "avalista",
+              "outro"
+            ]
+          },
+          "vinculo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "parenteDe": {
+            "nullable": true,
+            "type": "string"
+          },
+          "documento": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tipoPessoa": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "PF",
+              "PJ"
+            ]
+          },
+          "nome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomeCivil": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomeMae": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomePai": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nascimento": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sexo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "estadoCivil": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rg": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rgOrgao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rgUf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "tituloEleitor": {
+            "nullable": true,
+            "type": "string"
+          },
+          "profissao": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nacionalidade": {
+            "nullable": true,
+            "type": "string"
+          },
+          "situacaoCadastral": {
+            "nullable": true,
+            "type": "string"
+          },
+          "obito": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contatos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContatoPessoa"
+            }
+          },
+          "enderecos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnderecoPessoa"
+            }
+          },
+          "extras": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DadoExtra"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "papel",
+          "vinculo",
+          "parenteDe",
+          "documento",
+          "tipoPessoa",
+          "nome",
+          "nomeCivil",
+          "nomeMae",
+          "nomePai",
+          "nascimento",
+          "sexo",
+          "estadoCivil",
+          "rg",
+          "rgOrgao",
+          "rgUf",
+          "tituloEleitor",
+          "profissao",
+          "nacionalidade",
+          "situacaoCadastral",
+          "obito",
+          "atualizadoEm",
+          "contatos",
+          "enderecos",
+          "extras"
+        ],
+        "additionalProperties": false
+      },
+      "PessoasReveladas": {
+        "type": "object",
+        "properties": {
+          "alertas": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sensivelLiberado": {
+            "type": "boolean"
+          },
+          "pessoas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PessoaRevelada"
+            }
+          }
+        },
+        "required": [
+          "alertas",
+          "sensivelLiberado",
+          "pessoas"
+        ],
+        "additionalProperties": false
+      },
+      "CampoNovo": {
+        "type": "object",
+        "properties": {
+          "entidade": {
+            "type": "string",
+            "enum": [
+              "veiculo",
+              "pessoa",
+              "caso"
+            ]
+          },
+          "secao": {
+            "type": "string"
+          },
+          "chave": {
+            "type": "string"
+          },
+          "rotulo": {
+            "type": "string"
+          },
+          "ocorrencias": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "casos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "exemplo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "primeiraVez": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ultimaVez": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "entidade",
+          "secao",
+          "chave",
+          "rotulo",
+          "ocorrencias",
+          "casos",
+          "exemplo",
+          "primeiraVez",
+          "ultimaVez"
+        ],
+        "additionalProperties": false
+      },
+      "Integracao": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "apibrasil",
+              "evolution"
+            ]
+          },
+          "nome": {
+            "type": "string"
+          },
+          "baseUrl": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "instancia": {
+                "type": "string"
+              },
+              "servico": {
+                "type": "string",
+                "enum": [
+                  "dados",
+                  "consulta"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "bureauId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "bureauNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "custoConsulta": {
+            "nullable": true,
+            "type": "number"
+          },
+          "contrato": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "credenciaisFinal": {
+            "type": "string"
+          },
+          "webhookConfigurado": {
+            "type": "boolean"
+          },
+          "ultimoTesteEm": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "ultimoTesteOk": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "ultimoTesteDetalhe": {
+            "nullable": true,
+            "type": "string"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "nome",
+          "baseUrl",
+          "config",
+          "bureauId",
+          "bureauNome",
+          "custoConsulta",
+          "contrato",
+          "ativo",
+          "credenciaisFinal",
+          "webhookConfigurado",
+          "ultimoTesteEm",
+          "ultimoTesteOk",
+          "ultimoTesteDetalhe",
+          "criadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "IntegracaoCriada": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "webhookUrl": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "webhookUrl"
+        ],
+        "additionalProperties": false
+      },
+      "TesteIntegracao": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "detalhe": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "detalhe"
+        ],
+        "additionalProperties": false
+      },
+      "WebhookConfigurado": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "configuradoNaEvolution": {
+            "type": "boolean"
+          },
+          "detalhe": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "configuradoNaEvolution",
+          "detalhe"
+        ],
+        "additionalProperties": false
+      },
+      "Conversa": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "nome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recuperadorId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "recuperadorNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ultimaMensagem": {
+            "type": "string"
+          },
+          "ultimaDirecao": {
+            "type": "string",
+            "enum": [
+              "enviada",
+              "recebida"
+            ]
+          },
+          "ultimaEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "numero",
+          "nome",
+          "recuperadorId",
+          "recuperadorNome",
+          "ultimaMensagem",
+          "ultimaDirecao",
+          "ultimaEm",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "Mensagem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "direcao": {
+            "type": "string",
+            "enum": [
+              "enviada",
+              "recebida"
+            ]
+          },
+          "texto": {
+            "type": "string"
+          },
+          "casoId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placa": {
+            "nullable": true,
+            "type": "string"
+          },
+          "usuarioNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "direcao",
+          "texto",
+          "casoId",
+          "placa",
+          "usuarioNome",
+          "criadoEm"
+        ],
+        "additionalProperties": false
+      },
+      "PontoMapa": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "observadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fonte": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "casoId",
+          "placa",
+          "modelo",
+          "status",
+          "latitude",
+          "longitude",
+          "observadoEm",
+          "fonte",
+          "descricao"
+        ],
+        "additionalProperties": false
+      },
+      "AtivoMaisVisto": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "avistamentos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "locais": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "ultimoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "casoId",
+          "placa",
+          "modelo",
+          "status",
+          "avistamentos",
+          "locais",
+          "ultimoEm"
+        ],
+        "additionalProperties": false
+      },
+      "ContagemCidade": {
+        "type": "object",
+        "properties": {
+          "cidade": {
+            "type": "string"
+          },
+          "uf": {
+            "nullable": true,
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "emCampo": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "cidade",
+          "uf",
+          "total",
+          "retomados",
+          "emCampo"
+        ],
+        "additionalProperties": false
+      },
+      "ContagemCredor": {
+        "type": "object",
+        "properties": {
+          "credor": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "valorDivida": {
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "credor",
+          "total",
+          "retomados",
+          "valorDivida"
+        ],
+        "additionalProperties": false
+      },
+      "DesempenhoRecuperador": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "cidades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "casos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "emCampo": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "semExito": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "status",
+          "cidades",
+          "casos",
+          "retomados",
+          "emCampo",
+          "semExito"
+        ],
+        "additionalProperties": false
+      },
+      "AlertaCaso": {
+        "type": "object",
+        "properties": {
+          "casoId": {
+            "type": "string"
+          },
+          "placa": {
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "prazo_vencido",
+              "prazo_48h",
+              "aceite_vencido",
+              "parado",
+              "proprietario_diferente"
+            ]
+          },
+          "motivo": {
+            "type": "string"
+          },
+          "desde": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "casoId",
+          "placa",
+          "modelo",
+          "status",
+          "tipo",
+          "motivo",
+          "desde"
+        ],
+        "additionalProperties": false
+      },
+      "PontoEvolucao": {
+        "type": "object",
+        "properties": {
+          "mes": {
+            "type": "string"
+          },
+          "recebidos": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "retomados": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "mes",
+          "recebidos",
+          "retomados"
+        ],
+        "additionalProperties": false
+      },
+      "PainelRecuperacao": {
+        "type": "object",
+        "properties": {
+          "valorDivida": {
+            "nullable": true,
+            "type": "number"
+          },
+          "fipeCarteira": {
+            "nullable": true,
+            "type": "number"
+          },
+          "fipeRetomados": {
+            "nullable": true,
+            "type": "number"
+          },
+          "status": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "status",
+                "quantidade"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "mapa": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PontoMapa"
+            }
+          },
+          "maisVistos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AtivoMaisVisto"
+            }
+          },
+          "porCidade": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContagemCidade"
+            }
+          },
+          "porCredor": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContagemCredor"
+            }
+          },
+          "recuperadores": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DesempenhoRecuperador"
+            }
+          },
+          "alertas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlertaCaso"
+            }
+          },
+          "evolucao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PontoEvolucao"
+            }
+          }
+        },
+        "required": [
+          "valorDivida",
+          "fipeCarteira",
+          "fipeRetomados",
+          "status",
+          "mapa",
+          "maisVistos",
+          "porCidade",
+          "porCredor",
+          "recuperadores",
+          "alertas",
+          "evolucao"
         ],
         "additionalProperties": false
       }
@@ -4660,6 +7402,7 @@
                         "type": "string",
                         "enum": [
                           "admin",
+                          "gestor",
                           "operador",
                           "auditor"
                         ]
@@ -6612,7 +9355,7 @@
                           },
                           "renavam": {
                             "type": "string",
-                            "pattern": "^d{11}$"
+                            "pattern": "^\\d{11}$"
                           },
                           "modelo": {
                             "type": "string",
@@ -6650,6 +9393,47 @@
                         "required": [
                           "placa",
                           "modelo"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "relatorio": {
+                        "type": "object",
+                        "properties": {
+                          "texto": {
+                            "type": "string",
+                            "minLength": 10,
+                            "maxLength": 500000
+                          },
+                          "papelPessoa": {
+                            "type": "string",
+                            "enum": [
+                              "devedor",
+                              "proprietario",
+                              "terceiro_possuidor",
+                              "avalista",
+                              "outro"
+                            ]
+                          },
+                          "bureauId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "baseLegal": {
+                            "type": "string",
+                            "enum": [
+                              "execucao_contrato",
+                              "legitimo_interesse",
+                              "obrigacao_legal",
+                              "consentimento"
+                            ]
+                          },
+                          "justificativa": {
+                            "type": "string",
+                            "minLength": 10
+                          }
+                        },
+                        "required": [
+                          "texto"
                         ],
                         "additionalProperties": false
                       }
@@ -6691,7 +9475,7 @@
                           },
                           "renavam": {
                             "type": "string",
-                            "pattern": "^d{11}$"
+                            "pattern": "^\\d{11}$"
                           },
                           "modelo": {
                             "type": "string",
@@ -6749,6 +9533,47 @@
                       "saldoDevedor": {
                         "type": "number",
                         "minimum": 0
+                      },
+                      "relatorio": {
+                        "type": "object",
+                        "properties": {
+                          "texto": {
+                            "type": "string",
+                            "minLength": 10,
+                            "maxLength": 500000
+                          },
+                          "papelPessoa": {
+                            "type": "string",
+                            "enum": [
+                              "devedor",
+                              "proprietario",
+                              "terceiro_possuidor",
+                              "avalista",
+                              "outro"
+                            ]
+                          },
+                          "bureauId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "baseLegal": {
+                            "type": "string",
+                            "enum": [
+                              "execucao_contrato",
+                              "legitimo_interesse",
+                              "obrigacao_legal",
+                              "consentimento"
+                            ]
+                          },
+                          "justificativa": {
+                            "type": "string",
+                            "minLength": 10
+                          }
+                        },
+                        "required": [
+                          "texto"
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "required": [
@@ -6787,6 +9612,16 @@
             }
           },
           "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
             "description": "Default Response",
             "content": {
               "application/json": {
@@ -7091,158 +9926,6 @@
         }
       }
     },
-    "/api/casos/{id}/verificacao-veicular": {
-      "post": {
-        "tags": [
-          "veiculo"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "bureauId": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "baseLegal": {
-                    "type": "string",
-                    "enum": [
-                      "execucao_contrato",
-                      "legitimo_interesse",
-                      "obrigacao_legal",
-                      "consentimento"
-                    ]
-                  },
-                  "justificativa": {
-                    "type": "string",
-                    "minLength": 10
-                  },
-                  "veiculo": {
-                    "type": "object",
-                    "properties": {
-                      "placa": {
-                        "type": "string",
-                        "minLength": 1
-                      },
-                      "chassi": {
-                        "type": "string"
-                      },
-                      "renavam": {
-                        "type": "string",
-                        "pattern": "^\\d{11}$"
-                      },
-                      "modelo": {
-                        "type": "string",
-                        "minLength": 1
-                      },
-                      "cor": {
-                        "type": "string",
-                        "minLength": 1
-                      },
-                      "anoFabricacao": {
-                        "type": "integer",
-                        "minimum": 1950,
-                        "maximum": 2100
-                      },
-                      "anoModelo": {
-                        "type": "integer",
-                        "minimum": 1950,
-                        "maximum": 2100
-                      },
-                      "situacao": {
-                        "type": "string",
-                        "minLength": 1
-                      }
-                    },
-                    "required": [
-                      "placa"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "restricoes": {
-                    "default": [],
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "minLength": 1
-                    }
-                  },
-                  "renajud": {
-                    "type": "boolean"
-                  },
-                  "rouboFurto": {
-                    "type": "boolean"
-                  },
-                  "leilao": {
-                    "type": "boolean"
-                  },
-                  "alienacaoFiduciaria": {
-                    "type": "boolean"
-                  },
-                  "anoLicenciamento": {
-                    "type": "integer",
-                    "minimum": 1950,
-                    "maximum": 2100
-                  }
-                },
-                "required": [
-                  "bureauId",
-                  "baseLegal",
-                  "justificativa",
-                  "veiculo"
-                ],
-                "additionalProperties": false
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Criado"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Erro"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Erro"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/casos/{id}/verificacoes-veiculares": {
       "get": {
         "tags": [
@@ -7389,6 +10072,1107 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/relatorios": {
+      "post": {
+        "tags": [
+          "relatorios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "texto": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 500000
+                  },
+                  "papelPessoa": {
+                    "type": "string",
+                    "enum": [
+                      "devedor",
+                      "proprietario",
+                      "terceiro_possuidor",
+                      "avalista",
+                      "outro"
+                    ]
+                  },
+                  "bureauId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "baseLegal": {
+                    "type": "string",
+                    "enum": [
+                      "execucao_contrato",
+                      "legitimo_interesse",
+                      "obrigacao_legal",
+                      "consentimento"
+                    ]
+                  },
+                  "justificativa": {
+                    "type": "string",
+                    "minLength": 10
+                  }
+                },
+                "required": [
+                  "texto"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumoImportacao"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "relatorios"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RelatorioColado"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/conferir-devedor": {
+      "post": {
+        "tags": [
+          "relatorios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "documentos": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Z]{11,14}$"
+                    }
+                  }
+                },
+                "required": [
+                  "documentos"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "iguais": {
+                      "type": "array",
+                      "items": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "required": [
+                    "iguais"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/relatorios/{relatorioId}/texto": {
+      "post": {
+        "tags": [
+          "relatorios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "finalidade": {
+                    "type": "string",
+                    "minLength": 10
+                  }
+                },
+                "required": [
+                  "finalidade"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "relatorioId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "texto": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "texto"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/dados-extras": {
+      "get": {
+        "tags": [
+          "relatorios"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DadoExtra"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/pessoas": {
+      "get": {
+        "tags": [
+          "relatorios"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PessoasDoCaso"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/pessoas/revelar": {
+      "post": {
+        "tags": [
+          "relatorios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "finalidade": {
+                    "type": "string",
+                    "minLength": 10
+                  }
+                },
+                "required": [
+                  "finalidade"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PessoasReveladas"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campos-novos": {
+      "get": {
+        "tags": [
+          "relatorios"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CampoNovo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/integracoes": {
+      "get": {
+        "tags": [
+          "integracoes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Integracao"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "tipo": {
+                        "type": "string",
+                        "enum": [
+                          "apibrasil"
+                        ]
+                      },
+                      "nome": {
+                        "type": "string",
+                        "minLength": 2
+                      },
+                      "baseUrl": {
+                        "default": "https://gateway.apibrasil.io/api/v2",
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "bearerToken": {
+                        "type": "string",
+                        "minLength": 10
+                      },
+                      "deviceToken": {
+                        "type": "string",
+                        "minLength": 4
+                      },
+                      "servico": {
+                        "default": "dados",
+                        "type": "string",
+                        "enum": [
+                          "dados",
+                          "consulta"
+                        ]
+                      },
+                      "contratoFornecedorId": {
+                        "type": "string",
+                        "minLength": 3
+                      },
+                      "custoConsulta": {
+                        "default": 0,
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    },
+                    "required": [
+                      "tipo",
+                      "nome",
+                      "bearerToken",
+                      "contratoFornecedorId"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "tipo": {
+                        "type": "string",
+                        "enum": [
+                          "evolution"
+                        ]
+                      },
+                      "nome": {
+                        "type": "string",
+                        "minLength": 2
+                      },
+                      "baseUrl": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "apikey": {
+                        "type": "string",
+                        "minLength": 8
+                      },
+                      "instancia": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "tipo",
+                      "nome",
+                      "baseUrl",
+                      "apikey",
+                      "instancia"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegracaoCriada"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/integracoes/{id}": {
+      "put": {
+        "tags": [
+          "integracoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "ativo": {
+                    "type": "boolean"
+                  },
+                  "bearerToken": {
+                    "type": "string",
+                    "minLength": 10
+                  },
+                  "deviceToken": {
+                    "type": "string",
+                    "minLength": 4
+                  },
+                  "apikey": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "instancia": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "servico": {
+                    "type": "string",
+                    "enum": [
+                      "dados",
+                      "consulta"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/integracoes/{id}/testar": {
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TesteIntegracao"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/integracoes/{id}/webhook": {
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookConfigurado"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/consulta-apibrasil": {
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "integracaoId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "baseLegal": {
+                    "type": "string",
+                    "enum": [
+                      "execucao_contrato",
+                      "legitimo_interesse",
+                      "obrigacao_legal",
+                      "consentimento"
+                    ]
+                  },
+                  "justificativa": {
+                    "type": "string",
+                    "minLength": 10
+                  },
+                  "papelPessoa": {
+                    "type": "string",
+                    "enum": [
+                      "devedor",
+                      "proprietario",
+                      "terceiro_possuidor",
+                      "avalista",
+                      "outro"
+                    ]
+                  }
+                },
+                "required": [
+                  "baseLegal",
+                  "justificativa"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumoImportacao"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/casos/{id}/pessoas/{pessoaId}/conferir-whatsapp": {
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "pessoaId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "conferidos": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "comWhatsapp": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "conferidos",
+                    "comWhatsapp"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversas": {
+      "get": {
+        "tags": [
+          "integracoes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Conversa"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversas/{numero}": {
+      "get": {
+        "tags": [
+          "integracoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10,15}$"
+            },
+            "in": "path",
+            "name": "numero",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mensagem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "texto": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "casoId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "integracaoId": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "texto"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10,15}$"
+            },
+            "in": "path",
+            "name": "numero",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/painel/recuperacao": {
+      "get": {
+        "tags": [
+          "painel"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PainelRecuperacao"
                 }
               }
             }

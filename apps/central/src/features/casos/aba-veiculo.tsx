@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { ClipboardPasteIcon, ShieldAlertIcon, TagIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { CloudDownloadIcon, ShieldAlertIcon, SparklesIcon, TagIcon } from 'lucide-react';
+import { useState } from 'react';
 
-import { lerRelatorioVeicular, TIPOS_FIPE, verificacaoVeicularEntrada, type RelatorioVeicular } from '@workspace/domain';
+import { consultaIntegracaoEntrada, PAPEIS_DO_DOSSIE, TIPOS_FIPE, type PapelDoDossie } from '@workspace/domain';
 import { Rotulo } from '@workspace/ui/brand/rotulo';
 import { Alert, AlertDescription, AlertTitle } from '@workspace/ui/components/alert';
 import { Badge } from '@workspace/ui/components/badge';
@@ -23,27 +23,26 @@ import { Spinner } from '@workspace/ui/components/spinner';
 import { Textarea } from '@workspace/ui/components/textarea';
 import { formatarDataHora, formatarMoeda } from '@workspace/ui/lib/formato';
 import { toast } from '@workspace/ui/lib/toast';
+import { cn } from '@workspace/ui/lib/utils';
 
 import { ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
 import {
   api,
-  bureausQuery,
+  dadosExtrasQuery,
   exigir,
+  integracoesQuery,
   pode,
   verificacoesVeiculoQuery,
   type CasoDetalhe,
+  type DadoExtra,
   type UsuarioSessao,
 } from '@/lib/api.ts';
+import { ROTULO_PAPEL } from '@/lib/pessoa.ts';
 
+import { BASES_LEGAIS, descreverResumo, useAtualizarDepoisDeColar } from '../relatorio/dialogo-colar.tsx';
 import { useAtualizarCaso } from './painel-acoes.tsx';
 
 const ROTULO_TIPO = { carros: 'Carro', motos: 'Moto', caminhoes: 'Caminhão' } as const;
-const BASES = {
-  execucao_contrato: 'Execução de contrato',
-  legitimo_interesse: 'Legítimo interesse',
-  obrigacao_legal: 'Obrigação legal',
-  consentimento: 'Consentimento',
-} as const;
 
 function Linha({ rotulo, children }: { rotulo: string; children: React.ReactNode }) {
   return (
@@ -54,116 +53,325 @@ function Linha({ rotulo, children }: { rotulo: string; children: React.ReactNode
   );
 }
 
+export function Dado({ rotulo, valor, mono }: { rotulo: string; valor: React.ReactNode; mono?: boolean }) {
+  const vazio = valor === null || valor === undefined || valor === '';
+  return (
+    <div className="min-w-0 rounded-lg bg-white/[0.03] px-3 py-2.5 ring-1 ring-white/[0.05]">
+      <Rotulo className="text-[10px]">{rotulo}</Rotulo>
+      <p
+        className={cn('mt-0.5 line-clamp-2 text-sm break-words', vazio ? 'text-slate-600' : 'text-white', mono && 'font-mono text-xs')}
+        title={typeof valor === 'string' ? valor : undefined}
+      >
+        {vazio ? '—' : valor}
+      </p>
+    </div>
+  );
+}
+
 const simNao = (v: boolean | null | undefined, perigo: boolean) =>
   v == null ? <span className="text-muted-foreground">não informado</span> : v ? <span className={perigo ? 'text-red-300' : ''}>sim</span> : 'não';
 
-/** Veículo: identificação, valor FIPE e verificações de fornecedor contratado. */
+/** Agrupa os dados extras por seção, na ordem em que vieram. */
+export const porSecao = (extras: DadoExtra[]) => {
+  const grupos = new Map<string, DadoExtra[]>();
+  for (const e of extras) grupos.set(e.secao, [...(grupos.get(e.secao) ?? []), e]);
+  return [...grupos.entries()];
+};
+
+/** Dados extras agrupados por seção, com o selo de campo novo. */
+export function ListaDeExtras({ extras }: { extras: DadoExtra[] }) {
+  return (
+    <div className="space-y-4">
+      {porSecao(extras).map(([secao, itens]) => (
+        <div key={secao}>
+          <p className="mb-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">{secao}</p>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2 2xl:grid-cols-3">
+            {itens.map((e) => (
+              <div key={e.id} className="flex min-w-0 items-start gap-2 rounded-lg bg-white/[0.03] px-3 py-2 ring-1 ring-white/[0.05]">
+                <div className="min-w-0 flex-1">
+                  <Rotulo className="text-[10px]">{e.rotulo}</Rotulo>
+                  <p className="text-sm break-words text-white">{e.valor}</p>
+                </div>
+                {e.novo ? (
+                  <Badge className="shrink-0 bg-amber-500/15 text-amber-200">
+                    <SparklesIcon className="size-3" aria-hidden />
+                    novo
+                  </Badge>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Veículo: ficha técnica completa, valor FIPE, restrições e tudo o que veio sem campo próprio. */
 export function AbaVeiculo({ caso, sessao }: { caso: CasoDetalhe; sessao: UsuarioSessao }) {
   const verificacoes = useQuery(verificacoesVeiculoQuery(caso.id));
+  const extras = useQuery(dadosExtrasQuery(caso.id));
   const [fipe, setFipe] = useState(false);
-  const [relatorio, setRelatorio] = useState(false);
+  const [apiBrasil, setApiBrasil] = useState(false);
   const escreve = pode.escrever(sessao);
   const ultima = verificacoes.data?.[0];
   const divida = caso.origem === 'plataforma_credor' ? caso.ativo.valorDivida : caso.saldoDevedor;
+  const a = caso.ativo;
+  const extrasDoVeiculo = (extras.data ?? []).filter((e) => e.entidade !== 'pessoa');
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-white">Valor FIPE</CardTitle>
-          <CardDescription>Tabela pública. Serve para comparar o bem com a dívida e medir o valor recuperado.</CardDescription>
+          <CardTitle className="text-white">Ficha técnica</CardTitle>
+          <CardDescription>Como veio do credor e dos relatórios colados ou consultados. O dado mais novo prevalece.</CardDescription>
           {escreve ? (
             <CardAction>
-              <Button variant="ghost" size="sm" onClick={() => setFipe(true)}>
-                <TagIcon />
-                Consultar FIPE
+              <Button variant="outline" size="sm" onClick={() => setApiBrasil(true)}>
+                <CloudDownloadIcon />
+                Consultar API Brasil
               </Button>
             </CardAction>
           ) : null}
         </CardHeader>
         <CardContent>
-          {caso.ativo.valorFipe != null ? (
-            <>
-              <Linha rotulo="Valor">
-                <span className="tabular-nums">{formatarMoeda(caso.ativo.valorFipe)}</span>
-              </Linha>
-              <Linha rotulo="Referência">
-                {caso.ativo.fipeReferencia} · código {caso.ativo.fipeCodigo}
-              </Linha>
-              {divida ? (
-                <Linha rotulo={caso.origem === 'plataforma_credor' ? 'Valor ÷ dívida' : 'Saldo ÷ valor'}>
-                  <span className="tabular-nums">
-                    {caso.origem === 'plataforma_credor'
-                      ? `${Math.round((caso.ativo.valorFipe / divida) * 100)}%`
-                      : `${Math.round((divida / caso.ativo.valorFipe) * 100)}%`}
-                  </span>
-                </Linha>
-              ) : null}
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">Ainda não consultado.</p>
-          )}
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 2xl:grid-cols-4">
+            <Dado rotulo="Placa" valor={caso.placa} mono />
+            <Dado rotulo="Marca" valor={a.marca} />
+            <Dado rotulo="Modelo" valor={caso.modelo} />
+            <Dado rotulo="Ano fab./modelo" valor={a.anoFabricacao || a.ano ? `${a.anoFabricacao ?? '—'} / ${a.ano ?? '—'}` : null} />
+            <Dado rotulo="Cor" valor={a.cor} />
+            <Dado rotulo="Tipo" valor={a.tipo} />
+            <Dado rotulo="Espécie" valor={a.especie} />
+            <Dado rotulo="Categoria" valor={a.categoria} />
+            <Dado rotulo="Carroceria" valor={a.carroceria} />
+            <Dado rotulo="Combustível" valor={a.combustivel} />
+            <Dado rotulo="Potência" valor={a.potencia} />
+            <Dado rotulo="Cilindradas" valor={a.cilindradas} />
+            <Dado rotulo="Motor" valor={a.motor} mono />
+            <Dado rotulo="Procedência" valor={a.procedencia} />
+            <Dado rotulo="Chassi" valor={a.chassi} mono />
+            <Dado rotulo="Renavam" valor={a.renavam} mono />
+            <Dado rotulo="Situação" valor={a.situacao} />
+            <Dado rotulo="Emplacamento" valor={[a.municipioEmplacamento, a.ufEmplacamento].filter(Boolean).join(' / ') || null} />
+          </div>
         </CardContent>
       </Card>
 
+      <div className="grid gap-4 2xl:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-white">Restrições e situação</CardTitle>
+            <CardDescription>Do relatório mais recente. Cada texto colado fica no histórico do caso.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {verificacoes.isPending ? (
+              <Skeleton className="h-24" />
+            ) : verificacoes.isError ? (
+              <ErroDeConsulta erro={verificacoes.error} aoTentar={() => void verificacoes.refetch()} />
+            ) : ultima ? (
+              <>
+                <Linha rotulo="Situação">{ultima.situacao ?? '—'}</Linha>
+                <Linha rotulo="RENAJUD">{simNao(ultima.renajud, true)}</Linha>
+                <Linha rotulo="Alienação fiduciária">{simNao(ultima.alienacaoFiduciaria, false)}</Linha>
+                <Linha rotulo="Roubo ou furto">{simNao(ultima.rouboFurto, true)}</Linha>
+                <Linha rotulo="Leilão">{simNao(ultima.leilao, true)}</Linha>
+                <Linha rotulo="Licenciamento">{ultima.anoLicenciamento ?? '—'}</Linha>
+                <div className="flex flex-wrap gap-1.5 py-2">
+                  {ultima.restricoes.length ? (
+                    ultima.restricoes.map((r) => (
+                      <Badge key={r} className="bg-red-500/15 text-red-200">
+                        {r}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">sem restrições</span>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {ultima.fornecedor ?? 'Texto colado'} · {formatarDataHora(ultima.verificadoEm)} · {ultima.usuarioNome ?? '—'}
+                  {ultima.baseLegal ? ` · ${BASES_LEGAIS[ultima.baseLegal as keyof typeof BASES_LEGAIS] ?? ultima.baseLegal}` : ''}
+                </p>
+              </>
+            ) : (
+              <p className="py-2 text-sm text-muted-foreground">
+                Nenhuma verificação ainda. Cole o relatório do veículo ou consulte a API Brasil.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-white">Valor FIPE</CardTitle>
+            <CardDescription>Tabela pública. Compara o bem com a dívida e mede o valor recuperado.</CardDescription>
+            {escreve ? (
+              <CardAction>
+                <Button variant="ghost" size="sm" onClick={() => setFipe(true)}>
+                  <TagIcon />
+                  Consultar FIPE
+                </Button>
+              </CardAction>
+            ) : null}
+          </CardHeader>
+          <CardContent>
+            {a.valorFipe != null ? (
+              <>
+                <p className="mb-2 text-3xl font-bold text-white tabular-nums">{formatarMoeda(a.valorFipe)}</p>
+                <Linha rotulo="Referência">
+                  {a.fipeReferencia} · código {a.fipeCodigo}
+                </Linha>
+                {divida ? (
+                  <Linha rotulo={caso.origem === 'plataforma_credor' ? 'Valor ÷ dívida' : 'Saldo ÷ valor'}>
+                    <span className="tabular-nums">
+                      {caso.origem === 'plataforma_credor'
+                        ? `${Math.round((a.valorFipe / divida) * 100)}%`
+                        : `${Math.round((divida / a.valorFipe) * 100)}%`}
+                    </span>
+                  </Linha>
+                ) : null}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Ainda não consultado.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-white">Verificação veicular</CardTitle>
+          <CardTitle className="text-white">Outros dados do relatório</CardTitle>
           <CardDescription>
-            Restrições e situação do veículo, trazidas por fornecedor contratado. Cada consulta fica na trilha de auditoria.
+            O que veio sem campo próprio. Os marcados como novos aparecem em Gestão › Campos novos, para virar campo no próximo deploy.
           </CardDescription>
-          {escreve ? (
-            <CardAction>
-              <Button variant="ghost" size="sm" onClick={() => setRelatorio(true)}>
-                <ClipboardPasteIcon />
-                Colar relatório
-              </Button>
-            </CardAction>
-          ) : null}
         </CardHeader>
         <CardContent>
-          <Linha rotulo="Renavam">
-            <span className="font-mono text-xs">{caso.ativo.renavam ?? '—'}</span>
-          </Linha>
-          <Linha rotulo="Chassi">
-            <span className="font-mono text-xs">{caso.ativo.chassi ?? '—'}</span>
-          </Linha>
-          {verificacoes.isPending ? (
-            <Skeleton className="mt-3 h-24" />
-          ) : verificacoes.isError ? (
-            <ErroDeConsulta erro={verificacoes.error} aoTentar={() => void verificacoes.refetch()} />
-          ) : ultima ? (
-            <>
-              <Linha rotulo="Situação">{ultima.situacao ?? '—'}</Linha>
-              <Linha rotulo="RENAJUD">{simNao(ultima.renajud, true)}</Linha>
-              <Linha rotulo="Alienação fiduciária">{simNao(ultima.alienacaoFiduciaria, false)}</Linha>
-              <Linha rotulo="Roubo ou furto">{simNao(ultima.rouboFurto, true)}</Linha>
-              <Linha rotulo="Leilão">{simNao(ultima.leilao, true)}</Linha>
-              <Linha rotulo="Licenciamento">{ultima.anoLicenciamento ?? '—'}</Linha>
-              <div className="flex flex-wrap gap-1.5 py-2">
-                {ultima.restricoes.length ? (
-                  ultima.restricoes.map((r) => (
-                    <Badge key={r} variant="outline">
-                      {r}
-                    </Badge>
-                  ))
-                ) : (
-                  <span className="text-sm text-muted-foreground">sem restrições</span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {ultima.fornecedor} · {formatarDataHora(ultima.verificadoEm)} · {ultima.usuarioNome ?? '—'} · {BASES[ultima.baseLegal as keyof typeof BASES] ?? ultima.baseLegal}
-              </p>
-            </>
+          {extras.isPending ? (
+            <Skeleton className="h-20" />
+          ) : extrasDoVeiculo.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nada fora dos campos conhecidos.</p>
           ) : (
-            <p className="py-2 text-sm text-muted-foreground">Nenhuma verificação registrada.</p>
+            <ListaDeExtras extras={extrasDoVeiculo} />
           )}
         </CardContent>
       </Card>
 
       {fipe ? <DialogoFipe casoId={caso.id} aoFechar={() => setFipe(false)} /> : null}
-      {relatorio ? <DialogoRelatorio caso={caso} aoFechar={() => setRelatorio(false)} /> : null}
+      {apiBrasil ? <DialogoApiBrasil caso={caso} aoFechar={() => setApiBrasil(false)} /> : null}
     </div>
+  );
+}
+
+/** Consulta paga da placa: fornecedor, custo, base legal e justificativa na trilha. */
+function DialogoApiBrasil({ caso, aoFechar }: { caso: CasoDetalhe; aoFechar: () => void }) {
+  const integracoes = useQuery({ ...integracoesQuery, retry: false });
+  const atualizar = useAtualizarDepoisDeColar();
+  const [baseLegal, setBaseLegal] = useState<keyof typeof BASES_LEGAIS>('execucao_contrato');
+  const [justificativa, setJustificativa] = useState('');
+  const [papel, setPapel] = useState<PapelDoDossie | undefined>();
+  const [erros, setErros] = useState<Record<string, string>>({});
+  const conexao = integracoes.data?.find((i) => i.tipo === 'apibrasil' && i.ativo);
+
+  const consultar = useMutation({
+    mutationFn: (corpo: ReturnType<typeof consultaIntegracaoEntrada.parse>) =>
+      exigir(api.POST('/api/casos/{id}/consulta-apibrasil', { params: { path: { id: caso.id } }, body: corpo })),
+    onSuccess: (r) => {
+      toast.success('Consulta gravada no caso.', { description: descreverResumo(r) });
+      atualizar(caso.id);
+      aoFechar();
+    },
+  });
+  const precisaPapel = consultar.error?.message.includes('papel');
+
+  return (
+    <Dialog open onOpenChange={(a) => !a && aoFechar()}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Consultar a placa {caso.placa} na API Brasil</DialogTitle>
+          <DialogDescription>
+            Consulta paga. Fica na trilha de auditoria com o custo, a base legal e a justificativa. A resposta inteira é guardada e lida
+            como um relatório colado.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          noValidate
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const r = consultaIntegracaoEntrada.safeParse({ baseLegal, justificativa, papelPessoa: papel });
+            if (!r.success) return setErros(Object.fromEntries(r.error.issues.map((i) => [String(i.path[0]), i.message])));
+            setErros({});
+            consultar.mutate(r.data);
+          }}
+        >
+          {conexao ? (
+            <p className="rounded-lg bg-white/[0.03] px-3 py-2 text-sm ring-1 ring-white/[0.06]">
+              {conexao.nome} ·{' '}
+              {conexao.custoConsulta != null ? `${formatarMoeda(conexao.custoConsulta)} por consulta` : 'custo não informado'}
+            </p>
+          ) : integracoes.isPending ? (
+            <Skeleton className="h-10" />
+          ) : (
+            <Alert>
+              <ShieldAlertIcon />
+              <AlertTitle>Sem conexão com a API Brasil</AlertTitle>
+              <AlertDescription>Um administrador cadastra a chave em Gestão › Integrações.</AlertDescription>
+            </Alert>
+          )}
+          <Field>
+            <FieldLabel>Base legal</FieldLabel>
+            <Select value={baseLegal} onValueChange={(b) => setBaseLegal(b as keyof typeof BASES_LEGAIS)}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(BASES_LEGAIS).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>
+                    {v}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field data-invalid={!!erros.justificativa}>
+            <FieldLabel htmlFor="apib-just">Justificativa</FieldLabel>
+            <Textarea id="apib-just" rows={2} value={justificativa} onChange={(e) => setJustificativa(e.target.value)} />
+            <FieldDescription>Ex.: confirmar chassi e restrições antes da diligência.</FieldDescription>
+            <FieldError>{erros.justificativa}</FieldError>
+          </Field>
+          {precisaPapel ? (
+            <Field>
+              <FieldLabel>A resposta trouxe uma pessoa que não é o devedor. Qual o papel dela?</FieldLabel>
+              <Select value={papel ?? ''} onValueChange={(p) => setPapel(p as PapelDoDossie)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Escolha" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAPEIS_DO_DOSSIE.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {ROTULO_PAPEL[p]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          ) : consultar.error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{consultar.error.message}</AlertDescription>
+            </Alert>
+          ) : null}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={aoFechar}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={!conexao || consultar.isPending}>
+              {consultar.isPending ? <Spinner /> : <CloudDownloadIcon />}
+              Consultar e gravar
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -292,186 +500,6 @@ function DialogoFipe({ casoId, aoFechar }: { casoId: string; aoFechar: () => voi
           <Button disabled={!ano || consultar.isPending} onClick={() => consultar.mutate()}>
             {consultar.isPending ? <Spinner /> : null}
             Consultar e guardar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/** Rótulos legíveis do que o relatório trouxe, para a prévia. */
-const previa = (r: RelatorioVeicular): [string, string][] =>
-  (
-    [
-      ['Placa', r.placa],
-      ['Chassi', r.chassi],
-      ['Renavam', r.renavam],
-      ['Modelo', r.modelo],
-      ['Cor', r.cor],
-      ['Ano fab./modelo', r.anoFabricacao ? `${r.anoFabricacao} / ${r.anoModelo ?? '—'}` : undefined],
-      ['Situação', r.situacao],
-      ['Restrições', r.restricoes.join(', ') || undefined],
-      ['RENAJUD', r.renajud === undefined ? undefined : r.renajud ? 'sim' : 'não'],
-      ['Roubo ou furto', r.rouboFurto === undefined ? undefined : r.rouboFurto ? 'sim' : 'não'],
-      ['Leilão', r.leilao === undefined ? undefined : r.leilao ? 'sim' : 'não'],
-      ['Licenciamento', r.anoLicenciamento ? String(r.anoLicenciamento) : undefined],
-    ] as [string, string | undefined][]
-  ).filter((x): x is [string, string] => !!x[1]);
-
-function DialogoRelatorio({ caso, aoFechar }: { caso: CasoDetalhe; aoFechar: () => void }) {
-  const atualizar = useAtualizarCaso(caso.id);
-  const bureaus = useQuery(bureausQuery);
-  const veiculares = (bureaus.data ?? []).filter((b) => b.tipo === 'Veicular');
-  const [texto, setTexto] = useState('');
-  const [bureauId, setBureauId] = useState('');
-  const [baseLegal, setBaseLegal] = useState<keyof typeof BASES>('execucao_contrato');
-  const [justificativa, setJustificativa] = useState('');
-  const [erros, setErros] = useState<Record<string, string>>({});
-  const lido = useMemo(() => (texto.trim() ? lerRelatorioVeicular(texto) : null), [texto]);
-  const placaDiferente = lido?.placa && lido.placa !== caso.placa;
-
-  const registrar = useMutation({
-    mutationFn: (corpo: ReturnType<typeof verificacaoVeicularEntrada.parse>) =>
-      exigir(api.POST('/api/casos/{id}/verificacao-veicular', { params: { path: { id: caso.id } }, body: corpo })),
-    onSuccess: () => {
-      toast.success('Verificação registrada na trilha de auditoria.');
-      atualizar();
-      aoFechar();
-    },
-  });
-
-  const enviar = () => {
-    if (!lido) return;
-    const r = verificacaoVeicularEntrada.safeParse({
-      bureauId,
-      baseLegal,
-      justificativa,
-      veiculo: {
-        placa: lido.placa ?? caso.placa,
-        chassi: lido.chassi,
-        renavam: lido.renavam,
-        modelo: lido.modelo,
-        cor: lido.cor,
-        anoFabricacao: lido.anoFabricacao,
-        anoModelo: lido.anoModelo,
-        situacao: lido.situacao,
-      },
-      restricoes: lido.restricoes,
-      renajud: lido.renajud,
-      rouboFurto: lido.rouboFurto,
-      leilao: lido.leilao,
-      alienacaoFiduciaria: lido.alienacaoFiduciaria,
-      anoLicenciamento: lido.anoLicenciamento,
-    });
-    if (!r.success) return setErros(Object.fromEntries(r.error.issues.map((i) => [String(i.path.at(-1)), i.message])));
-    setErros({});
-    registrar.mutate(r.data);
-  };
-
-  return (
-    <Dialog open onOpenChange={(a) => !a && aoFechar()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Colar relatório do fornecedor</DialogTitle>
-          <DialogDescription>
-            Só os dados do veículo e as restrições são lidos. Dono, documento e localização por radar são descartados — o dado pessoal
-            vem da carteira do credor, e localização legítima é o avistamento da equipe de campo.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <Field>
-            <FieldLabel htmlFor="relatorio">Relatório</FieldLabel>
-            <Textarea id="relatorio" rows={6} value={texto} onChange={(e) => setTexto(e.target.value)} className="font-mono text-xs" />
-          </Field>
-
-          {lido ? (
-            <div className="space-y-3 rounded-lg bg-white/3 p-4 ring-1 ring-white/5">
-              <p className="text-sm font-semibold text-white">O que será guardado</p>
-              {previa(lido).length ? (
-                <dl className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-                  {previa(lido).map(([k, v]) => (
-                    <div key={k} className="flex justify-between gap-2">
-                      <dt className="text-muted-foreground">{k}</dt>
-                      <dd className="text-right text-white">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : (
-                <p className="text-sm text-amber-300">Nenhum dado do veículo reconhecido no texto.</p>
-              )}
-              {lido.descartados.length ? (
-                <Alert>
-                  <ShieldAlertIcon />
-                  <AlertTitle>Descartado: {lido.descartados.join(', ')}</AlertTitle>
-                  <AlertDescription>
-                    Relatório com dono e radar costuma vir de painel de consulta sem origem legal. Confira o contrato e a fonte do fornecedor
-                    antes de continuar usando.
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-              {placaDiferente ? (
-                <p className="text-sm text-red-300">
-                  O relatório é da placa {lido.placa}, e o caso é da {caso.placa}.
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field data-invalid={!!erros.bureauId}>
-              <FieldLabel>Fornecedor contratado</FieldLabel>
-              <Select value={bureauId} onValueChange={setBureauId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={bureaus.isPending ? 'Carregando…' : 'Escolha'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {veiculares.map((b) => (
-                    <SelectItem key={b.id} value={b.id}>
-                      {b.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FieldDescription>Cadastrado em Dados & Bureaus, com o contrato.</FieldDescription>
-              <FieldError>{erros.bureauId}</FieldError>
-            </Field>
-            <Field>
-              <FieldLabel>Base legal</FieldLabel>
-              <Select value={baseLegal} onValueChange={(b) => setBaseLegal(b as keyof typeof BASES)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(BASES).map(([k, r]) => (
-                    <SelectItem key={k} value={k}>
-                      {r}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
-          <Field data-invalid={!!erros.justificativa}>
-            <FieldLabel htmlFor="justificativa-veiculo">Por que esta consulta</FieldLabel>
-            <Textarea id="justificativa-veiculo" rows={2} value={justificativa} onChange={(e) => setJustificativa(e.target.value)} />
-            <FieldError>{erros.justificativa}</FieldError>
-          </Field>
-          {Object.keys(erros).some((k) => !['bureauId', 'justificativa'].includes(k)) ? (
-            <p className="text-sm text-red-300">{Object.entries(erros).map(([k, m]) => `${k}: ${m}`).join(' · ')}</p>
-          ) : null}
-          {registrar.error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{registrar.error.message}</AlertDescription>
-            </Alert>
-          ) : null}
-        </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={aoFechar}>
-            Cancelar
-          </Button>
-          <Button disabled={!lido || !!placaDiferente || registrar.isPending} onClick={enviar}>
-            {registrar.isPending ? <Spinner /> : null}
-            Registrar verificação
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -29,6 +29,9 @@ import { rotasFicha } from './rotas/ficha.ts';
 import { rotasFinanceiro } from './rotas/financeiro.ts';
 import { rotasJuridico } from './rotas/juridico.ts';
 import { rotasCadastroCaso } from './rotas/cadastro-caso.ts';
+import { rotasIntegracoes } from './rotas/integracoes.ts';
+import { rotasPainel } from './rotas/painel.ts';
+import { rotasRelatorios } from './rotas/relatorios.ts';
 import { rotasVeiculo } from './rotas/veiculo.ts';
 import { criarClienteFipe, type ClienteFipe } from './integracoes/fipe.ts';
 import { rotasUsuarios } from './rotas/usuarios.ts';
@@ -40,6 +43,8 @@ export interface OpcoesServidor {
   logger?: FastifyServerOptions['logger'];
   /** Tabela FIPE. Os testes passam uma falsa, para não depender da internet. */
   fipe?: ClienteFipe;
+  /** HTTP das integrações (API Brasil, Evolution). Os testes passam um falso. */
+  executar?: typeof fetch;
 }
 
 /** Níveis do pino na escala do Cloud Logging, que lê `severity` (e não `level`). */
@@ -64,7 +69,7 @@ const LOG_DE_PRODUCAO = {
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
 };
 
-export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe() }: OpcoesServidor) => {
+export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe(), executar }: OpcoesServidor) => {
   const producao = ambiente.NODE_ENV === 'production';
   const app = Fastify({
     logger: logger ?? (ambiente.NODE_ENV === 'test' ? false : producao ? LOG_DE_PRODUCAO : { level: 'debug' }),
@@ -75,7 +80,17 @@ export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = cr
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
-  await app.register(helmet);
+  // Mapa: tiles e fontes do OpenFreeMap (sem chave nem rastreio) e o worker do MapLibre (blob:).
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        'connect-src': ["'self'", 'https://tiles.openfreemap.org'],
+        'img-src': ["'self'", 'data:', 'blob:', 'https://tiles.openfreemap.org'],
+        'worker-src': ["'self'", 'blob:'],
+        'child-src': ["'self'", 'blob:'],
+      },
+    },
+  });
   await app.register(cookie);
   await app.register(rateLimit, { global: false });
   await app.register(swagger, {
@@ -114,6 +129,9 @@ export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = cr
       await api.register(rotasJuridico);
       await api.register(rotasCadastroCaso);
       await api.register(rotasVeiculo, { fipe });
+      await api.register(rotasRelatorios);
+      await api.register(rotasIntegracoes, { db, chave: ambiente.CHAVE_SEGREDOS, urlPublica: ambiente.URL_PUBLICA, executar });
+      await api.register(rotasPainel);
       await api.register(rotasAuditoria);
       await api.register(rotasCamila, { ia, modelo: ambiente.CAMILA_MODELO });
     },

@@ -29,7 +29,7 @@ import { toast } from '@workspace/ui/lib/toast';
 import { CabecalhoDePagina, ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
 import { api, CANAL_DA_ORIGEM, exigir, usuariosQuery } from '@/lib/api.ts';
 
-const PAPEL = { admin: 'Administrador', operador: 'Operador', auditor: 'Auditor' } as const;
+const PAPEL = { admin: 'Administrador', gestor: 'Gestor', operador: 'Operador', auditor: 'Auditor' } as const;
 
 /**
  * Contas de acesso. Não há auto-cadastro: só o admin cria conta, e um
@@ -108,7 +108,7 @@ const formulario = z
     nome: z.string().trim().min(3, 'informe o nome'),
     email: z.string().trim().email('e-mail inválido'),
     senha: z.string().min(12, 'mínimo de 12 caracteres'),
-    papel: z.enum(['admin', 'operador', 'auditor']),
+    papel: z.enum(['admin', 'gestor', 'operador', 'auditor']),
     canais: z.array(z.enum(['plataforma_credor', 'lead_proprio'])),
   })
   .refine((v) => v.papel !== 'operador' || v.canais.length > 0, {
@@ -173,6 +173,7 @@ function DialogoNovoUsuario({ aberto, aoMudar }: { aberto: boolean; aoMudar: (a:
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="operador">Operador — trabalha nos planos escolhidos</SelectItem>
+                      <SelectItem value="gestor">Gestor — opera os dois planos e vê perfil e crédito</SelectItem>
                       <SelectItem value="auditor">Auditor — vê tudo, não altera nada</SelectItem>
                       <SelectItem value="admin">Administrador — acesso total</SelectItem>
                     </SelectContent>

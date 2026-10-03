@@ -147,7 +147,7 @@ export interface paths {
                             email: string;
                             nome: string;
                             /** @enum {string} */
-                            papel: "admin" | "operador" | "auditor";
+                            papel: "admin" | "gestor" | "operador" | "auditor";
                             canais: ("plataforma_credor" | "lead_proprio")[];
                             ativo: boolean;
                         }[];
@@ -1888,6 +1888,15 @@ export interface paths {
                             devedorDoc?: string;
                             valorDivida?: number;
                         };
+                        relatorio?: {
+                            texto: string;
+                            /** @enum {string} */
+                            papelPessoa?: "devedor" | "proprietario" | "terceiro_possuidor" | "avalista" | "outro";
+                            bureauId?: string;
+                            /** @enum {string} */
+                            baseLegal?: "execucao_contrato" | "legitimo_interesse" | "obrigacao_legal" | "consentimento";
+                            justificativa?: string;
+                        };
                     } | {
                         /** @enum {string} */
                         origem: "lead_proprio";
@@ -1910,6 +1919,15 @@ export interface paths {
                         canalLead: "Inbound Site" | "WhatsApp" | "Indicação" | "Parceria" | "Anúncio";
                         evidenciaLead: string;
                         saldoDevedor?: number;
+                        relatorio?: {
+                            texto: string;
+                            /** @enum {string} */
+                            papelPessoa?: "devedor" | "proprietario" | "terceiro_possuidor" | "avalista" | "outro";
+                            bureauId?: string;
+                            /** @enum {string} */
+                            baseLegal?: "execucao_contrato" | "legitimo_interesse" | "obrigacao_legal" | "consentimento";
+                            justificativa?: string;
+                        };
                     };
                 };
             };
@@ -1934,6 +1952,15 @@ export interface paths {
                 };
                 /** @description Default Response */
                 409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2164,87 +2191,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/casos/{id}/verificacao-veicular": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        bureauId: string;
-                        /** @enum {string} */
-                        baseLegal: "execucao_contrato" | "legitimo_interesse" | "obrigacao_legal" | "consentimento";
-                        justificativa: string;
-                        veiculo: {
-                            placa: string;
-                            chassi?: string;
-                            renavam?: string;
-                            modelo?: string;
-                            cor?: string;
-                            anoFabricacao?: number;
-                            anoModelo?: number;
-                            situacao?: string;
-                        };
-                        /** @default [] */
-                        restricoes?: string[];
-                        renajud?: boolean;
-                        rouboFurto?: boolean;
-                        leilao?: boolean;
-                        alienacaoFiduciaria?: boolean;
-                        anoLicenciamento?: number;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Criado"];
-                    };
-                };
-                /** @description Default Response */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Erro"];
-                    };
-                };
-                /** @description Default Response */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Erro"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/casos/{id}/verificacoes-veiculares": {
         parameters: {
             query?: never;
@@ -2363,6 +2309,935 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/relatorios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RelatorioColado"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        texto: string;
+                        /** @enum {string} */
+                        papelPessoa?: "devedor" | "proprietario" | "terceiro_possuidor" | "avalista" | "outro";
+                        bureauId?: string;
+                        /** @enum {string} */
+                        baseLegal?: "execucao_contrato" | "legitimo_interesse" | "obrigacao_legal" | "consentimento";
+                        justificativa?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResumoImportacao"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/conferir-devedor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        documentos: string[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            iguais: boolean[];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/relatorios/{relatorioId}/texto": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    relatorioId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        finalidade: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            texto: string;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/dados-extras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DadoExtra"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/pessoas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PessoasDoCaso"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/pessoas/revelar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        finalidade: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PessoasReveladas"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/campos-novos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CampoNovo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integracoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Integracao"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        tipo: "apibrasil";
+                        nome: string;
+                        /**
+                         * Format: uri
+                         * @default https://gateway.apibrasil.io/api/v2
+                         */
+                        baseUrl?: string;
+                        bearerToken: string;
+                        deviceToken?: string;
+                        /**
+                         * @default dados
+                         * @enum {string}
+                         */
+                        servico?: "dados" | "consulta";
+                        contratoFornecedorId: string;
+                        /** @default 0 */
+                        custoConsulta?: number;
+                    } | {
+                        /** @enum {string} */
+                        tipo: "evolution";
+                        nome: string;
+                        /** Format: uri */
+                        baseUrl: string;
+                        apikey: string;
+                        instancia: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["IntegracaoCriada"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integracoes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome?: string;
+                        /** Format: uri */
+                        baseUrl?: string;
+                        ativo?: boolean;
+                        bearerToken?: string;
+                        deviceToken?: string;
+                        apikey?: string;
+                        instancia?: string;
+                        /** @enum {string} */
+                        servico?: "dados" | "consulta";
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integracoes/{id}/testar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TesteIntegracao"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integracoes/{id}/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WebhookConfigurado"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/consulta-apibrasil": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        integracaoId?: string;
+                        /** @enum {string} */
+                        baseLegal: "execucao_contrato" | "legitimo_interesse" | "obrigacao_legal" | "consentimento";
+                        justificativa: string;
+                        /** @enum {string} */
+                        papelPessoa?: "devedor" | "proprietario" | "terceiro_possuidor" | "avalista" | "outro";
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ResumoImportacao"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/casos/{id}/pessoas/{pessoaId}/conferir-whatsapp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    pessoaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            conferidos: number;
+                            comWhatsapp: number;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Conversa"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversas/{numero}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    numero: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Mensagem"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    numero: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        texto: string;
+                        casoId?: string;
+                        integracaoId?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/painel/recuperacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PainelRecuperacao"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2570,7 +3445,7 @@ export interface components {
             email: string;
             nome: string;
             /** @enum {string} */
-            papel: "admin" | "operador" | "auditor";
+            papel: "admin" | "gestor" | "operador" | "auditor";
             canais: ("plataforma_credor" | "lead_proprio")[];
             canaisVisiveis: ("plataforma_credor" | "lead_proprio")[];
             tenant: components["schemas"]["TenantInput"];
@@ -2585,7 +3460,7 @@ export interface components {
             email: string;
             nome: string;
             /** @enum {string} */
-            papel: "admin" | "operador" | "auditor";
+            papel: "admin" | "gestor" | "operador" | "auditor";
             canais: ("plataforma_credor" | "lead_proprio")[];
         };
         CasoInput: {
@@ -2780,7 +3655,7 @@ export interface components {
             nome: string;
             senha: string;
             /** @enum {string} */
-            papel: "admin" | "operador" | "auditor";
+            papel: "admin" | "gestor" | "operador" | "auditor";
             /** @default [] */
             canais: ("plataforma_credor" | "lead_proprio")[];
         };
@@ -2907,6 +3782,20 @@ export interface components {
                 valorFipe: number | null;
                 fipeCodigo: string | null;
                 fipeReferencia: string | null;
+                marca: string | null;
+                situacao: string | null;
+                tipo: string | null;
+                especie: string | null;
+                categoria: string | null;
+                carroceria: string | null;
+                combustivel: string | null;
+                potencia: string | null;
+                cilindradas: string | null;
+                motor: string | null;
+                procedencia: string | null;
+                municipioEmplacamento: string | null;
+                ufEmplacamento: string | null;
+                anoFabricacao: number | null;
             };
             fonte: {
                 nome: string;
@@ -2918,7 +3807,7 @@ export interface components {
         EventoCasoInput: {
             id: number;
             /** @enum {string} */
-            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento";
+            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento" | "relatorio_colado";
             statusDe: string | null;
             statusPara: string | null;
             usuarioNome: string | null;
@@ -3053,9 +3942,9 @@ export interface components {
         };
         VerificacaoVeicularInput: {
             id: number;
-            fornecedor: string;
-            baseLegal: string;
-            justificativa: string;
+            fornecedor: string | null;
+            baseLegal: string | null;
+            justificativa: string | null;
             situacao: string | null;
             restricoes: string[];
             renajud: boolean | null;
@@ -3074,8 +3963,281 @@ export interface components {
             longitude: number | null;
             descricao: string;
             /** @enum {string} */
-            fonte: "equipe_campo" | "credor" | "devedor" | "outro";
+            fonte: "equipe_campo" | "credor" | "devedor" | "outro" | "radar";
             usuarioNome: string | null;
+        };
+        ResumoImportacaoInput: {
+            relatorioId: number;
+            veiculo: {
+                campos: string[];
+                restricoes: number;
+            } | null;
+            pessoas: {
+                id: string;
+                nome: string | null;
+                papeis: ("devedor" | "proprietario" | "terceiro_possuidor" | "parente" | "avalista" | "outro")[];
+            }[];
+            contatos: number;
+            enderecos: number;
+            parentes: number;
+            radares: number;
+            extras: number;
+            novos: {
+                secao: string;
+                rotulo: string;
+            }[];
+            avisos: string[];
+        };
+        RelatorioColadoInput: {
+            id: number;
+            /** @enum {string} */
+            via: "colado" | "integracao";
+            secoes: string[];
+            resumo: {
+                [key: string]: unknown;
+            };
+            fornecedor: string | null;
+            usuarioNome: string | null;
+            coladoEm: unknown;
+            tamanho: number;
+        };
+        DadoExtraInput: {
+            id: number;
+            /** @enum {string} */
+            entidade: "veiculo" | "pessoa" | "caso";
+            pessoaId: string | null;
+            secao: string;
+            chave: string;
+            rotulo: string;
+            valor: string;
+            sensivel: boolean;
+            novo: boolean;
+            promovidoEm: unknown;
+            criadoEm: unknown;
+        };
+        PessoasDoCasoInput: {
+            alertas: string[];
+            pessoas: {
+                id: string;
+                /** @enum {string} */
+                papel: "devedor" | "proprietario" | "terceiro_possuidor" | "parente" | "avalista" | "outro";
+                vinculo: string | null;
+                iniciais: string | null;
+                documentoMascarado: string | null;
+                /** @enum {string|null} */
+                tipoPessoa: "PF" | "PJ" | null;
+                obito: boolean | null;
+                contatos: number;
+                enderecos: number;
+            }[];
+        };
+        FonteContatoInput: {
+            fonte: string;
+            data?: string;
+            ranking?: number;
+            titular?: string;
+        };
+        ContatoPessoaInput: {
+            id: number;
+            /** @enum {string} */
+            tipo: "celular" | "fixo" | "email" | "invalido";
+            valor: string;
+            original: string | null;
+            valido: boolean;
+            whatsapp: boolean | null;
+            whatsappConferidoEm: unknown;
+            fontes: components["schemas"]["FonteContatoInput"][];
+        };
+        EnderecoPessoaInput: {
+            id: number;
+            logradouro: string;
+            numero: string | null;
+            complemento: string | null;
+            bairro: string | null;
+            cidade: string | null;
+            uf: string | null;
+            cep: string | null;
+            variantes: string[];
+            fontes: string[];
+            latitude: number | null;
+            longitude: number | null;
+        };
+        PessoaReveladaInput: {
+            id: string;
+            /** @enum {string} */
+            papel: "devedor" | "proprietario" | "terceiro_possuidor" | "parente" | "avalista" | "outro";
+            vinculo: string | null;
+            parenteDe: string | null;
+            documento: string | null;
+            /** @enum {string|null} */
+            tipoPessoa: "PF" | "PJ" | null;
+            nome: string | null;
+            nomeCivil: string | null;
+            nomeMae: string | null;
+            nomePai: string | null;
+            nascimento: string | null;
+            sexo: string | null;
+            estadoCivil: string | null;
+            rg: string | null;
+            rgOrgao: string | null;
+            rgUf: string | null;
+            tituloEleitor: string | null;
+            profissao: string | null;
+            nacionalidade: string | null;
+            situacaoCadastral: string | null;
+            obito: boolean | null;
+            atualizadoEm: unknown;
+            contatos: components["schemas"]["ContatoPessoaInput"][];
+            enderecos: components["schemas"]["EnderecoPessoaInput"][];
+            extras: components["schemas"]["DadoExtraInput"][];
+        };
+        PessoasReveladasInput: {
+            alertas: string[];
+            sensivelLiberado: boolean;
+            pessoas: components["schemas"]["PessoaReveladaInput"][];
+        };
+        CampoNovoInput: {
+            /** @enum {string} */
+            entidade: "veiculo" | "pessoa" | "caso";
+            secao: string;
+            chave: string;
+            rotulo: string;
+            ocorrencias: number;
+            casos: number;
+            exemplo: string | null;
+            primeiraVez: unknown;
+            ultimaVez: unknown;
+        };
+        IntegracaoInput: {
+            id: string;
+            /** @enum {string} */
+            tipo: "apibrasil" | "evolution";
+            nome: string;
+            baseUrl: string;
+            config: {
+                instancia?: string;
+                /** @enum {string} */
+                servico?: "dados" | "consulta";
+            };
+            bureauId: string | null;
+            bureauNome: string | null;
+            custoConsulta: number | null;
+            contrato: string | null;
+            ativo: boolean;
+            credenciaisFinal: string;
+            webhookConfigurado: boolean;
+            ultimoTesteEm: unknown;
+            ultimoTesteOk: boolean | null;
+            ultimoTesteDetalhe: string | null;
+            criadoEm: unknown;
+        };
+        IntegracaoCriadaInput: {
+            id: string;
+            webhookUrl: string | null;
+        };
+        TesteIntegracaoInput: {
+            ok: boolean;
+            detalhe: string;
+        };
+        WebhookConfiguradoInput: {
+            url: string;
+            configuradoNaEvolution: boolean;
+            detalhe: string;
+        };
+        ConversaInput: {
+            numero: string;
+            nome: string | null;
+            recuperadorId: string | null;
+            recuperadorNome: string | null;
+            ultimaMensagem: string;
+            /** @enum {string} */
+            ultimaDirecao: "enviada" | "recebida";
+            ultimaEm: unknown;
+            total: number;
+        };
+        MensagemInput: {
+            id: number;
+            /** @enum {string} */
+            direcao: "enviada" | "recebida";
+            texto: string;
+            casoId: string | null;
+            placa: string | null;
+            usuarioNome: string | null;
+            criadoEm: unknown;
+        };
+        PontoMapaInput: {
+            casoId: string;
+            placa: string;
+            modelo: string | null;
+            status: string;
+            latitude: number;
+            longitude: number;
+            observadoEm: unknown;
+            fonte: string;
+            descricao: string;
+        };
+        AtivoMaisVistoInput: {
+            casoId: string;
+            placa: string;
+            modelo: string | null;
+            status: string;
+            avistamentos: number;
+            locais: number;
+            ultimoEm: unknown;
+        };
+        ContagemCidadeInput: {
+            cidade: string;
+            uf: string | null;
+            total: number;
+            retomados: number;
+            emCampo: number;
+        };
+        ContagemCredorInput: {
+            credor: string;
+            total: number;
+            retomados: number;
+            valorDivida: number | null;
+        };
+        DesempenhoRecuperadorInput: {
+            id: string;
+            nome: string;
+            status: string;
+            cidades: string[];
+            casos: number;
+            retomados: number;
+            emCampo: number;
+            semExito: number;
+        };
+        AlertaCasoInput: {
+            casoId: string;
+            placa: string;
+            modelo: string | null;
+            status: string;
+            /** @enum {string} */
+            tipo: "prazo_vencido" | "prazo_48h" | "aceite_vencido" | "parado" | "proprietario_diferente";
+            motivo: string;
+            desde: unknown;
+        };
+        PontoEvolucaoInput: {
+            mes: string;
+            recebidos: number;
+            retomados: number;
+        };
+        PainelRecuperacaoInput: {
+            valorDivida: number | null;
+            fipeCarteira: number | null;
+            fipeRetomados: number | null;
+            status: {
+                status: string;
+                quantidade: number;
+            }[];
+            mapa: components["schemas"]["PontoMapaInput"][];
+            maisVistos: components["schemas"]["AtivoMaisVistoInput"][];
+            porCidade: components["schemas"]["ContagemCidadeInput"][];
+            porCredor: components["schemas"]["ContagemCredorInput"][];
+            recuperadores: components["schemas"]["DesempenhoRecuperadorInput"][];
+            alertas: components["schemas"]["AlertaCasoInput"][];
+            evolucao: components["schemas"]["PontoEvolucaoInput"][];
         };
         Erro: {
             erro: string;
@@ -3091,7 +4253,7 @@ export interface components {
             email: string;
             nome: string;
             /** @enum {string} */
-            papel: "admin" | "operador" | "auditor";
+            papel: "admin" | "gestor" | "operador" | "auditor";
             canais: ("plataforma_credor" | "lead_proprio")[];
             canaisVisiveis: ("plataforma_credor" | "lead_proprio")[];
             tenant: components["schemas"]["Tenant"];
@@ -3107,7 +4269,7 @@ export interface components {
             email: string;
             nome: string;
             /** @enum {string} */
-            papel: "admin" | "operador" | "auditor";
+            papel: "admin" | "gestor" | "operador" | "auditor";
             canais: ("plataforma_credor" | "lead_proprio")[];
         };
         Caso: {
@@ -3315,7 +4477,7 @@ export interface components {
             nome: string;
             senha: string;
             /** @enum {string} */
-            papel: "admin" | "operador" | "auditor";
+            papel: "admin" | "gestor" | "operador" | "auditor";
             /** @default [] */
             canais: ("plataforma_credor" | "lead_proprio")[];
         };
@@ -3450,6 +4612,20 @@ export interface components {
                 valorFipe: number | null;
                 fipeCodigo: string | null;
                 fipeReferencia: string | null;
+                marca: string | null;
+                situacao: string | null;
+                tipo: string | null;
+                especie: string | null;
+                categoria: string | null;
+                carroceria: string | null;
+                combustivel: string | null;
+                potencia: string | null;
+                cilindradas: string | null;
+                motor: string | null;
+                procedencia: string | null;
+                municipioEmplacamento: string | null;
+                ufEmplacamento: string | null;
+                anoFabricacao: number | null;
             };
             fonte: {
                 nome: string;
@@ -3461,7 +4637,7 @@ export interface components {
         EventoCaso: {
             id: number;
             /** @enum {string} */
-            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento";
+            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento" | "relatorio_colado";
             statusDe: string | null;
             statusPara: string | null;
             usuarioNome: string | null;
@@ -3607,9 +4783,9 @@ export interface components {
         };
         VerificacaoVeicular: {
             id: number;
-            fornecedor: string;
-            baseLegal: string;
-            justificativa: string;
+            fornecedor: string | null;
+            baseLegal: string | null;
+            justificativa: string | null;
             situacao: string | null;
             restricoes: string[];
             renajud: boolean | null;
@@ -3631,8 +4807,295 @@ export interface components {
             longitude: number | null;
             descricao: string;
             /** @enum {string} */
-            fonte: "equipe_campo" | "credor" | "devedor" | "outro";
+            fonte: "equipe_campo" | "credor" | "devedor" | "outro" | "radar";
             usuarioNome: string | null;
+        };
+        ResumoImportacao: {
+            relatorioId: number;
+            veiculo: {
+                campos: string[];
+                restricoes: number;
+            } | null;
+            pessoas: {
+                id: string;
+                nome: string | null;
+                papeis: ("devedor" | "proprietario" | "terceiro_possuidor" | "parente" | "avalista" | "outro")[];
+            }[];
+            contatos: number;
+            enderecos: number;
+            parentes: number;
+            radares: number;
+            extras: number;
+            novos: {
+                secao: string;
+                rotulo: string;
+            }[];
+            avisos: string[];
+        };
+        RelatorioColado: {
+            id: number;
+            /** @enum {string} */
+            via: "colado" | "integracao";
+            secoes: string[];
+            resumo: {
+                [key: string]: unknown;
+            };
+            fornecedor: string | null;
+            usuarioNome: string | null;
+            /** Format: date-time */
+            coladoEm: string;
+            tamanho: number;
+        };
+        DadoExtra: {
+            id: number;
+            /** @enum {string} */
+            entidade: "veiculo" | "pessoa" | "caso";
+            pessoaId: string | null;
+            secao: string;
+            chave: string;
+            rotulo: string;
+            valor: string;
+            sensivel: boolean;
+            novo: boolean;
+            /** Format: date-time */
+            promovidoEm: string | null;
+            /** Format: date-time */
+            criadoEm: string;
+        };
+        PessoasDoCaso: {
+            alertas: string[];
+            pessoas: {
+                id: string;
+                /** @enum {string} */
+                papel: "devedor" | "proprietario" | "terceiro_possuidor" | "parente" | "avalista" | "outro";
+                vinculo: string | null;
+                iniciais: string | null;
+                documentoMascarado: string | null;
+                /** @enum {string|null} */
+                tipoPessoa: "PF" | "PJ" | null;
+                obito: boolean | null;
+                contatos: number;
+                enderecos: number;
+            }[];
+        };
+        FonteContato: {
+            fonte: string;
+            data?: string;
+            ranking?: number;
+            titular?: string;
+        };
+        ContatoPessoa: {
+            id: number;
+            /** @enum {string} */
+            tipo: "celular" | "fixo" | "email" | "invalido";
+            valor: string;
+            original: string | null;
+            valido: boolean;
+            whatsapp: boolean | null;
+            /** Format: date-time */
+            whatsappConferidoEm: string | null;
+            fontes: components["schemas"]["FonteContato"][];
+        };
+        EnderecoPessoa: {
+            id: number;
+            logradouro: string;
+            numero: string | null;
+            complemento: string | null;
+            bairro: string | null;
+            cidade: string | null;
+            uf: string | null;
+            cep: string | null;
+            variantes: string[];
+            fontes: string[];
+            latitude: number | null;
+            longitude: number | null;
+        };
+        PessoaRevelada: {
+            id: string;
+            /** @enum {string} */
+            papel: "devedor" | "proprietario" | "terceiro_possuidor" | "parente" | "avalista" | "outro";
+            vinculo: string | null;
+            parenteDe: string | null;
+            documento: string | null;
+            /** @enum {string|null} */
+            tipoPessoa: "PF" | "PJ" | null;
+            nome: string | null;
+            nomeCivil: string | null;
+            nomeMae: string | null;
+            nomePai: string | null;
+            nascimento: string | null;
+            sexo: string | null;
+            estadoCivil: string | null;
+            rg: string | null;
+            rgOrgao: string | null;
+            rgUf: string | null;
+            tituloEleitor: string | null;
+            profissao: string | null;
+            nacionalidade: string | null;
+            situacaoCadastral: string | null;
+            obito: boolean | null;
+            /** Format: date-time */
+            atualizadoEm: string;
+            contatos: components["schemas"]["ContatoPessoa"][];
+            enderecos: components["schemas"]["EnderecoPessoa"][];
+            extras: components["schemas"]["DadoExtra"][];
+        };
+        PessoasReveladas: {
+            alertas: string[];
+            sensivelLiberado: boolean;
+            pessoas: components["schemas"]["PessoaRevelada"][];
+        };
+        CampoNovo: {
+            /** @enum {string} */
+            entidade: "veiculo" | "pessoa" | "caso";
+            secao: string;
+            chave: string;
+            rotulo: string;
+            ocorrencias: number;
+            casos: number;
+            exemplo: string | null;
+            /** Format: date-time */
+            primeiraVez: string;
+            /** Format: date-time */
+            ultimaVez: string;
+        };
+        Integracao: {
+            id: string;
+            /** @enum {string} */
+            tipo: "apibrasil" | "evolution";
+            nome: string;
+            baseUrl: string;
+            config: {
+                instancia?: string;
+                /** @enum {string} */
+                servico?: "dados" | "consulta";
+            };
+            bureauId: string | null;
+            bureauNome: string | null;
+            custoConsulta: number | null;
+            contrato: string | null;
+            ativo: boolean;
+            credenciaisFinal: string;
+            webhookConfigurado: boolean;
+            /** Format: date-time */
+            ultimoTesteEm: string | null;
+            ultimoTesteOk: boolean | null;
+            ultimoTesteDetalhe: string | null;
+            /** Format: date-time */
+            criadoEm: string;
+        };
+        IntegracaoCriada: {
+            id: string;
+            webhookUrl: string | null;
+        };
+        TesteIntegracao: {
+            ok: boolean;
+            detalhe: string;
+        };
+        WebhookConfigurado: {
+            url: string;
+            configuradoNaEvolution: boolean;
+            detalhe: string;
+        };
+        Conversa: {
+            numero: string;
+            nome: string | null;
+            recuperadorId: string | null;
+            recuperadorNome: string | null;
+            ultimaMensagem: string;
+            /** @enum {string} */
+            ultimaDirecao: "enviada" | "recebida";
+            /** Format: date-time */
+            ultimaEm: string;
+            total: number;
+        };
+        Mensagem: {
+            id: number;
+            /** @enum {string} */
+            direcao: "enviada" | "recebida";
+            texto: string;
+            casoId: string | null;
+            placa: string | null;
+            usuarioNome: string | null;
+            /** Format: date-time */
+            criadoEm: string;
+        };
+        PontoMapa: {
+            casoId: string;
+            placa: string;
+            modelo: string | null;
+            status: string;
+            latitude: number;
+            longitude: number;
+            /** Format: date-time */
+            observadoEm: string;
+            fonte: string;
+            descricao: string;
+        };
+        AtivoMaisVisto: {
+            casoId: string;
+            placa: string;
+            modelo: string | null;
+            status: string;
+            avistamentos: number;
+            locais: number;
+            /** Format: date-time */
+            ultimoEm: string;
+        };
+        ContagemCidade: {
+            cidade: string;
+            uf: string | null;
+            total: number;
+            retomados: number;
+            emCampo: number;
+        };
+        ContagemCredor: {
+            credor: string;
+            total: number;
+            retomados: number;
+            valorDivida: number | null;
+        };
+        DesempenhoRecuperador: {
+            id: string;
+            nome: string;
+            status: string;
+            cidades: string[];
+            casos: number;
+            retomados: number;
+            emCampo: number;
+            semExito: number;
+        };
+        AlertaCaso: {
+            casoId: string;
+            placa: string;
+            modelo: string | null;
+            status: string;
+            /** @enum {string} */
+            tipo: "prazo_vencido" | "prazo_48h" | "aceite_vencido" | "parado" | "proprietario_diferente";
+            motivo: string;
+            /** Format: date-time */
+            desde: string | null;
+        };
+        PontoEvolucao: {
+            mes: string;
+            recebidos: number;
+            retomados: number;
+        };
+        PainelRecuperacao: {
+            valorDivida: number | null;
+            fipeCarteira: number | null;
+            fipeRetomados: number | null;
+            status: {
+                status: string;
+                quantidade: number;
+            }[];
+            mapa: components["schemas"]["PontoMapa"][];
+            maisVistos: components["schemas"]["AtivoMaisVisto"][];
+            porCidade: components["schemas"]["ContagemCidade"][];
+            porCredor: components["schemas"]["ContagemCredor"][];
+            recuperadores: components["schemas"]["DesempenhoRecuperador"][];
+            alertas: components["schemas"]["AlertaCaso"][];
+            evolucao: components["schemas"]["PontoEvolucao"][];
         };
     };
     responses: never;
