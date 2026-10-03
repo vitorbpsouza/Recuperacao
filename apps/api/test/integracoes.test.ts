@@ -144,6 +144,106 @@ describe('WhatsApp pela Evolution', () => {
     expect(mensagens[0]).toMatchObject({ placa: 'SEED001', usuarioNome: 'opa' });
   });
 
+  const evento = (numero: string, id: string, message: Record<string, unknown>, extra: Record<string, unknown> = {}, pushName = 'Zé do Guincho') => ({
+    event: 'messages.upsert',
+    data: { key: { remoteJid: `${numero}@s.whatsapp.net`, fromMe: false, id, ...extra }, pushName, message },
+  });
+  const postarWebhook = (corpo: unknown) => amb.app.inject({ method: 'POST', url: new URL(webhook).pathname, payload: corpo as object });
+
+  it('recebe foto, áudio e localização; guarda o arquivo e só o Plano A o abre', async () => {
+    const [conversa] = (await amb.chamar(opA, 'GET', '/api/conversas')).json();
+    const foto = Buffer.from('conteudo-da-foto-de-teste').toString('base64');
+    await postarWebhook(evento(conversa.numero, 'MIDIA-1', { imageMessage: { caption: 'Achei na rua 2', mimetype: 'image/jpeg' }, base64: foto }));
+    // Sem base64 no evento: a API baixa da Evolution.
+    externo.responder = (url) =>
+      url.includes('/chat/getBase64FromMediaMessage') ? { base64: Buffer.from('audio-de-teste').toString('base64'), mimetype: 'audio/ogg; codecs=opus' } : {};
+    await postarWebhook(evento(conversa.numero, 'MIDIA-2', { audioMessage: { mimetype: 'audio/ogg; codecs=opus', ptt: true } }));
+    expect(externo.chamadas[0]).toMatchObject({ url: 'https://evo.exemplo.com/chat/getBase64FromMediaMessage/recredita', corpo: { message: { key: { id: 'MIDIA-2' } } } });
+    await postarWebhook(evento(conversa.numero, 'MIDIA-3', { locationMessage: { degreesLatitude: -19.9191, degreesLongitude: -43.9386, name: 'Posto' } }));
+
+    const mensagens = (await amb.chamar(opA, 'GET', `/api/conversas/${conversa.numero}`)).json();
+    expect(mensagens.slice(-3).map((m: Record<string, unknown>) => [m.midiaTipo, m.midiaMime, m.temArquivo, m.texto])).toEqual([
+      ['imagem', 'image/jpeg', true, 'Achei na rua 2'],
+      ['audio', 'audio/ogg', true, ''],
+      ['localizacao', null, false, 'Posto'],
+    ]);
+    expect(mensagens.at(-1)).toMatchObject({ latitude: -19.9191, longitude: -43.9386 });
+
+    const arquivo = await amb.chamar(opA, 'GET', `/api/mensagens/${mensagens.at(-3).id}/midia`);
+    expect(arquivo.statusCode).toBe(200);
+    expect(arquivo.headers['content-type']).toBe('image/jpeg');
+    expect(arquivo.body).toBe('conteudo-da-foto-de-teste');
+    const opB = await amb.entrar('opb@teste.local');
+    expect((await amb.chamar(opB, 'GET', `/api/mensagens/${mensagens.at(-3).id}/midia`)).statusCode).toBe(404);
+
+    const [atual] = (await amb.chamar(opA, 'GET', '/api/conversas')).json();
+    expect(atual).toMatchObject({ nomeWhatsapp: 'Zé do Guincho', ultimaMidia: 'localizacao' });
+  });
+
+  it('mensagem mandada do celular entra como enviada; o eco do que a central mandou não duplica', async () => {
+    const [conversa] = (await amb.chamar(opA, 'GET', '/api/conversas')).json();
+    const antes = conversa.total;
+    await postarWebhook(evento(conversa.numero, 'MSG-1', { conversation: 'Caso novo na sua região: placa SEED001.' }, { fromMe: true }, 'Operação'));
+    await postarWebhook(evento(conversa.numero, 'MSG-CEL', { conversation: 'mandei do celular' }, { fromMe: true }, 'Operação'));
+    const mensagens = (await amb.chamar(opA, 'GET', `/api/conversas/${conversa.numero}`)).json();
+    expect(mensagens).toHaveLength(antes + 1);
+    expect(mensagens.at(-1)).toMatchObject({ direcao: 'enviada', texto: 'mandei do celular', usuarioNome: null });
+    // O pushName de mensagem enviada é o da operação: não vira nome do contato.
+    expect((await amb.chamar(opA, 'GET', '/api/conversas')).json()[0].nomeWhatsapp).toBe('Zé do Guincho');
+  });
+
+  it('o nome do contato não some quando a última mensagem é nossa, e a conversa ganha um veículo', async () => {
+    const numero = '5531975629312';
+    await postarWebhook(evento(numero, 'T-1', { conversation: 'oi' }, {}, 'Fulano Terceiro'));
+    externo.responder = () => ({ key: { id: 'T-2' } });
+    await amb.chamar(opA, 'POST', `/api/conversas/${numero}`, { texto: 'achou?' });
+    const daLista = async () => (await amb.chamar(opA, 'GET', '/api/conversas')).json().find((c: { numero: string }) => c.numero === numero);
+    expect(await daLista()).toMatchObject({ nome: 'Fulano Terceiro', ultimaDirecao: 'enviada', casoId: null });
+
+    const vinculo = await amb.chamar(opA, 'PUT', `/api/conversas/${numero}/contato`, { casoId: 'caso-a-002' });
+    expect(vinculo.statusCode).toBe(200);
+    expect(await daLista()).toMatchObject({ casoId: 'caso-a-002', placa: 'SEED002' });
+    // Mensagem nova já entra ligada ao veículo.
+    await postarWebhook(evento(numero, 'T-3', { conversation: 'vi o carro' }, {}, 'Fulano Terceiro'));
+    expect((await amb.chamar(opA, 'GET', `/api/conversas/${numero}`)).json().at(-1)).toMatchObject({ casoId: 'caso-a-002', placa: 'SEED002' });
+
+    await amb.chamar(opA, 'PUT', `/api/conversas/${numero}/contato`, { nome: 'Guincho do Fulano' });
+    expect(await daLista()).toMatchObject({ nome: 'Guincho do Fulano', nomeWhatsapp: 'Fulano Terceiro', casoId: 'caso-a-002' });
+    expect((await amb.chamar(opA, 'PUT', `/api/conversas/${numero}/contato`, { casoId: 'caso-b-001' })).statusCode).toBe(404);
+    await amb.chamar(opA, 'PUT', `/api/conversas/${numero}/contato`, { casoId: null });
+    expect(await daLista()).toMatchObject({ casoId: null, placa: null });
+  });
+
+  it('envia foto como mídia e áudio como mensagem de voz, e guarda o arquivo', async () => {
+    const numero = '5531975629312';
+    externo.responder = (url) => ({ key: { id: url.includes('sendWhatsAppAudio') ? 'ENV-AUDIO' : 'ENV-FOTO' } });
+    const foto = await amb.chamar(opA, 'POST', `/api/conversas/${numero}/midia`, {
+      arquivo: Buffer.from('png-de-teste-com-conteudo').toString('base64'),
+      tipoMime: 'image/png',
+      nomeArquivo: 'placa.png',
+      legenda: 'é este?',
+    });
+    expect(foto.statusCode).toBe(201);
+    expect(externo.chamadas[0]).toMatchObject({
+      url: 'https://evo.exemplo.com/message/sendMedia/recredita',
+      corpo: { number: numero, mediatype: 'image', mimetype: 'image/png', fileName: 'placa.png', caption: 'é este?' },
+    });
+    const audio = await amb.chamar(opA, 'POST', `/api/conversas/${numero}/midia`, {
+      arquivo: Buffer.from('webm-de-voz-de-teste').toString('base64'),
+      tipoMime: 'audio/webm;codecs=opus',
+      voz: true,
+    });
+    expect(audio.statusCode).toBe(201);
+    expect(externo.chamadas[1]).toMatchObject({ url: 'https://evo.exemplo.com/message/sendWhatsAppAudio/recredita', corpo: { number: numero } });
+
+    const mensagens = (await amb.chamar(opA, 'GET', `/api/conversas/${numero}`)).json();
+    expect(mensagens.slice(-2).map((m: Record<string, unknown>) => [m.direcao, m.midiaTipo, m.midiaMime, m.temArquivo, m.texto, m.usuarioNome])).toEqual([
+      ['enviada', 'imagem', 'image/png', true, 'é este?', 'opa'],
+      ['enviada', 'audio', 'audio/webm', true, '', 'opa'],
+    ]);
+    expect((await amb.chamar(opA, 'GET', `/api/mensagens/${mensagens.at(-1).id}/midia`)).body).toBe('webm-de-voz-de-teste');
+  });
+
   it('confere quais celulares da pessoa têm WhatsApp', async () => {
     await amb.chamar(opA, 'POST', '/api/casos/caso-a-004/relatorios', {
       texto: `--- DADOS BÁSICOS ---\nNome: PESSOA FICTICIA\nCPF: 012.345.678-90\n--- TELEFONES ---\n(37) 99993-0001 | 01/01/2024\n(37) 99993-0002 | 01/01/2024`,

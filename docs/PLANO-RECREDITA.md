@@ -542,6 +542,12 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
       - Prazo máximo vencido, purga encerrada e 20 dias da notificação extrajudicial sem consolidação → evento `prazo_vencido`, uma vez por prazo. Caso em campo não é redistribuído sozinho: o recuperador pode estar no meio da abordagem.
     - **Desvio da seção 2:** sem pg-boss. Ele não roda no PGlite (dev e testes) e a regra cabe numa função SQL idempotente; a fila de jobs volta à mesa quando houver integração com retentativa (DataJud, webhooks).
     - Testes: domínio 62, banco 72, API 109.
+  - **WhatsApp da operação: mídia, nome do contato e veículo (2026-10-03, migração 0013):**
+    - **Mídia:** foto, áudio, vídeo, documento, figurinha e localização, nos dois sentidos. O webhook lê a mídia em base64 (a configuração do webhook passa a ligar o base64) ou a baixa da Evolution; o arquivo fica no volume (`FOTOS_DIR/whatsapp`), com SHA-256, e só quem enxerga o Plano A o abre. A central anexa arquivo (até 32 MB, texto vira legenda) e grava áudio pelo microfone, que sai como mensagem de voz.
+    - **Mensagem mandada do celular** (fromMe) entra como enviada, "pelo celular"; o eco do que a central mandou não duplica.
+    - **Nome do contato:** o nome do WhatsApp (pushName) fica em `contato_whatsapp` e não some quando a última mensagem é nossa; a operação pode dar outro nome.
+    - **Veículo da conversa:** a conversa recebe um caso do Plano A (busca por placa); as mensagens seguintes entram ligadas a ele e a placa aparece na lista.
+    - Testes: API 113.
   - **Pendente (próximas etapas do Plano A):**
     - Importação de carteira e arquivo de recall.
     - Enriquecimento com `dado_enriquecido`.

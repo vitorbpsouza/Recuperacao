@@ -84,6 +84,7 @@ const LOG_DE_PRODUCAO = {
 
 export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe(), executar, fotosDir, barramento = null }: OpcoesServidor) => {
   const producao = ambiente.NODE_ENV === 'production';
+  const pastaDeArquivos = fotosDir === undefined ? pastaDasFotos(ambiente) : fotosDir;
   const app = Fastify({
     logger: logger ?? (ambiente.NODE_ENV === 'test' ? false : producao ? LOG_DE_PRODUCAO : { level: 'debug' }),
     // Cloud Run fica atrás de proxy: o IP real do cliente (para rate limit) vem no X-Forwarded-For.
@@ -143,13 +144,21 @@ export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = cr
       await api.register(rotasCadastroCaso);
       await api.register(rotasVeiculo, { fipe });
       await api.register(rotasRelatorios);
-      await api.register(rotasIntegracoes, { db, chave: ambiente.CHAVE_SEGREDOS, urlPublica: ambiente.URL_PUBLICA, executar });
+      await api.register(rotasIntegracoes, {
+        db,
+        chave: ambiente.CHAVE_SEGREDOS,
+        urlPublica: ambiente.URL_PUBLICA,
+        executar,
+        fotosDir: pastaDeArquivos,
+        // Nos testes o eco não espera: o envio e o webhook já vêm em ordem.
+        esperaEcoMs: ambiente.NODE_ENV === 'test' ? 0 : 2000,
+      });
       await api.register(rotasPainel);
       await api.register(rotasLocalizacao, {
         db,
         ia,
         modelo: ambiente.CAMILA_MODELO,
-        fotosDir: fotosDir === undefined ? pastaDasFotos(ambiente) : fotosDir,
+        fotosDir: pastaDeArquivos,
         chave: ambiente.CHAVE_SEGREDOS,
         urlPublica: ambiente.URL_PUBLICA,
         executar,

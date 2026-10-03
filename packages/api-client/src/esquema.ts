@@ -3347,6 +3347,135 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/conversas/{numero}/contato": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    numero: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome?: string | null;
+                        casoId?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ContatoConversa"];
+                    };
+                };
+                /** @description Default Response */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversas/{numero}/midia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    numero: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        arquivo: string;
+                        tipoMime: string;
+                        nomeArquivo?: string;
+                        legenda?: string;
+                        voz?: boolean;
+                        casoId?: string;
+                        integracaoId?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+                /** @description Default Response */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Erro"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/painel/recuperacao": {
         parameters: {
             query?: never;
@@ -4781,9 +4910,17 @@ export interface components {
         ConversaInput: {
             numero: string;
             nome: string | null;
+            nomeWhatsapp: string | null;
+            nomeDado: string | null;
             recuperadorId: string | null;
             recuperadorNome: string | null;
+            casoId: string | null;
+            placa: string | null;
+            modelo: string | null;
+            casoStatus: string | null;
             ultimaMensagem: string;
+            /** @enum {string|null} */
+            ultimaMidia: "imagem" | "audio" | "video" | "documento" | "figurinha" | "localizacao" | null;
             /** @enum {string} */
             ultimaDirecao: "enviada" | "recebida";
             ultimaEm: unknown;
@@ -4798,6 +4935,18 @@ export interface components {
             placa: string | null;
             usuarioNome: string | null;
             criadoEm: unknown;
+            /** @enum {string|null} */
+            midiaTipo: "imagem" | "audio" | "video" | "documento" | "figurinha" | "localizacao" | null;
+            midiaMime: string | null;
+            midiaNome: string | null;
+            temArquivo: boolean;
+            latitude: number | null;
+            longitude: number | null;
+        };
+        ContatoConversaInput: {
+            numero: string;
+            nome: string | null;
+            casoId: string | null;
         };
         PontoMapaInput: {
             casoId: string;
@@ -5770,9 +5919,17 @@ export interface components {
         Conversa: {
             numero: string;
             nome: string | null;
+            nomeWhatsapp: string | null;
+            nomeDado: string | null;
             recuperadorId: string | null;
             recuperadorNome: string | null;
+            casoId: string | null;
+            placa: string | null;
+            modelo: string | null;
+            casoStatus: string | null;
             ultimaMensagem: string;
+            /** @enum {string|null} */
+            ultimaMidia: "imagem" | "audio" | "video" | "documento" | "figurinha" | "localizacao" | null;
             /** @enum {string} */
             ultimaDirecao: "enviada" | "recebida";
             /** Format: date-time */
@@ -5789,6 +5946,18 @@ export interface components {
             usuarioNome: string | null;
             /** Format: date-time */
             criadoEm: string;
+            /** @enum {string|null} */
+            midiaTipo: "imagem" | "audio" | "video" | "documento" | "figurinha" | "localizacao" | null;
+            midiaMime: string | null;
+            midiaNome: string | null;
+            temArquivo: boolean;
+            latitude: number | null;
+            longitude: number | null;
+        };
+        ContatoConversa: {
+            numero: string;
+            nome: string | null;
+            casoId: string | null;
         };
         PontoMapa: {
             casoId: string;

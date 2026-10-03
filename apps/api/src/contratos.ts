@@ -709,12 +709,25 @@ export const testeIntegracao = z.object({ ok: z.boolean(), detalhe: z.string() }
 
 export const webhookConfigurado = z.object({ url: z.string(), configuradoNaEvolution: z.boolean(), detalhe: z.string() });
 
+const tipoDeMidia = z.enum(['imagem', 'audio', 'video', 'documento', 'figurinha', 'localizacao']);
+
 export const conversa = z.object({
   numero: z.string(),
+  /** Nome dado pela operação, do recuperador ou o do WhatsApp, nessa ordem. */
   nome: z.string().nullable(),
+  /** Como o contato se chama no WhatsApp (pushName). */
+  nomeWhatsapp: z.string().nullable(),
+  /** Nome dado pela operação. */
+  nomeDado: z.string().nullable(),
   recuperadorId: z.string().nullable(),
   recuperadorNome: z.string().nullable(),
+  /** Veículo da conversa. */
+  casoId: z.string().nullable(),
+  placa: z.string().nullable(),
+  modelo: z.string().nullable(),
+  casoStatus: z.string().nullable(),
   ultimaMensagem: z.string(),
+  ultimaMidia: tipoDeMidia.nullable(),
   ultimaDirecao: z.enum(['enviada', 'recebida']),
   ultimaEm: z.coerce.date(),
   total: z.number().int(),
@@ -728,6 +741,19 @@ export const mensagem = z.object({
   placa: z.string().nullable(),
   usuarioNome: z.string().nullable(),
   criadoEm: z.coerce.date(),
+  midiaTipo: tipoDeMidia.nullable(),
+  midiaMime: z.string().nullable(),
+  midiaNome: z.string().nullable(),
+  /** O arquivo está no volume e pode ser aberto em /api/mensagens/{id}/midia. */
+  temArquivo: z.boolean(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+});
+
+export const contatoConversa = z.object({
+  numero: z.string(),
+  nome: z.string().nullable(),
+  casoId: z.string().nullable(),
 });
 
 registrar({
@@ -737,6 +763,7 @@ registrar({
   WebhookConfigurado: webhookConfigurado,
   Conversa: conversa,
   Mensagem: mensagem,
+  ContatoConversa: contatoConversa,
 });
 
 // ---------------------------------------------------------------------------

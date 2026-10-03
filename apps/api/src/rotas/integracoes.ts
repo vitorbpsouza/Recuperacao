@@ -9,6 +9,9 @@
  * terceiros, CDC art. 42 e LGPD).
  */
 import { createHash, randomBytes } from 'node:crypto';
+import { createReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
+import { join, normalize } from 'node:path';
 
 import { sql, type SQL } from 'drizzle-orm';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
@@ -18,14 +21,24 @@ import { comContexto, type Db, type Tx } from '@workspace/db';
 import {
   atualizarIntegracaoEntrada,
   consultaIntegracaoEntrada,
+  contatoConversaEntrada,
   enviarMensagemEntrada,
+  enviarMidiaEntrada,
   novaIntegracaoEntrada,
 } from '@workspace/domain';
 
 import { exigirPapel } from '../auth/plugin.ts';
 import * as c from '../contratos.ts';
 import { criarClienteApiBrasil, ErroDeIntegracao, type CredenciaisApiBrasil, type ServicoApiBrasil } from '../integracoes/apibrasil.ts';
-import { criarClienteEvolution, lerMensagemDoWebhook, numeroWhatsapp, type CredenciaisEvolution } from '../integracoes/evolution.ts';
+import {
+  criarClienteEvolution,
+  lerMensagemDoWebhook,
+  mimeSimples,
+  numeroWhatsapp,
+  type CredenciaisEvolution,
+  type TipoDeMidia,
+} from '../integracoes/evolution.ts';
+import { conteudoDoBase64, guardarMidia, LIMITE_MIDIA } from '../servicos/midia-whatsapp.ts';
 import { ErroDeRelatorio, importarRelatorio } from '../servicos/relatorio.ts';
 import { cifrar, decifrar, finalDe } from '../servicos/segredos.ts';
 
@@ -35,6 +48,10 @@ export interface OpcoesIntegracoes {
   urlPublica?: string;
   /** Os testes passam um fetch falso: nada sai para a internet. */
   executar?: typeof fetch;
+  /** Pasta das mídias do WhatsApp (a mesma das fotos de campo). Nulo: a mensagem entra sem o arquivo. */
+  fotosDir?: string | null;
+  /** Quanto o eco de uma mensagem enviada pela central espera para não passar na frente dela. */
+  esperaEcoMs?: number;
 }
 
 const consultar = async <T>(tx: Tx, q: SQL): Promise<T[]> => ((await tx.execute(q)) as unknown as { rows: T[] }).rows;
@@ -63,7 +80,10 @@ const integracaoAtiva = async (tx: Tx, tipo: LinhaIntegracao['tipo'], id?: strin
 
 const webhookUrl = (base: string, token: string) => `${base.replace(/\/+$/, '')}/api/webhooks/evolution/${token}`;
 
-export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async (app, { db, chave, urlPublica, executar = fetch }) => {
+export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async (
+  app,
+  { db, chave, urlPublica, executar = fetch, fotosDir = null, esperaEcoMs = 2000 },
+) => {
   const baseDaRequisicao = (protocolo: string, host: string | undefined) => urlPublica ?? `${protocolo}://${host ?? 'localhost'}`;
 
   const clienteEvolution = (i: LinhaIntegracao) =>
@@ -337,7 +357,7 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
     },
   );
 
-  /** Conversas da operação: uma por número, com a última mensagem. */
+  /** Conversas da operação: uma por número, com a última mensagem, o nome do contato e o veículo. */
   app.get(
     '/conversas',
     { schema: { tags: ['integracoes'], response: { 200: z.array(c.conversa) } } },
@@ -345,13 +365,24 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
       req.banco((tx) =>
         consultar<z.infer<typeof c.conversa>>(
           tx,
-          sql`select distinct on (m.numero) m.numero, r.id as "recuperadorId", r.nome as "recuperadorNome",
-                     coalesce(r.nome, m.nome_contato) as nome, m.texto as "ultimaMensagem", m.direcao as "ultimaDirecao",
-                     m.criado_em as "ultimaEm",
+          sql`select m.numero, r.id as "recuperadorId", r.nome as "recuperadorNome",
+                     coalesce(ct.nome, r.nome, ct.nome_whatsapp, ultimo.nome_contato) as nome,
+                     coalesce(ct.nome_whatsapp, ultimo.nome_contato) as "nomeWhatsapp", ct.nome as "nomeDado",
+                     ct.caso_id as "casoId", a.placa, a.modelo, k.status as "casoStatus",
+                     m.texto as "ultimaMensagem", m.midia_tipo as "ultimaMidia", m.direcao as "ultimaDirecao", m.criado_em as "ultimaEm",
                      (select count(*)::int from mensagem_whatsapp x where x.numero = m.numero) as total
-                from mensagem_whatsapp m left join recuperador r on r.id = m.recuperador_id
-               order by m.numero, m.criado_em desc`,
-        ).then((l) => l.sort((a, b) => +new Date(b.ultimaEm) - +new Date(a.ultimaEm))),
+                from (select distinct on (numero) * from mensagem_whatsapp order by numero, criado_em desc, id desc) m
+                left join recuperador r on r.id = m.recuperador_id
+                left join contato_whatsapp ct on ct.tenant_id = m.tenant_id and ct.numero = m.numero
+                left join lateral (
+                  select x.nome_contato from mensagem_whatsapp x
+                   where x.numero = m.numero and x.nome_contato is not null
+                   order by x.criado_em desc limit 1
+                ) ultimo on true
+                left join caso k on k.id = ct.caso_id
+                left join ativo a on a.id = k.ativo_id
+               order by m.criado_em desc`,
+        ),
       ),
   );
 
@@ -362,17 +393,83 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
       req.banco((tx) =>
         consultar<z.infer<typeof c.mensagem>>(
           tx,
-          sql`select m.id::int as id, m.direcao, m.texto, m.caso_id as "casoId", a.placa, u.nome as "usuarioNome", m.criado_em as "criadoEm"
-                from mensagem_whatsapp m
-                left join usuario u on u.id = m.usuario_id
-                left join caso k on k.id = m.caso_id
-                left join ativo a on a.id = k.ativo_id
-               where m.numero = ${req.params.numero}
-               order by m.criado_em, m.id
-               limit 500`,
+          // As 500 mais recentes, em ordem de chegada.
+          sql`select * from (
+                select m.id::int as id, m.direcao, m.texto, m.caso_id as "casoId", a.placa, u.nome as "usuarioNome", m.criado_em as "criadoEm",
+                       m.midia_tipo as "midiaTipo", m.midia_mime as "midiaMime", m.midia_nome as "midiaNome",
+                       (m.midia_arquivo is not null) as "temArquivo", m.latitude::float8 as latitude, m.longitude::float8 as longitude
+                  from mensagem_whatsapp m
+                  left join usuario u on u.id = m.usuario_id
+                  left join caso k on k.id = m.caso_id
+                  left join ativo a on a.id = k.ativo_id
+                 where m.numero = ${req.params.numero}
+                 order by m.criado_em desc, m.id desc
+                 limit 500
+              ) x order by "criadoEm", id`,
         ),
       ),
   );
+
+  /** Nome dado pela operação e veículo da conversa. As próximas mensagens já entram ligadas ao caso. */
+  app.put(
+    '/conversas/:numero/contato',
+    {
+      schema: {
+        tags: ['integracoes'],
+        params: z.object({ numero: z.string().regex(/^\d{10,15}$/) }),
+        body: contatoConversaEntrada,
+        response: { 200: c.contatoConversa, 404: c.erro },
+      },
+    },
+    async (req, reply) => {
+      const numero = numeroWhatsapp(req.params.numero);
+      const { nome, casoId } = req.body;
+      const r = await req.banco(async (tx) => {
+        if (casoId) {
+          const [k] = await consultar(tx, sql`select id from caso where id = ${casoId} and finalidade = 'recuperacao_para_credor'`);
+          if (!k) return null;
+        }
+        const [l] = await consultar<z.infer<typeof c.contatoConversa>>(
+          tx,
+          sql`insert into contato_whatsapp (numero, nome, caso_id) values (${numero}, ${nome ?? null}, ${casoId ?? null})
+              on conflict (tenant_id, numero) do update set
+                nome    = case when ${nome !== undefined}::boolean then excluded.nome else contato_whatsapp.nome end,
+                caso_id = case when ${casoId !== undefined}::boolean then excluded.caso_id else contato_whatsapp.caso_id end
+              returning numero, nome, caso_id as "casoId"`,
+        );
+        return l ?? null;
+      });
+      if (!r) return reply.code(404).send({ erro: 'caso do Plano A não encontrado' });
+      return r;
+    },
+  );
+
+  /**
+   * Grava a mensagem que a central mandou. Se o eco do webhook chegou antes
+   * (mesmo id na Evolution), devolve a que já está gravada.
+   */
+  const registrarEnviada = (
+    tx: Tx,
+    m: { integracaoId: string; numero: string; casoId: string | null; texto: string; externoId: string | null; midia?: Record<string, unknown> | null },
+  ) => {
+    const d = m.midia ?? {};
+    return consultar<{ id: string }>(
+      tx,
+      sql`with nova as (
+            insert into mensagem_whatsapp (integracao_id, numero, recuperador_id, caso_id, direcao, texto, externo_id,
+                                           midia_tipo, midia_mime, midia_nome, midia_arquivo, midia_sha256, midia_tamanho)
+            values (${m.integracaoId}, ${m.numero}, recuperador_do_numero(app_tenant(), ${m.numero}), ${m.casoId}, 'enviada', ${m.texto}, ${m.externoId},
+                    ${(d.tipo as string) ?? null}, ${(d.mime as string) ?? null}, ${(d.nome as string) ?? null}, ${(d.arquivo as string) ?? null},
+                    ${(d.sha256 as string) ?? null}, ${(d.tamanho as number) ?? null})
+            on conflict do nothing
+            returning id::text as id
+          )
+          select id from nova
+          union all
+          select id::text from mensagem_whatsapp where integracao_id = ${m.integracaoId} and externo_id = ${m.externoId}
+          limit 1`,
+    );
+  };
 
   app.post(
     '/conversas/:numero',
@@ -396,36 +493,157 @@ export const rotasIntegracoes: FastifyPluginAsyncZod<OpcoesIntegracoes> = async 
         throw e;
       }
       const [m] = await req.banco((tx) =>
-        consultar<{ id: string }>(
-          tx,
-          sql`insert into mensagem_whatsapp (integracao_id, numero, recuperador_id, caso_id, direcao, texto, externo_id)
-              values (${i.id}, ${numero}, recuperador_do_numero(app_tenant(), ${numero}), ${req.body.casoId ?? null}, 'enviada',
-                      ${req.body.texto}, ${externoId})
-              returning id::text as id`,
-        ),
+        registrarEnviada(tx, { integracaoId: i.id, numero, casoId: req.body.casoId ?? null, texto: req.body.texto, externoId }),
       );
       return reply.code(201).send({ id: m!.id });
+    },
+  );
+
+  /** Foto, vídeo, documento ou áudio para o contato. O arquivo fica guardado como o recebido. */
+  app.post(
+    '/conversas/:numero/midia',
+    {
+      bodyLimit: 48 * 1024 * 1024,
+      schema: {
+        tags: ['integracoes'],
+        params: z.object({ numero: z.string().regex(/^\d{10,15}$/) }),
+        body: enviarMidiaEntrada,
+        response: { 201: c.criado, 400: c.erro, 409: c.erro, 502: c.erro },
+      },
+    },
+    async (req, reply) => {
+      const numero = numeroWhatsapp(req.params.numero);
+      const b = req.body;
+      const i = await req.banco((tx) => integracaoAtiva(tx, 'evolution', b.integracaoId));
+      if (!i) return reply.code(409).send({ erro: 'nenhuma conexão ativa com a Evolution: cadastre em Integrações' });
+
+      const conteudo = conteudoDoBase64(b.arquivo);
+      if (conteudo.length === 0) return reply.code(400).send({ erro: 'arquivo vazio' });
+      if (conteudo.length > LIMITE_MIDIA) return reply.code(400).send({ erro: `arquivo grande demais (máximo de ${LIMITE_MIDIA / 1024 / 1024} MB)` });
+      const mime = mimeSimples(b.tipoMime) ?? 'application/octet-stream';
+      const tipo: TipoDeMidia =
+        b.voz || mime.startsWith('audio/') ? 'audio' : mime.startsWith('image/') ? 'imagem' : mime.startsWith('video/') ? 'video' : 'documento';
+      const base64 = conteudo.toString('base64');
+
+      let externoId: string | null = null;
+      try {
+        const evolution = clienteEvolution(i);
+        const r =
+          tipo === 'audio'
+            ? await evolution.enviarAudio(numero, base64)
+            : await evolution.enviarMidia(numero, {
+                tipo: tipo === 'imagem' ? 'image' : tipo === 'video' ? 'video' : 'document',
+                mime,
+                base64,
+                nome: b.nomeArquivo,
+                legenda: b.legenda,
+              });
+        externoId = r.key?.id ?? null;
+      } catch (e) {
+        if (e instanceof ErroDeIntegracao) return reply.code(502).send({ erro: e.message });
+        throw e;
+      }
+
+      const guardada = fotosDir ? await guardarMidia(fotosDir, req.contexto!.tenantId, conteudo, mime) : null;
+      const [m] = await req.banco((tx) =>
+        registrarEnviada(tx, {
+          integracaoId: i.id,
+          numero,
+          casoId: b.casoId ?? null,
+          texto: tipo === 'audio' ? '' : (b.legenda ?? ''),
+          externoId,
+          midia: { tipo, mime, nome: b.nomeArquivo ?? null, ...guardada },
+        }),
+      );
+      return reply.code(201).send({ id: m!.id });
+    },
+  );
+
+  /** O arquivo de uma mídia da conversa, para quem enxerga o Plano A. */
+  app.get(
+    '/mensagens/:id/midia',
+    { schema: { tags: ['integracoes'], hide: true, params: z.object({ id: z.coerce.number().int() }) } },
+    async (req, reply) => {
+      const [m] = await req.banco((tx) =>
+        consultar<{ arquivo: string | null; mime: string | null; nome: string | null }>(
+          tx,
+          sql`select midia_arquivo as arquivo, midia_mime as mime, midia_nome as nome from mensagem_whatsapp where id = ${req.params.id}`,
+        ),
+      );
+      if (!m?.arquivo || !fotosDir) return reply.code(404).send({ erro: 'mídia não encontrada' });
+      const caminho = normalize(join(fotosDir, m.arquivo));
+      if (!caminho.startsWith(normalize(fotosDir))) return reply.code(404).send({ erro: 'mídia não encontrada' });
+      try {
+        await stat(caminho);
+      } catch {
+        return reply.code(404).send({ erro: 'arquivo da mídia não está no volume' });
+      }
+      const nome = m.nome ? `; filename*=UTF-8''${encodeURIComponent(m.nome)}` : '';
+      return reply
+        .header('content-type', m.mime ?? 'application/octet-stream')
+        .header('content-disposition', `inline${nome}`)
+        .header('cache-control', 'private, max-age=86400')
+        .send(createReadStream(caminho));
     },
   );
 
   /**
    * Webhook da Evolution: sem sessão, autenticado pelo token na URL. Responde
    * 200 sempre — quem não tem o token não descobre se acertou.
+   *
+   * Grava o que o contato mandou e o que a operação mandou direto do celular.
+   * A mídia vem em base64 no próprio evento (webhook com base64 ligado) ou é
+   * baixada da Evolution.
    */
   app.post(
     '/webhooks/evolution/:token',
     {
+      bodyLimit: 64 * 1024 * 1024,
       config: { publica: true, rateLimit: { max: 600, timeWindow: '1 minute' } },
       schema: { hide: true, params: z.object({ token: z.string().min(16).max(64) }), body: z.unknown() },
     },
     async (req) => {
       const m = lerMensagemDoWebhook(req.body);
-      if (m && /^\d{10,15}$/.test(m.numero)) {
-        await comContexto(db, { tenantId: '', usuarioId: null, canais: [] }, (tx) =>
-          tx.execute(sql`select webhook_evolution_registrar(${createHash('sha256').update(req.params.token).digest('hex')}, ${m.numero},
-                                                          ${m.texto}, ${m.externoId}, ${m.nome})`),
-        );
+      if (!m) return { ok: true };
+      const hash = createHash('sha256').update(req.params.token).digest('hex');
+      const semSessao = <T>(fn: (tx: Tx) => Promise<T>) => comContexto(db, { tenantId: '', usuarioId: null, canais: [] }, fn);
+
+      let midia: Record<string, unknown> | null = null;
+      if (m.midia) {
+        const { base64: _base64, ...descricao } = m.midia;
+        midia = descricao;
+        if (m.midia.tipo !== 'localizacao' && fotosDir) {
+          const [i] = await semSessao((tx) =>
+            consultar<{ tenant_id: string; base_url: string; credenciais_cifradas: string; config: { instancia?: string } }>(
+              tx,
+              sql`select tenant_id, base_url, credenciais_cifradas, config from webhook_evolution_integracao(${hash})`,
+            ),
+          );
+          if (!i) return { ok: true };
+          try {
+            let base64 = m.midia.base64;
+            let mime = m.midia.mime;
+            if (!base64) {
+              const evolution = criarClienteEvolution(i.base_url, i.config.instancia ?? '', decifrar<CredenciaisEvolution>(chave, i.credenciais_cifradas), executar);
+              const baixada = await evolution.baixarMidia(m.chave);
+              base64 = baixada.base64 ?? null;
+              mime = mimeSimples(baixada.mimetype) ?? mime;
+            }
+            if (base64) midia = { ...midia, mime, ...(await guardarMidia(fotosDir, i.tenant_id, conteudoDoBase64(base64), mime)) };
+          } catch (e) {
+            // A mensagem entra mesmo sem o arquivo: a tela mostra que a mídia não foi guardada.
+            req.log.warn({ err: e }, 'mídia do WhatsApp não guardada');
+          }
+        }
       }
+
+      // O que a central mandou volta como eco: espera a central gravar a dela, com o usuário.
+      if (m.direcao === 'enviada' && esperaEcoMs > 0) await new Promise((r) => setTimeout(r, esperaEcoMs));
+
+      await semSessao((tx) =>
+        tx.execute(sql`select webhook_evolution_registrar(${hash}, ${m.numero}, ${m.direcao}, ${m.texto}, ${m.externoId}, ${m.nome},
+                                                        ${midia ? JSON.stringify(midia) : null}::jsonb)`),
+      );
       return { ok: true };
     },
   );

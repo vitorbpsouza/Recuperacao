@@ -3207,6 +3207,14 @@
             "nullable": true,
             "type": "string"
           },
+          "nomeWhatsapp": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomeDado": {
+            "nullable": true,
+            "type": "string"
+          },
           "recuperadorId": {
             "nullable": true,
             "type": "string"
@@ -3215,8 +3223,36 @@
             "nullable": true,
             "type": "string"
           },
+          "casoId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placa": {
+            "nullable": true,
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "casoStatus": {
+            "nullable": true,
+            "type": "string"
+          },
           "ultimaMensagem": {
             "type": "string"
+          },
+          "ultimaMidia": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "imagem",
+              "audio",
+              "video",
+              "documento",
+              "figurinha",
+              "localizacao"
+            ]
           },
           "ultimaDirecao": {
             "type": "string",
@@ -3235,9 +3271,16 @@
         "required": [
           "numero",
           "nome",
+          "nomeWhatsapp",
+          "nomeDado",
           "recuperadorId",
           "recuperadorNome",
+          "casoId",
+          "placa",
+          "modelo",
+          "casoStatus",
           "ultimaMensagem",
+          "ultimaMidia",
           "ultimaDirecao",
           "ultimaEm",
           "total"
@@ -3273,7 +3316,38 @@
             "nullable": true,
             "type": "string"
           },
-          "criadoEm": {}
+          "criadoEm": {},
+          "midiaTipo": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "imagem",
+              "audio",
+              "video",
+              "documento",
+              "figurinha",
+              "localizacao"
+            ]
+          },
+          "midiaMime": {
+            "nullable": true,
+            "type": "string"
+          },
+          "midiaNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "temArquivo": {
+            "type": "boolean"
+          },
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
+          }
         },
         "required": [
           "id",
@@ -3282,7 +3356,34 @@
           "casoId",
           "placa",
           "usuarioNome",
-          "criadoEm"
+          "criadoEm",
+          "midiaTipo",
+          "midiaMime",
+          "midiaNome",
+          "temArquivo",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "ContatoConversaInput": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "nome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "casoId": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "numero",
+          "nome",
+          "casoId"
         ]
       },
       "PontoMapaInput": {
@@ -7515,6 +7616,14 @@
             "nullable": true,
             "type": "string"
           },
+          "nomeWhatsapp": {
+            "nullable": true,
+            "type": "string"
+          },
+          "nomeDado": {
+            "nullable": true,
+            "type": "string"
+          },
           "recuperadorId": {
             "nullable": true,
             "type": "string"
@@ -7523,8 +7632,36 @@
             "nullable": true,
             "type": "string"
           },
+          "casoId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "placa": {
+            "nullable": true,
+            "type": "string"
+          },
+          "modelo": {
+            "nullable": true,
+            "type": "string"
+          },
+          "casoStatus": {
+            "nullable": true,
+            "type": "string"
+          },
           "ultimaMensagem": {
             "type": "string"
+          },
+          "ultimaMidia": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "imagem",
+              "audio",
+              "video",
+              "documento",
+              "figurinha",
+              "localizacao"
+            ]
           },
           "ultimaDirecao": {
             "type": "string",
@@ -7546,9 +7683,16 @@
         "required": [
           "numero",
           "nome",
+          "nomeWhatsapp",
+          "nomeDado",
           "recuperadorId",
           "recuperadorNome",
+          "casoId",
+          "placa",
+          "modelo",
+          "casoStatus",
           "ultimaMensagem",
+          "ultimaMidia",
           "ultimaDirecao",
           "ultimaEm",
           "total"
@@ -7588,6 +7732,37 @@
           "criadoEm": {
             "type": "string",
             "format": "date-time"
+          },
+          "midiaTipo": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "imagem",
+              "audio",
+              "video",
+              "documento",
+              "figurinha",
+              "localizacao"
+            ]
+          },
+          "midiaMime": {
+            "nullable": true,
+            "type": "string"
+          },
+          "midiaNome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "temArquivo": {
+            "type": "boolean"
+          },
+          "latitude": {
+            "nullable": true,
+            "type": "number"
+          },
+          "longitude": {
+            "nullable": true,
+            "type": "number"
           }
         },
         "required": [
@@ -7597,7 +7772,35 @@
           "casoId",
           "placa",
           "usuarioNome",
-          "criadoEm"
+          "criadoEm",
+          "midiaTipo",
+          "midiaMime",
+          "midiaNome",
+          "temArquivo",
+          "latitude",
+          "longitude"
+        ],
+        "additionalProperties": false
+      },
+      "ContatoConversa": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "nome": {
+            "nullable": true,
+            "type": "string"
+          },
+          "casoId": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "numero",
+          "nome",
+          "casoId"
         ],
         "additionalProperties": false
       },
@@ -12503,6 +12706,176 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversas/{numero}/contato": {
+      "put": {
+        "tags": [
+          "integracoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "nullable": true,
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 120
+                  },
+                  "casoId": {
+                    "nullable": true,
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10,15}$"
+            },
+            "in": "path",
+            "name": "numero",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContatoConversa"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/conversas/{numero}/midia": {
+      "post": {
+        "tags": [
+          "integracoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arquivo": {
+                    "type": "string",
+                    "minLength": 16,
+                    "maxLength": 44000000
+                  },
+                  "tipoMime": {
+                    "type": "string",
+                    "pattern": "^[a-z]+\\/[a-z0-9.+-]+(;.*)?$"
+                  },
+                  "nomeArquivo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "legenda": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "voz": {
+                    "type": "boolean"
+                  },
+                  "casoId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "integracaoId": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "arquivo",
+                  "tipoMime"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10,15}$"
+            },
+            "in": "path",
+            "name": "numero",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Criado"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
                 }
               }
             }

@@ -533,6 +533,35 @@ export const enviarMensagemEntrada = z
   })
   .strict();
 
+/**
+ * Mídia para o WhatsApp: foto, vídeo, documento ou áudio (com `voz`, sai como
+ * mensagem de voz). O arquivo vem em base64, como a foto de campo.
+ */
+export const enviarMidiaEntrada = z
+  .object({
+    arquivo: z.string().min(16, 'arquivo vazio').max(44_000_000, 'arquivo grande demais (máximo de 32 MB)'),
+    tipoMime: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(/^[a-z]+\/[a-z0-9.+-]+(;.*)?$/, 'tipo de arquivo inválido'),
+    nomeArquivo: z.string().trim().min(1).max(200).optional(),
+    legenda: z.string().trim().max(1000).optional(),
+    voz: z.boolean().optional(),
+    casoId: texto.optional(),
+    integracaoId: texto.optional(),
+  })
+  .strict();
+
+/** Nome dado pela operação e veículo (caso do Plano A) da conversa. `null` limpa. */
+export const contatoConversaEntrada = z
+  .object({
+    nome: z.string().trim().min(2, 'nome curto demais').max(120).nullable().optional(),
+    casoId: texto.nullable().optional(),
+  })
+  .strict()
+  .refine((c) => c.nome !== undefined || c.casoId !== undefined, { message: 'informe o nome ou o veículo' });
+
 // ---------------------------------------------------------------------------
 // Foto de campo e link para terceiros
 // ---------------------------------------------------------------------------
