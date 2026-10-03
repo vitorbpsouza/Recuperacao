@@ -953,7 +953,37 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        nome: string;
+                        /** @enum {string} */
+                        tipo: "Crédito" | "Veicular" | "Localização" | "Judicial";
+                        contratoFornecedorId: string;
+                        /** @default 0 */
+                        custoConsulta?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Criado"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1848,6 +1878,7 @@ export interface paths {
                         bem: {
                             placa: string;
                             chassi?: string;
+                            renavam?: string;
                             modelo: string;
                             ano?: number;
                             cor?: string;
@@ -1865,6 +1896,7 @@ export interface paths {
                         bem: {
                             placa: string;
                             chassi?: string;
+                            renavam?: string;
                             modelo: string;
                             ano?: number;
                             cor?: string;

@@ -44,6 +44,16 @@ describe('schema Drizzle × migrações', () => {
 });
 
 describe('dado de base', () => {
+  it('banco novo, sem seed, já tem as duas fontes (produção não depende do seed)', async () => {
+    const fontes = await banco.bruta.query<{ id: string; finalidade: string }>(
+      'select id, finalidade_permitida as finalidade from fonte_ativo order by id',
+    );
+    expect(fontes).toEqual([
+      { id: 'fonte-inbound', finalidade: 'aquisicao_com_quitacao' },
+      { id: 'fonte-plataforma', finalidade: 'recuperacao_para_credor' },
+    ]);
+  });
+
   it('a migração cria o tenant ReCredita igual ao TENANT_RECREDITA do código', async () => {
     const tenants = await banco.bruta.query('select id, nome, sigla from tenant');
     expect(tenants).toEqual([{ ...TENANT_RECREDITA }]);

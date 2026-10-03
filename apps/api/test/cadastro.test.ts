@@ -6,10 +6,12 @@ import { ambienteDeTeste, type Ambiente, type Sessao } from './apoio.ts';
 let amb: Ambiente;
 let opA: Sessao;
 let opB: Sessao;
+let admin: Sessao;
 beforeAll(async () => {
   amb = await ambienteDeTeste();
   opA = await amb.entrar('opa@teste.local');
   opB = await amb.entrar('opb@teste.local');
+  admin = await amb.entrar('admin@teste.local');
 });
 afterAll(() => amb.fechar());
 
@@ -50,6 +52,12 @@ describe('cadastro de caso com o bem', () => {
     expect([403, 404]).toContain(r.statusCode);
   });
 
+  it('mensagem de validação em português', async () => {
+    const r = await amb.chamar(opA, 'POST', '/api/casos/cadastro', { origem: 'plataforma_credor', fonteId: '', credorId: 'cred-alfa', bem });
+    expect(r.statusCode).toBe(400);
+    expect(r.body).toContain('escolha a fonte');
+  });
+
   it('Plano B: nasce Lead Recebido, com RENAJUD presumido até verificar', async () => {
     const r = await amb.chamar(opB, 'POST', '/api/casos/cadastro', {
       origem: 'lead_proprio', fonteId: 'fonte-inbound', bem: { ...bem, placa: 'RCD3E45' },
@@ -58,5 +66,16 @@ describe('cadastro de caso com o bem', () => {
     expect(r.statusCode).toBe(201);
     const t = (await amb.chamar(opB, 'GET', `/api/casos/${r.json().id}/pode-transferir`)).json();
     expect(t.podeTransferir).toBe(false);
+  });
+});
+
+describe('fornecedores', () => {
+  it('só admin cadastra, e o contrato é obrigatório', async () => {
+    const corpo = { nome: 'Consulta Veicular Contratada', tipo: 'Veicular', contratoFornecedorId: 'CTR-2026-001', custoConsulta: 3.5 };
+    expect((await amb.chamar(opA, 'POST', '/api/bureaus', corpo)).statusCode).toBe(403);
+    expect((await amb.chamar(admin, 'POST', '/api/bureaus', { ...corpo, contratoFornecedorId: '' })).statusCode).toBe(400);
+    expect((await amb.chamar(admin, 'POST', '/api/bureaus', corpo)).statusCode).toBe(201);
+    const lista = (await amb.chamar(opA, 'GET', '/api/bureaus')).json();
+    expect(lista.map((b: { nome: string }) => b.nome)).toContain('Consulta Veicular Contratada');
   });
 });

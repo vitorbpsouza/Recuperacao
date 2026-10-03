@@ -506,6 +506,12 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
     - **Avistamentos (Plano A):** onde o bem foi visto, por quem e quando, com GPS do aparelho e hora do servidor. São append-only e entram na linha do tempo.
     - Ficha com as abas **Veículo** e **Avistamentos**; no celular, a barra de abas rola de lado.
     - Migração 0006. Testes: domínio 35, banco 61, API 70 e E2E 14.
+    - **Correções para o primeiro uso em produção (migração 0007):**
+      - As fontes dos dois planos viraram dado de base: antes só existiam no seed e, no servidor, nenhum caso podia ser cadastrado.
+      - Fornecedor de consulta agora se cadastra pela tela (Dados & Bureaus → Novo fornecedor, só admin, contrato obrigatório).
+      - No "Novo caso": colar os dados do veículo preenche o formulário; a fonte do plano vem sozinha; o credor se cadastra ali mesmo; tem campo Renavam; os obrigatórios estão marcados.
+      - Mensagens de validação em português em toda a aplicação.
+      - Testes: domínio 38, banco 62, API 72 e E2E 14.
     - **Política:** relatórios de painel de consulta sem origem legal (dono, CPF e radar de cerco eletrônico) não são fonte aceitável. A localização legítima vem do avistamento e de fornecedor com contrato e base legal.
   - **Pendente (próximas etapas do Plano A):**
     - Importação de carteira e arquivo de recall.

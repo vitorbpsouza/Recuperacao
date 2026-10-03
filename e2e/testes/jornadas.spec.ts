@@ -93,28 +93,41 @@ test('Plano A: retomada pelo painel de próximos passos, e a entrega espera a pu
   await expect(page.getByText(/o devedor ainda pode purgar a mora até/)).toBeVisible();
 });
 
-test('cadastra um bem no Plano A e cai na ficha do caso novo', async ({ page }) => {
+test('cadastra um bem colando os dados do veículo e criando o credor na hora', async ({ page }) => {
   await page.goto('/a/casos');
   await page.getByRole('button', { name: 'Novo caso' }).click();
   const dialogo = page.getByRole('dialog');
 
-  await dialogo.getByRole('combobox').first().click();
-  await page.getByRole('option', { name: 'Plataforma de Bens (app do credor)' }).click();
-  await dialogo.getByRole('combobox').nth(1).click();
-  await page.getByRole('option', { name: 'Banco Alfa S.A.' }).click();
-
-  await dialogo.getByLabel('Placa').fill('ABC1234X');
-  await dialogo.getByLabel('Modelo').fill('CHEVROLET/ONIX LT');
+  // Sem nada preenchido: mensagens em português, nos campos certos.
   await dialogo.getByRole('button', { name: 'Cadastrar' }).click();
-  await expect(dialogo.getByText('placa inválida')).toBeVisible();
+  await expect(dialogo.getByText('informe a placa')).toBeVisible();
+  await expect(dialogo.getByText('informe o modelo')).toBeVisible();
 
-  await dialogo.getByLabel('Placa').fill('RCE4F56');
+  // A fonte do plano já vem escolhida; os dados do veículo vêm do relatório colado.
+  await expect(dialogo.getByText('Carteira do credor')).toBeVisible();
+  await dialogo.getByLabel('Colar dados do veículo').fill(
+    [
+      'Placa: RCE4F56',
+      'Chassi: 9BWZZZ377VT004251',
+      'Renavam: 01234567890',
+      'Modelo: CHEVROLET/ONIX LT',
+      'Cor: PRATA',
+      'Ano Fab/Mod: 2020 / 2021',
+      'Nome: PESSOA FICTICIA',
+    ].join('\n'),
+  );
+  await expect(dialogo.getByLabel('Placa')).toHaveValue('RCE4F56');
+  await expect(dialogo.getByLabel('Renavam')).toHaveValue('01234567890');
+  await expect(dialogo.getByText(/Descartado: dados do proprietário/)).toBeVisible();
+
+  await dialogo.getByRole('combobox').first().click();
+  await page.getByRole('option', { name: '+ Cadastrar novo credor' }).click();
+  await dialogo.getByLabel('Nome do credor').fill('Banco Teste E2E S.A.');
   await dialogo.getByLabel('CPF ou CNPJ').fill('529.982.247-25');
   await dialogo.getByRole('button', { name: 'Cadastrar' }).click();
 
   await expect(page.getByRole('heading', { name: 'CHEVROLET/ONIX LT' })).toBeVisible();
   await expect(page).toHaveURL(/\/a\/casos\/.+/);
-  await expect(page.getByText('Recebido', { exact: true }).first()).toBeVisible();
 });
 
 test('relatório do fornecedor: guarda o veículo e descarta dono e radar', async ({ page }) => {

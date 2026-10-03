@@ -14,11 +14,15 @@ import { z } from 'zod';
 import { chassiValido, cnpjValido, cpfValido, numeroCnjValido, placaValida } from './documentos.ts';
 import { MODALIDADES_RETOMADA, RITOS } from './fluxos.ts';
 
+// Mensagens de validação em português em todo lugar que usa o zod (API e telas).
+// Os campos de cadastro ainda trazem mensagens próprias, mais diretas que as do locale.
+z.config(z.locales.pt());
+
 export const origemCaso = z.enum(['plataforma_credor', 'lead_proprio']);
 export const finalidadePermitida = z.enum(['recuperacao_para_credor', 'aquisicao_com_quitacao']);
 export const papelUsuario = z.enum(['admin', 'operador', 'auditor']);
 
-const texto = z.string().trim().min(1);
+const texto = z.string().trim().min(1, 'campo obrigatório');
 
 export const loginEntrada = z
   .object({
@@ -310,9 +314,10 @@ export const resistenciaEntrada = z
 /** O veículo e a dívida, como chegam do credor ou do lead. */
 export const bemEntrada = z
   .object({
-    placa: z.string().trim().refine(placaValida, 'placa inválida: use ABC1234 ou ABC1D23'),
+    placa: z.string().trim().min(1, 'informe a placa').refine(placaValida, 'placa inválida: use ABC1234 ou ABC1D23'),
     chassi: z.string().trim().refine(chassiValido, 'chassi inválido: 17 caracteres, sem I, O nem Q').optional(),
-    modelo: texto,
+    renavam: z.string().regex(/^\d{11}$/, 'Renavam com 11 dígitos').optional(),
+    modelo: z.string().trim().min(1, 'informe o modelo'),
     ano: z.number().int().min(1950).max(2100).optional(),
     cor: texto.optional(),
     cidade: texto.optional(),
@@ -335,15 +340,15 @@ export const cadastroCasoEntrada = z.discriminatedUnion('origem', [
   z
     .object({
       origem: z.literal('plataforma_credor'),
-      fonteId: texto,
-      credorId: texto,
+      fonteId: z.string().min(1, 'escolha a fonte'),
+      credorId: z.string().min(1, 'escolha o credor (ou cadastre um novo)'),
       bem: bemEntrada,
     })
     .strict(),
   z
     .object({
       origem: z.literal('lead_proprio'),
-      fonteId: texto,
+      fonteId: z.string().min(1, 'escolha a fonte'),
       credorId: texto.optional(),
       bem: bemEntrada,
       canalLead: z.enum(['Inbound Site', 'WhatsApp', 'Indicação', 'Parceria', 'Anúncio']),
@@ -413,3 +418,14 @@ export const avistamentoEntrada = z
     message: 'informe latitude e longitude juntas',
     path: ['longitude'],
   });
+
+/** Fornecedor de consulta (bureau): sempre com contrato, que é o que dá procedência ao dado. */
+export const novoBureauEntrada = z
+  .object({
+    nome: z.string().trim().min(2, 'informe o nome do fornecedor'),
+    tipo: z.enum(['Crédito', 'Veicular', 'Localização', 'Judicial']),
+    /** Número ou referência do contrato com o fornecedor. Sem contrato não há consulta. */
+    contratoFornecedorId: z.string().trim().min(3, 'informe o número ou a referência do contrato'),
+    custoConsulta: z.number().min(0, 'custo não pode ser negativo').default(0),
+  })
+  .strict();

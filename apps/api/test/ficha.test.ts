@@ -30,7 +30,7 @@ describe('ficha do caso', () => {
       placa: 'SEED001',
       recuperadorNome: 'Carlos Pereira',
       ativo: { chassi: 'SEEDCHASSI00000001', ano: 2021, credorNome: 'Banco Alfa', valorDivida: 38500 },
-      fonte: { nome: 'Plataforma de Bens (app do credor)', tipo: 'Plataforma' },
+      fonte: { nome: 'Carteira do credor', tipo: 'Credor Direto' },
     });
     expect(r.body).not.toContain('Devedor Sintético');
     expect(r.body).not.toContain('00000000011');

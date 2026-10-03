@@ -3,7 +3,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import { schema } from '@workspace/db';
-import { normalizarPlaca, novoAtivoEntrada, novoRecuperadorEntrada } from '@workspace/domain';
+import { normalizarPlaca, novoAtivoEntrada, novoBureauEntrada, novoRecuperadorEntrada } from '@workspace/domain';
 
 import { exigirPapel } from '../auth/plugin.ts';
 import * as c from '../contratos.ts';
@@ -135,5 +135,22 @@ export const rotasCadastros: FastifyPluginAsyncZod = async (app) => {
           .from(bureau)
           .where(eq(bureau.ativo, true)),
       ),
+  );
+
+  /**
+   * Cadastra fornecedor de consulta. O contrato é obrigatório: é ele que dá
+   * procedência a cada consulta feita por esse fornecedor. Fornecedor por
+   * integração ganha a variável da chave depois, na configuração do servidor.
+   */
+  app.post(
+    '/bureaus',
+    {
+      preHandler: exigirPapel('admin'),
+      schema: { tags: ['cadastros'], body: novoBureauEntrada, response: { 201: c.criado } },
+    },
+    async (req, reply) => {
+      const [novo] = await req.banco((tx) => tx.insert(bureau).values(req.body).returning({ id: bureau.id }));
+      return reply.code(201).send({ id: novo!.id });
+    },
   );
 };

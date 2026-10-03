@@ -54,6 +54,7 @@ export const rotasCadastroCaso: FastifyPluginAsyncZod = async (app) => {
           .values({
             placa,
             chassi: bem.chassi?.toUpperCase().replace(/\s/g, ''),
+            renavam: bem.renavam,
             modelo: bem.modelo,
             ano: bem.ano,
             cor: bem.cor,

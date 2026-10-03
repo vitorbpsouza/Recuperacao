@@ -8,10 +8,7 @@ export const TENANT_RECREDITA = { id: 'recredita', nome: 'ReCredita', sigla: 'RC
 
 /** Dados do seed, uma instrução por item. Separadas por ';' no fim da linha. */
 const INSTRUCOES_SEED = `
-      insert into fonte_ativo (id, nome, tipo, ingestao, finalidade_permitida, termo_de_uso_url, credor_nome) values
-        ('fonte-plataforma', 'Plataforma de Bens (app do credor)', 'Plataforma',   'Manual', 'recuperacao_para_credor', 'https://exemplo.invalid/termos', null),
-        ('fonte-inbound',    'Lead Inbound (site e WhatsApp)',     'Lead Próprio', 'Manual', 'aquisicao_com_quitacao',  null, null)
-      on conflict (id) do nothing;
+      -- As fontes vêm da migração 0007 (dado de base).
 
       insert into bureau (id, nome, tipo, contrato_fornecedor_id, env_var_chave, custo_consulta) values
         ('bureau-serasa',   'Serasa Experian',          'Crédito',     'CTR-SERASA-0001',   'SERASA_API_KEY',      2.50),

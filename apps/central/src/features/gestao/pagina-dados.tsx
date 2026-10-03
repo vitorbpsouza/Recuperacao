@@ -1,9 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
+import { PlusIcon } from 'lucide-react';
+import { useState } from 'react';
 import { ActivityIcon, CpuIcon, DatabaseIcon, MapPinnedIcon, ScaleIcon, ShieldCheckIcon } from 'lucide-react';
 
 import { InfoTooltip } from '@workspace/ui/brand/info-tooltip';
 import { Rotulo } from '@workspace/ui/brand/rotulo';
 import { Badge } from '@workspace/ui/components/badge';
+import { Button } from '@workspace/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/card';
 import { Skeleton } from '@workspace/ui/components/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/table';
@@ -11,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/componen
 import { formatarDataHora, formatarMoeda, formatarNumero } from '@workspace/ui/lib/formato';
 
 import { CabecalhoDePagina, ErroDeConsulta } from '@/components/estado-da-consulta.tsx';
+import { DialogoFornecedor } from './dialogo-fornecedor.tsx';
 import { auditoriaQuery, bureausQuery, custosBureauQuery, pode, type Bureau, type UsuarioSessao } from '@/lib/api.ts';
 
 const ICONE_DO_TIPO: Record<Bureau['tipo'], typeof ShieldCheckIcon> = {
@@ -34,12 +38,22 @@ const BASE_LEGAL: Record<string, string> = {
  */
 export function PaginaDados({ sessao }: { sessao: UsuarioSessao }) {
   const auditor = pode.auditar(sessao);
+  const [novo, setNovo] = useState(false);
   return (
     <>
       <CabecalhoDePagina
         titulo="Dados & Bureaus"
         descricao="Fornecedores contratados, custo por consulta e a trilha de procedência de cada dado."
+        acoes={
+          pode.administrar(sessao) ? (
+            <Button size="sm" onClick={() => setNovo(true)}>
+              <PlusIcon />
+              Novo fornecedor
+            </Button>
+          ) : undefined
+        }
       />
+      {novo ? <DialogoFornecedor aoFechar={() => setNovo(false)} /> : null}
       <Tabs defaultValue="bureaus">
         <TabsList>
           <TabsTrigger value="bureaus">Bureaus</TabsTrigger>

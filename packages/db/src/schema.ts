@@ -184,7 +184,7 @@ export const bureau = pgTable('bureau', {
   nome: text('nome').notNull(),
   tipo: text('tipo').$type<'Crédito' | 'Veicular' | 'Localização' | 'Judicial'>().notNull(),
   contratoFornecedorId: text('contrato_fornecedor_id').notNull(),
-  envVarChave: text('env_var_chave').notNull(),
+  envVarChave: text('env_var_chave'),
   custoConsulta: numeric('custo_consulta', { precision: 10, scale: 2, mode: 'number' }).notNull().default(0),
   ativo: boolean('ativo').notNull().default(true),
 });
