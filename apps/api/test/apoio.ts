@@ -13,6 +13,7 @@ import { lerAmbiente } from '../src/ambiente.ts';
 import type { ClienteFipe } from '../src/integracoes/fipe.ts';
 import { criarServidor, type Servidor } from '../src/servidor.ts';
 import { criarUsuario } from '../src/servicos/usuarios.ts';
+import { criarBarramento } from '../src/tempo-real.ts';
 
 export const SENHA = 'senha-bem-longa-123';
 
@@ -84,7 +85,8 @@ export const ambienteDeTeste = async (opcoes: { comIa?: boolean } = {}): Promise
     }
   });
 
-  const app = await criarServidor({ db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false, fipe: FIPE_FALSA, executar: FETCH_FALSO, ia: opcoes.comIa ? IA_FALSA : null, fotosDir });
+  const barramento = await criarBarramento(banco.bruta);
+  const app = await criarServidor({ barramento, db: banco.db, ambiente: lerAmbiente({ NODE_ENV: 'test' }), logger: process.env.LOG_TESTE ? { level: 'error' } : false, fipe: FIPE_FALSA, executar: FETCH_FALSO, ia: opcoes.comIa ? IA_FALSA : null, fotosDir });
 
   const entrar = async (email: string, senha = SENHA): Promise<Sessao> => {
     const r = await app.inject({ method: 'POST', url: '/api/auth/login', payload: { email, senha } });
@@ -111,6 +113,7 @@ export const ambienteDeTeste = async (opcoes: { comIa?: boolean } = {}): Promise
     chamar,
     fechar: async () => {
       await app.close();
+      await barramento.fechar();
       await banco.bruta.fechar();
     },
   };

@@ -7,6 +7,7 @@ import { AppHeader } from '@/components/layout/app-header.tsx';
 import { AppSidebar } from '@/components/layout/app-sidebar.tsx';
 import { MenuDeComandos } from '@/components/layout/menu-de-comandos.tsx';
 import { CANAL_DA_ORIGEM, sessaoQuery, type Canal } from '@/lib/api.ts';
+import { useEventosAoVivo } from '@/lib/eventos-ao-vivo.ts';
 
 /**
  * Layout autenticado. A sessão é revalidada no servidor antes de qualquer
@@ -25,6 +26,7 @@ export const Route = createFileRoute('/_app')({
 function LayoutAutenticado() {
   const { sessao } = Route.useRouteContext();
   const [buscaAberta, setBuscaAberta] = useState(false);
+  useEventosAoVivo(sessao);
 
   // O plano vem da rota (/a ou /b). Fora delas, o primeiro que o usuário enxerga.
   const canalDaRota = useMatches({

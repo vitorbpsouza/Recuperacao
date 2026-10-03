@@ -1,5 +1,6 @@
 export * from './casos.ts';
 export * from './documentos.ts';
+export * from './eventos.ts';
 export * from './fluxos.ts';
 export * from './kpis.ts';
 export * from './localizacao.ts';

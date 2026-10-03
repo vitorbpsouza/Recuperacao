@@ -1,4 +1,4 @@
-import { CarIcon, CircleDotIcon, ClipboardPasteIcon, FilePlus2Icon, GavelIcon, MapPinIcon, ScaleIcon, SendIcon } from 'lucide-react';
+import { AlarmClockIcon, CarIcon, CircleDotIcon, ClipboardPasteIcon, FilePlus2Icon, GavelIcon, MapPinIcon, ScaleIcon, SendIcon } from 'lucide-react';
 
 import { StatusBadge } from '@workspace/ui/brand/status-badge';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@workspace/ui/components/empty';
@@ -17,6 +17,7 @@ const ICONE = {
   verificacao_veicular: CarIcon,
   avistamento: MapPinIcon,
   relatorio_colado: ClipboardPasteIcon,
+  prazo_vencido: AlarmClockIcon,
 } as const;
 
 const REGISTRO: Record<string, string> = {
@@ -63,6 +64,10 @@ const textoDe = (e: EventoCaso) => {
       ].filter(Boolean);
       return `${d.via === 'integracao' ? 'Consulta por integração' : 'Relatório colado'}${partes.length ? ` · ${partes.join(', ')}` : ''}`;
     }
+    case 'prazo_vencido': {
+      const { mensagem } = e.dados as { mensagem?: string };
+      return mensagem ?? 'Prazo vencido';
+    }
     default:
       return 'Status alterado';
   }
@@ -98,7 +103,7 @@ export function LinhaDoTempo({ eventos, carregando }: { eventos: EventoCaso[] | 
               {e.statusPara ? <StatusBadge status={e.statusPara} tom={tomDoStatus(e.statusPara)} /> : null}
             </div>
             <p className="mt-1 text-xs text-muted-foreground tabular-nums">
-              {formatarDataHora(e.ocorridoEm)} · {e.usuarioNome ?? 'carga automática'}
+              {formatarDataHora(e.ocorridoEm)} · {e.usuarioNome ?? (e.dados.automatico ? 'sistema (prazo)' : 'carga automática')}
               {e.statusDe ? ` · antes: ${e.statusDe}` : ''}
             </p>
             {typeof e.dados.motivo === 'string' ? <p className="mt-1 text-sm text-slate-300">{e.dados.motivo}</p> : null}

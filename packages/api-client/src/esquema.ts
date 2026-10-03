@@ -4418,7 +4418,7 @@ export interface components {
         EventoCasoInput: {
             id: number;
             /** @enum {string} */
-            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento" | "relatorio_colado";
+            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento" | "relatorio_colado" | "prazo_vencido";
             statusDe: string | null;
             statusPara: string | null;
             usuarioNome: string | null;
@@ -5383,7 +5383,7 @@ export interface components {
         EventoCaso: {
             id: number;
             /** @enum {string} */
-            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento" | "relatorio_colado";
+            tipo: "criado" | "status_alterado" | "distribuido" | "rito_definido" | "registro_juridico" | "verificacao_veicular" | "avistamento" | "relatorio_colado" | "prazo_vencido";
             statusDe: string | null;
             statusPara: string | null;
             usuarioNome: string | null;

@@ -305,6 +305,7 @@ export const eventoCaso = z.object({
     'verificacao_veicular',
     'avistamento',
     'relatorio_colado',
+    'prazo_vencido',
   ]),
   statusDe: z.string().nullable(),
   statusPara: z.string().nullable(),

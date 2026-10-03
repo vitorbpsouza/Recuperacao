@@ -24,8 +24,49 @@ export interface Executor {
 export interface ConexaoBruta extends Executor {
   /** Executa `fn` numa conexão exclusiva — necessário para BEGIN/COMMIT com pool. */
   exclusiva<T>(fn: (c: Executor) => Promise<T>): Promise<T>;
+  /**
+   * LISTEN num canal do Postgres. `aoReceber` recebe o payload de cada NOTIFY
+   * confirmado. Devolve a função que para de escutar.
+   */
+  ouvir(canal: string, aoReceber: (payload: string) => void): Promise<() => Promise<void>>;
   fechar(): Promise<void>;
 }
+
+const CANAL_VALIDO = /^[a-z_][a-z0-9_]{0,62}$/;
+
+/**
+ * LISTEN numa conexão própria, fora do pool: a conexão fica presa ao canal
+ * enquanto a API estiver no ar. Caiu (restart do banco, rede), reconecta com
+ * espera crescente — sem isso, o tempo real morreria calado.
+ */
+const ouvirNoServidor = async (url: string, canal: string, aoReceber: (payload: string) => void) => {
+  let cliente: pg.Client | null = null;
+  let parado = false;
+  let espera = 1_000;
+
+  const conectar = async (): Promise<void> => {
+    const c = new pg.Client({ connectionString: url });
+    c.on('notification', (n) => {
+      if (n.channel === canal && n.payload !== undefined) aoReceber(n.payload);
+    });
+    c.on('error', () => {
+      void c.end().catch(() => undefined);
+      if (cliente === c) cliente = null;
+      if (!parado) setTimeout(() => void conectar().catch(() => undefined), espera);
+      espera = Math.min(espera * 2, 30_000);
+    });
+    await c.connect();
+    await c.query(`listen ${canal}`);
+    cliente = c;
+    espera = 1_000;
+  };
+
+  await conectar();
+  return async () => {
+    parado = true;
+    await cliente?.end().catch(() => undefined);
+  };
+};
 
 export interface Banco {
   db: Db;
@@ -58,8 +99,9 @@ export const DIRETORIO_DEV = join(homedir(), '.recredita', 'pglite-dev');
  * políticas de RLS testadas são as mesmas que valem em produção.
  */
 export const abrirBanco = async (opcoes: OpcoesBanco = {}): Promise<Banco> => {
-  if (opcoes.url) {
-    const pool = new pg.Pool({ connectionString: opcoes.url });
+  const url = opcoes.url;
+  if (url) {
+    const pool = new pg.Pool({ connectionString: url });
     const executorDe = (c: pg.Pool | pg.PoolClient): Executor => ({
       exec: async (sql) => {
         await c.query(sql);
@@ -79,6 +121,10 @@ export const abrirBanco = async (opcoes: OpcoesBanco = {}): Promise<Banco> => {
           } finally {
             cliente.release();
           }
+        },
+        ouvir: (canal, aoReceber) => {
+          if (!CANAL_VALIDO.test(canal)) throw new Error(`canal inválido: ${canal}`);
+          return ouvirNoServidor(url, canal, aoReceber);
         },
         fechar: () => pool.end(),
       },
@@ -103,6 +149,13 @@ export const abrirBanco = async (opcoes: OpcoesBanco = {}): Promise<Banco> => {
       ...executor,
       // PGlite é uma conexão só: toda execução já é exclusiva.
       exclusiva: (fn) => fn(executor),
+      ouvir: async (canal, aoReceber) => {
+        if (!CANAL_VALIDO.test(canal)) throw new Error(`canal inválido: ${canal}`);
+        const parar = await pglite.listen(canal, aoReceber);
+        return async () => {
+          if (!pglite.closed) await parar();
+        };
+      },
       fechar: () => pglite.close(),
     },
   };

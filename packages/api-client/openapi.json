@@ -1598,7 +1598,8 @@
               "registro_juridico",
               "verificacao_veicular",
               "avistamento",
-              "relatorio_colado"
+              "relatorio_colado",
+              "prazo_vencido"
             ]
           },
           "statusDe": {
@@ -5799,7 +5800,8 @@
               "registro_juridico",
               "verificacao_veicular",
               "avistamento",
-              "relatorio_colado"
+              "relatorio_colado",
+              "prazo_vencido"
             ]
           },
           "statusDe": {

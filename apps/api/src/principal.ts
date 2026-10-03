@@ -22,8 +22,10 @@ import { abrirBancoDoAmbiente, comoDono, migrar, schema, semear, TENANT_RECREDIT
 
 import { lerAmbiente } from './ambiente.ts';
 import { criarClienteIa } from './ia.ts';
+import { iniciarVarreduraDePrazos } from './jobs/prazos.ts';
 import { criarServidor } from './servidor.ts';
 import { criarUsuario } from './servicos/usuarios.ts';
+import { criarBarramento } from './tempo-real.ts';
 
 /** Chave do advisory lock da preparação do banco (qualquer inteiro fixo). */
 const TRAVA_DE_PREPARO = 2_026_100_2;
@@ -77,11 +79,19 @@ const ambiente = lerAmbiente();
 const banco = await abrirBancoDoAmbiente();
 await prepararBanco(banco);
 
-const app = await criarServidor({ db: banco.db, ambiente, ia: criarClienteIa(ambiente) });
+const barramento = await criarBarramento(banco.bruta, (erro) => console.error('evento ao vivo inválido', erro));
+const app = await criarServidor({ db: banco.db, ambiente, ia: criarClienteIa(ambiente), barramento });
 await app.listen({ port: ambiente.PORT, host: '0.0.0.0' });
 
+const pararVarredura =
+  ambiente.VARREDURA_PRAZOS_SEGUNDOS > 0
+    ? iniciarVarreduraDePrazos(banco.bruta, ambiente.VARREDURA_PRAZOS_SEGUNDOS * 1000, app.log)
+    : () => undefined;
+
 const encerrar = async () => {
+  pararVarredura();
   await app.close();
+  await barramento.fechar();
   await banco.bruta.fechar();
   process.exit(0);
 };

@@ -533,6 +533,15 @@ admin, gestor, operador (por canal), jurídico, financeiro, auditor, recuperador
     - Fontes de avistamento novas: `camera` (câmera de condomínio, comércio, LPR de parceiro) e `foto`.
     - Testes: domínio 57, banco 62, API 105 e E2E 15.
   - **Campos dinâmicos (2026-10-03, migração 0011):** rótulo novo de veículo, pessoa ou caso vira campo oficial na hora, sem deploy: entra no catálogo `campo_dinamico` e aparece na ficha técnica, nos relatórios e no CSV (o valor continua em `dado_extra`). A tela Gestão › Campos dos relatórios renomeia, junta sinônimos de fornecedores diferentes e oculta. Coluna de verdade só quando um campo pesar em filtro (a tela copia o SQL). A API nunca altera a estrutura do banco: um texto malformado não muda tabela. A migração também devolveu ao veículo as seções "IMPORTAÇÃO" e "OUTROS", que o leitor antigo dava à pessoa; o leitor agora dá a uma seção desconhecida o dono das seções vizinhas e lê "Emplacamento: CIDADE/UF" como município e UF.
+  - **Tempo real, recall e prazos automáticos (2026-10-03, migração 0012):**
+    - **Tempo real:** cada evento da linha do tempo sai em `NOTIFY caso_evento`; a API escuta numa conexão só (no Postgres de servidor, um cliente dedicado que reconecta sozinho; no PGlite, o LISTEN nativo) e repassa por SSE em `GET /api/eventos` só o que é do tenant e dos canais da sessão. O payload não leva devedor, dívida nem endereço: a tela recarrega pelas rotas, sob o RLS. A conexão fecha a cada 10 minutos e o navegador reabre, conferindo a sessão de novo.
+    - **Central:** cada evento recarrega a ficha, a lista do plano e os painéis; recall, cura, volta à fila e prazo vencido viram aviso (o recall fica na tela até ser fechado). Quem fez a mudança não recebe aviso dela.
+    - **Recall de verdade:** caso que sai de campo (recall, cura, retomada, suspensão, encerramento) revoga na hora os links de campo, e `link_campo_resolver` só resolve com o caso em campo — antes, o link de um caso retirado pelo credor continuava aceitando foto até expirar.
+    - **Prazos:** `varrer_prazos()` no banco, idempotente e com trava (uma instância varre por vez); a API a chama a cada `VARREDURA_PRAZOS_SEGUNDOS` (60; 0 desliga).
+      - Aceite vencido → o caso volta à fila ("Pronto para Campo") ou à análise, se a habilitação deixou de valer; o motivo vai para a linha do tempo como "sistema (prazo)".
+      - Prazo máximo vencido, purga encerrada e 20 dias da notificação extrajudicial sem consolidação → evento `prazo_vencido`, uma vez por prazo. Caso em campo não é redistribuído sozinho: o recuperador pode estar no meio da abordagem.
+    - **Desvio da seção 2:** sem pg-boss. Ele não roda no PGlite (dev e testes) e a regra cabe numa função SQL idempotente; a fila de jobs volta à mesa quando houver integração com retentativa (DataJud, webhooks).
+    - Testes: domínio 62, banco 72, API 109.
   - **Pendente (próximas etapas do Plano A):**
     - Importação de carteira e arquivo de recall.
     - Enriquecimento com `dado_enriquecido`.

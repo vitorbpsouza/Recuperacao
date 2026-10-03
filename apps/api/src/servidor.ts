@@ -27,6 +27,7 @@ import { rotasAuth } from './rotas/auth.ts';
 import { rotasCadastros } from './rotas/cadastros.ts';
 import { rotasCamila } from './rotas/camila.ts';
 import { rotasCasos } from './rotas/casos.ts';
+import { rotasEventos } from './rotas/eventos.ts';
 import { rotasColisoes } from './rotas/colisoes.ts';
 import { rotasFicha } from './rotas/ficha.ts';
 import { rotasFinanceiro } from './rotas/financeiro.ts';
@@ -39,6 +40,7 @@ import { rotasRelatorios } from './rotas/relatorios.ts';
 import { rotasVeiculo } from './rotas/veiculo.ts';
 import { criarClienteFipe, type ClienteFipe } from './integracoes/fipe.ts';
 import { rotasUsuarios } from './rotas/usuarios.ts';
+import type { Barramento } from './tempo-real.ts';
 
 export interface OpcoesServidor {
   db: Db;
@@ -51,6 +53,8 @@ export interface OpcoesServidor {
   executar?: typeof fetch;
   /** Pasta das fotos. Ausente: FOTOS_DIR; fora de produção, ~/.recredita/fotos. */
   fotosDir?: string | null;
+  /** Eventos do banco ao vivo (LISTEN). Ausente: /api/eventos responde 503. */
+  barramento?: Barramento | null;
 }
 
 const pastaDasFotos = (ambiente: Ambiente) =>
@@ -78,7 +82,7 @@ const LOG_DE_PRODUCAO = {
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
 };
 
-export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe(), executar, fotosDir }: OpcoesServidor) => {
+export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = criarClienteFipe(), executar, fotosDir, barramento = null }: OpcoesServidor) => {
   const producao = ambiente.NODE_ENV === 'production';
   const app = Fastify({
     logger: logger ?? (ambiente.NODE_ENV === 'test' ? false : producao ? LOG_DE_PRODUCAO : { level: 'debug' }),
@@ -151,6 +155,7 @@ export const criarServidor = async ({ db, ambiente, ia = null, logger, fipe = cr
         executar,
       });
       await api.register(rotasAuditoria);
+      await api.register(rotasEventos, { barramento });
       await api.register(rotasCamila, { ia, modelo: ambiente.CAMILA_MODELO });
     },
     { prefix: '/api' },

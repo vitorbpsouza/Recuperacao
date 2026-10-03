@@ -35,6 +35,12 @@ const esquema = z.object({
   GOOGLE_CLOUD_LOCATION: z.string().default('southamerica-east1'),
   GEMINI_API_KEY: z.string().optional(),
   CAMILA_MODELO: z.string().default('gemini-3-flash-preview'),
+  /**
+   * De quanto em quanto tempo a API varre os prazos do Plano A (aceite,
+   * prazo máximo, purga, notificação extrajudicial). 0 desliga — por exemplo,
+   * numa instância que não deve agir sozinha.
+   */
+  VARREDURA_PRAZOS_SEGUNDOS: z.coerce.number().int().min(0).default(60),
 });
 
 export type Ambiente = z.infer<typeof esquema> & { SEGREDO_SESSAO: string; CHAVE_SEGREDOS: string };
